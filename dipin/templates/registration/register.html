@@ -1,0 +1,18 @@
+{% extends "home.html" %}
+
+{% block title %}
+Register
+{% endblock %}
+
+{% block content %}
+<h2>Register Here:</h2>
+
+<form method="post" action="{% url 'accounts:register' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-success" type="submit">Register</button>
+</form>
+
+<p>Already have an account? <a href="{% url 'accounts:login' %}">Login Here</a></p>
+
+{% endblock %}
