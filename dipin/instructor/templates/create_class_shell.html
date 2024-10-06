@@ -6,22 +6,17 @@
 
 {% block content %}
   <div class="container mt-5 pt-5">
-    <h1 class="mb-4">Create Class Shell</h1>
+    <h1 class="mb-5 text-center">Create Class Shell</h1>
     
     <div class="row">
-      <div class="col-md-8 offset-md-2">
-        <form method="post">
+      <div class="col-md-6 offset-md-3">
+        <form method="post" class="card p-4 shadow-sm">
           {% csrf_token %}
-          <div class="card p-4 shadow-sm">
-            <div class="card-body">
               {{ form.as_p }}
-              <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-          </div>
+              <button type="submit" class="btn btn-primary ">Create</button>
         </form>
-        
-        <div class="mt-3">
-          <a href="{% url 'instructor:class_shell_list' %}" class="btn btn-secondary">Go to Dashboard</a>
+        <div class="mt-5">
+          <a href="{% url 'instructor:class_shell_list' %}" class="btn btn-secondary py-3 px-5">Go to Dashboard</a>
         </div>
       </div>
     </div>

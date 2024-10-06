@@ -1,12 +1,15 @@
 {% extends "home.html" %}
 
+{% block title %}
+  Content Management
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
     <div class="row">
-        <!-- Leftmost column with improved buttons -->
+        <!-- Leftmost column with buttons -->
         <div class="col-md-3">
-            <div class="d-grid gap-2">
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('lecture')">Lecture</button>
+            <div class="d-grid gap-4">
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('lecture')">Lectures</button>
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('exercise')">Exercise</button>
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('quiz')">Quiz</button>
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('assignment')">Assignment</button>
@@ -16,156 +19,42 @@
 
         <!-- Right content area -->
         <div class="col-md-9">
-            <div id="dynamic-content" class="p-4" style="min-height: 500px; background-color: #f8f9fa;">
-                <!-- Lecture content will be the default display -->
-                <h1>Manage Course for {{ class_shell.course_name }}</h1>
-                <ul class="list-group">
-                    {% for course in courses %}
-                        <li class="list-group-item">
-                            <strong>{{ course.title }}</strong>
-                            <p>{{ course.text }}</p>
+            <div id="lecture-content" class="content-section" style="display: none;">
+                {% include 'lecture.html' %}
+            </div>
 
-                            <!-- Display associated files for this course -->
-                            <ul>
-                                {% for file in files %}
-                                    {% if file.course.id == course.id %}
-                                        <li>
-                                            <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
+            <div id="exercise-content" class="content-section" style="display: none;">
+                {% include 'exercise.html' %}
+            </div>
 
-                            <!-- Edit form for existing course -->
-                            <form method="post" enctype="multipart/form-data" id="edit-course-{{ course.id }}" style="display: none;">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="course_title_{{ course.id }}">Title</label>
-                                    <input type="text" name="title" id="course_title_{{ course.id }}" class="form-control" value="{{ course.title }}">
-                                </div>
-                                <div class="form-group">
-                                    <label for="course_content_{{ course.id }}">Content</label>
-                                    <textarea name="text" id="course_content_{{ course.id }}" class="form-control">{{ course.text }}</textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="file_upload_{{ course.id }}">Upload File (Optional)</label>
-                                    <input type="file" name="file" id="file_upload_{{ course.id }}" class="form-control">
-                                </div>
-                                <input type="hidden" name="course_id" value="{{ course.id }}">
-                                <button type="submit" name="edit_course" class="btn btn-primary">Save Changes</button>
-                            </form>
+            <div id="quiz-content" class="content-section" style="display: none;">
+                {% include 'quizlist.html' %}  
+            </div>
 
-                            <button class="btn btn-warning btn-sm float-right" onclick="toggleEditForm('{{ course.id }}')">Edit</button>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">No course content available.</li>
-                    {% endfor %}
-                </ul>
+            <div id="assignment-content" class="content-section" style="display: none;">
+                {% include 'assignment.html' %}  
+            </div>
 
-                <!-- Form for adding new content -->
-                <button class="btn btn-primary btn-block mt-4" onclick="toggleNewContentForm()">Add Content</button>
-
-                <form method="post" enctype="multipart/form-data" id="new-content-form" style="display: none;">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <h3>New Course Content</h3>
-                        <div class="form-group">
-                            {{ course_form.as_p }}
-                        </div>
-                        <div class="form-group">
-                            <label for="file_upload">Upload File (Optional)</label>
-                            <input type="file" name="file" id="file_upload" class="form-control">
-                        </div>
-                        <button type="submit" name="add_course" class="btn btn-primary">Add Content</button>
-                    </div>
-                </form>
+            <div id="other-content" class="content-section" style="display: none;">
+                <h1>Other Section Coming Soon</h1>
             </div>
         </div>
     </div>
-</div>
 
 <script>
-    // Function to dynamically load content based on menu selection
     function loadContent(contentType) {
-        let content;
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
 
-        // Dynamic content loading based on clicked item
-        switch(contentType) {
-            case 'lecture':
-                content = `
-                    <h1>Manage Course for {{ class_shell.course_name }}</h1>
-                    <ul class="list-group">
-                        {% for course in courses %}
-                            <li class="list-group-item">
-                                <strong>{{ course.title }}</strong>
-                                <p>{{ course.text }}</p>
-                                <ul>
-                                    {% for file in files %}
-                                        {% if file.course.id == course.id %}
-                                            <li>
-                                                <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                                <form method="post" enctype="multipart/form-data" id="edit-course-{{ course.id }}" style="display: none;">
-                                    {% csrf_token %}
-                                    <div class="form-group">
-                                        <label for="course_title_{{ course.id }}">Title</label>
-                                        <input type="text" name="title" id="course_title_{{ course.id }}" class="form-control" value="{{ course.title }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="course_content_{{ course.id }}">Content</label>
-                                        <textarea name="text" id="course_content_{{ course.id }}" class="form-control">{{ course.text }}</textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="file_upload_{{ course.id }}">Upload File (Optional)</label>
-                                        <input type="file" name="file" id="file_upload_{{ course.id }}" class="form-control">
-                                    </div>
-                                    <input type="hidden" name="course_id" value="{{ course.id }}">
-                                    <button type="submit" name="edit_course" class="btn btn-primary">Save Changes</button>
-                                </form>
-                                <button class="btn btn-warning btn-sm float-right" onclick="toggleEditForm('{{ course.id }}')">Edit</button>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item">No course content available.</li>
-                        {% endfor %}
-                    </ul>
-                `;
-                break;
-            case 'exercise':
-                content = '<h1>Exercise Management Coming Soon</h1>';
-                break;
-            case 'quiz':
-                content = '<h1>Quiz Management Coming Soon</h1>';
-                break;
-            case 'assignment':
-                content = '<h1>Assignment Management Coming Soon</h1>';
-                break;
-            case 'other':
-                content = '<h1>Other Section Coming Soon</h1>';
-                break;
-        }
-
-        // Replace the dynamic content area with the selected content
-        document.getElementById('dynamic-content').innerHTML = content;
+        // Show the selected content section
+        document.getElementById(`${contentType}-content`).style.display = 'block';
     }
 
-    // Default to showing Lecture content
+    // Load 'lecture' content by default
     document.addEventListener('DOMContentLoaded', function() {
         loadContent('lecture');
     });
-
-    // Functions for toggling forms
-    function toggleEditForm(courseId) {
-        var form = document.getElementById('edit-course-' + courseId);
-        form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-    }
-
-    function toggleNewContentForm() {
-        var form = document.getElementById('new-content-form');
-        form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-    }
 </script>
-
 {% endblock %}
