@@ -1,0 +1,50 @@
+    <div class="container mt-5">
+        <h2>Manage Exercise for {{ class_shell.course_name }}</h2>
+
+        <h3>Exercises</h3>
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th scope="col">Exercise Title</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quiz in quizzes %}
+                    <tr>
+                        <td><strong>{{ quiz.title }}</strong></td>
+                        <td>
+                            <a href="{% url 'instructor:go_to_quiz' class_shell.id quiz.id %}" class="btn btn-link">View Questions</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2">No exercises available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if quiz_instance %}
+            <h3>Questions for {{ quiz_instance.title }}</h3>
+            <ul class="list-group mt-4">
+                {% for question in questions %}
+                    <li class="list-group-item">
+                        <strong>Question {{ forloop.counter }}:</strong>
+                        <p>{{ question.text }}</p>
+                        
+                        <ul>
+                            {% for choice in question.choices.all %}
+                                <li>
+                                    <strong>{{ forloop.counter }}. </strong>{{ choice.text }} 
+                                    {% if choice.is_correct %}(Correct Answer){% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No questions available for this exercise.</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
