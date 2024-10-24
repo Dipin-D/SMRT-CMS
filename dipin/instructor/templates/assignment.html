@@ -1,37 +1,90 @@
 <h2>Manage Assignments for {{ class_shell.course_name }}</h2>
 
-<button id="show-assignment-form" class="btn btn-primary mt-3">Add New Assignment</button>
+<!-- Button to Show the New Assignment Form -->
+<button id="add-assignment" class="btn btn-primary">Add Assignment</button>
 
-<!-- New Assignment Form (Initially Hidden) -->
-<form method="post" enctype="multipart/form-data" id="new-assignment-form" class="mt-3" style="display: none;">
+<!-- New Assignment Content Form -->
+<form method="post" enctype="multipart/form-data" id="new-assignment-form" style="display: none;" class="mt-4">
     {% csrf_token %}
-    {{ assignment_form.as_p }} 
-    <button type="submit" name="add_assignment" class="btn btn-primary">Add Assignment</button>
+    <div class="form-group">
+        <label for="new_assignment_title">Title</label>
+        <input type="text" name="title" id="new_assignment_title" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="new_assignment_content">Content</label>
+        <textarea name="text" id="new_assignment_content" class="form-control" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="new_assignment_file">Upload File (Optional)</label>
+        <input type="file" name="assignment_file" id="new_assignment_file" class="form-control">  
+    </div>
+    <button type="submit" name="add_assignment" class="btn btn-primary">Add Content</button>
 </form>
 
-<!-- Display Existing Assignments -->
+<!-- List of Assignments -->
 <ul class="list-group mt-3">
     {% for assignment in assignments %}
         <li class="list-group-item mt-4">
             <strong>{{ assignment.title }}</strong>
             <p>{{ assignment.text }}</p>
 
+            <!-- Display Files for this Assignment -->
+            <ul class="list-group mt-3">
+                {% for assignment_file in assignment.assignment_files.all %}
+                    <li>
+                        <a href="{{ assignment_file.assignment_file.url }}" target="_blank">{{ assignment_file.assignment_file.name }}</a>
+                    </li>
+                {% empty %}
+                    <li>No files available for this assignment.</li>
+                {% endfor %}
+            </ul>
+
             <!-- Edit Assignment Form -->
-            <form method="post" enctype="multipart/form-data" class="edit-assignment-form mt-3">
+            <form method="post" enctype="multipart/form-data" class="edit-assignment-form mt-3" id="edit-assignment-{{ assignment.id }}" style="display: none;">
                 {% csrf_token %}
+                
                 <div class="form-group">
                     <label for="assignment_title_{{ assignment.id }}">Title</label>
                     <input type="text" name="title" id="assignment_title_{{ assignment.id }}" class="form-control" value="{{ assignment.title }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="assignment_text_{{ assignment.id }}">Text</label>
-                    <textarea name="text" id="assignment_text_{{ assignment.id }}" class="form-control" required>{{ assignment.text }}</textarea>
+                    <label for="assignment_content_{{ assignment.id }}">Content</label>
+                    <textarea name="text" id="assignment_content_{{ assignment.id }}" class="form-control" required>{{ assignment.text }}</textarea>
                 </div>
+                
+                <!-- Display existing file with option to remove -->
+                <div class="form-group">
+                    <label>Existing File:</label>
+                    {% if assignment.assignment_files.all %}
+                        <ul>
+                            {% for assignment_file in assignment.assignment_files.all %}
+                                <li>
+                                    <a href="{{ assignment_file.assignment_file.url }}" target="_blank">{{ assignment_file.assignment_file.name }}</a>
+                                    <br>
+                                    <label>
+                                        <input type="checkbox" name="remove_file" value="{{ assignment_file.id }}"> Remove this file
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No existing files for this assignment.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- New file upload option for editing -->
+                <div class="form-group">
+                    <label for="edit_assignment_file_{{ assignment.id }}">Upload New File (Optional)</label>
+                    <input type="file" name="assignment_file" id="edit_assignment_file_{{ assignment.id }}" class="form-control">  
+                </div>
+                
                 <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
                 <button type="submit" name="edit_assignment" class="btn btn-primary">Save Changes</button>
             </form>
 
-            <!-- Delete Button -->
+            <!-- Edit and Delete Buttons -->
+            <!-- Add the missing class to the Edit button -->
+            <button class="btn btn-warning btn-sm edit-assignment-btn" data-assignment-id="{{ assignment.id }}">Edit</button>
             <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
                 {% csrf_token %}
                 <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
@@ -39,14 +92,32 @@
             </form>
         </li>
     {% empty %}
-        <li class="list-group-item">No assignments available.</li>
+        <li class="list-group-item">No assignment content available.</li>
     {% endfor %}
 </ul>
 
+<!-- Simple JavaScript to Toggle Assignment Form -->
 <script>
-    // Show the new assignment form when the button is clicked
-    document.getElementById('show-assignment-form').addEventListener('click', function() {
-        var form = document.getElementById('new-assignment-form');
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';  // Toggle form visibility
+    // Show the new assignment form
+    document.getElementById('add-assignment').addEventListener('click', function() {
+        const newAssignmentForm = document.getElementById('new-assignment-form');
+        newAssignmentForm.style.display = newAssignmentForm.style.display === 'none' ? 'block' : 'none';
+
+        // Reset the form when showing it
+        if (newAssignmentForm.style.display === 'block') {
+            document.getElementById('new_assignment_title').value = '';
+            document.getElementById('new_assignment_content').value = '';
+            document.getElementById('new_assignment_file').value = '';
+            document.getElementById('new_assignment_id').value = ''; // Reset hidden assignment ID
+        }
+    });
+
+    // Add event listeners to all edit buttons for assignments
+    document.querySelectorAll('.edit-assignment-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const assignmentId = this.getAttribute('data-assignment-id');
+            const editForm = document.getElementById(`edit-assignment-${assignmentId}`);
+            editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+        });
     });
 </script>

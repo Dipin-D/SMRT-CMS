@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClassShell, CourseFile, Course, Question, Quiz, Answer, Assignment  
+from .models import ClassShell, CourseFile, Course, Question, Quiz, Answer, Exercise, Assignment, AssignmentFile, BaseQuestion, ExerciseQuestion  
 
 class ClassShellForm(forms.ModelForm):
     class Meta:
@@ -21,7 +21,12 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
         fields = ['text', 'title']
-    text = forms.CharField(widget=forms.Textarea(attrs={'cols': 80, 'rows': 10}))
+    text = forms.CharField(widget=forms.Textarea(attrs={'cols': 40, 'rows': 10}))
+
+class AssignmentFileForm(forms.ModelForm):
+    class Meta:
+        model = AssignmentFile
+        fields = ['assignment_file']
 
 # Quiz Form
 class QuizForm(forms.ModelForm):
@@ -29,13 +34,16 @@ class QuizForm(forms.ModelForm):
         model = Quiz
         fields = ['title', 'grading_percentage']
 
-
-from django import forms
-from .models import Question
-
-class QuestionForm(forms.ModelForm):
+# Exercise Form
+class ExerciseForm(forms.ModelForm):  # Corrected spelling here
     class Meta:
-        model = Question
+        model = Exercise
+        fields = ['title', 'grading_percentage']
+
+# Base Question Form
+class BaseQuestionForm(forms.ModelForm):
+    class Meta:
+        model = BaseQuestion
         fields = ['text', 'type']
 
     answer_1 = forms.CharField(label='Answer 1', max_length=200, required=False)
@@ -64,3 +72,11 @@ class QuestionForm(forms.ModelForm):
     )
 
     essay_answer = forms.CharField(label='Essay Answer', widget=forms.Textarea, required=False)
+
+class QuestionForm(BaseQuestionForm):
+    class Meta(BaseQuestionForm.Meta):
+        model = Question  
+
+class ExerciseQuestionForm(BaseQuestionForm):
+    class Meta(BaseQuestionForm.Meta):
+        model = ExerciseQuestion  
