@@ -19,22 +19,27 @@
 
         <!-- Right content area -->
         <div class="col-md-9">
+            <!-- Section for Lectures, hidden by default -->
             <div id="lecture-content" class="content-section" style="display: none;">
                 {% include 'lecture.html' %}
             </div>
 
+            <!-- Section for Exercises, hidden by default -->
             <div id="exercise-content" class="content-section" style="display: none;">
                 {% include 'exercise.html' %}
             </div>
 
+            <!-- Section for Quizzes, hidden by default -->
             <div id="quiz-content" class="content-section" style="display: none;">
-                {% include 'quizlist.html' %}  
+                {% include 'quiz.html' %}
             </div>
 
+            <!-- Section for Assignments, hidden by default -->
             <div id="assignment-content" class="content-section" style="display: none;">
-                {% include 'assignment.html' %}  
+                {% include 'assignment.html' %}
             </div>
 
+            <!-- Section for Other, hidden by default -->
             <div id="other-content" class="content-section" style="display: none;">
                 <h1>Other Section Coming Soon</h1>
             </div>
@@ -50,11 +55,15 @@
 
         // Show the selected content section
         document.getElementById(`${contentType}-content`).style.display = 'block';
+
+        // Store the selected tab in local storage
+        localStorage.setItem('activeTab', contentType);
     }
 
-    // Load 'lecture' content by default
+    // Load the appropriate content section based on local storage or default to 'lecture'
     document.addEventListener('DOMContentLoaded', function() {
-        loadContent('lecture');
+        const activeTab = localStorage.getItem('activeTab') || 'lecture';  // Default to 'lecture'
+        loadContent(activeTab);
     });
 </script>
 {% endblock %}

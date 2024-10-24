@@ -1,50 +1,91 @@
-    <div class="container mt-5">
-        <h2>Manage Exercise for {{ class_shell.course_name }}</h2>
+<h2 class="mt-4">Manage Exercises for {{ class_shell.course_name }}</h2>
 
-        <h3>Exercises</h3>
-        <table class="table mt-4">
-            <thead>
-                <tr>
-                    <th scope="col">Exercise Title</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for quiz in quizzes %}
-                    <tr>
-                        <td><strong>{{ quiz.title }}</strong></td>
-                        <td>
-                            <a href="{% url 'instructor:go_to_quiz' class_shell.id quiz.id %}" class="btn btn-link">View Questions</a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="2">No exercises available.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- Button to show the Create Exercise form -->
+<div class="mt-3 mb-3">
+    <button class="btn btn-primary" onclick="toggleExerciseForm()">Create Exercise</button>
+</div>
 
-        {% if quiz_instance %}
-            <h3>Questions for {{ quiz_instance.title }}</h3>
-            <ul class="list-group mt-4">
-                {% for question in questions %}
-                    <li class="list-group-item">
-                        <strong>Question {{ forloop.counter }}:</strong>
-                        <p>{{ question.text }}</p>
-                        
-                        <ul>
-                            {% for choice in question.choices.all %}
-                                <li>
-                                    <strong>{{ forloop.counter }}. </strong>{{ choice.text }} 
-                                    {% if choice.is_correct %}(Correct Answer){% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% empty %}
-                    <li class="list-group-item">No questions available for this exercise.</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+<!-- Exercise Creation Form (initially hidden) -->
+<div id="exercise-form-section" class="mb-4" style="display: none;">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ exercise_form.as_p }}
+                </div>
+                <button type="submit" name="add_exercise" class="btn btn-success">Create</button>
+            </form>
+        </div>
     </div>
+</div>
+
+<!-- List of Existing Exercises -->
+<ul class="list-group">
+    {% for exercise in exercises %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>{{ exercise.title }}</strong>
+
+                <div>
+                    <!-- Edit Button -->
+                    <button class="btn btn-warning btn-sm me-2" data-exercise-id="{{ exercise.id }}" onclick="toggleEditForm({{ exercise.id }})">Edit</button>
+
+                    <!-- Delete Form -->
+                    <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this exercise?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+                        <button type="submit" name="delete_exercise" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+
+                    <!-- Go to Exercise Button -->
+                    <a href="{% url 'instructor:go_to_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}" class="btn btn-info btn-sm ms-2">Go to Exercise</a>
+                </div>
+            </div>
+
+            <!-- Edit Exercise Form (initially hidden) -->
+            <div class="edit-exercise-form mt-3" id="edit-form-{{ exercise.id }}" style="display: none;">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exercise_title_{{ exercise.id }}">Title</label>
+                        <input type="text" name="title" id="exercise_title_{{ exercise.id }}" class="form-control" value="{{ exercise.title }}" placeholder="Edit Exercise Title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="grading_percentage_{{ exercise.id }}">Grading Percentage</label>
+                        <input type="number" name="grading_percentage" id="grading_percentage_{{ exercise.id }}" class="form-control" value="{{ exercise.grading_percentage }}" placeholder="Edit Grading Percentage" required>
+                    </div>
+                    <button type="submit" name="edit_exercise" class="btn btn-primary mt-2">Save</button>
+                    <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+                </form>
+            </div>
+        </li>
+    {% empty %}
+        <li class="list-group-item">No exercises available.</li>
+    {% endfor %}
+</ul>
+
+<!-- JavaScript to toggle visibility -->
+<script>
+    function toggleExerciseForm() {
+        const exerciseFormSection = document.getElementById('exercise-form-section');
+        exerciseFormSection.style.display = exerciseFormSection.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleEditForm(exerciseId) {
+        const editForm = document.getElementById(`edit-form-${exerciseId}`);
+        // Hide other forms before showing the selected one
+        document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
+            if (form.id !== `edit-form-${exerciseId}`) {
+                form.style.display = 'none';
+            }
+        });
+        editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
+            form.style.display = 'none'; // Ensure all edit forms are hidden initially
+        });
+    });
+</script>
