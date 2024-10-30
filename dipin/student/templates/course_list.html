@@ -1,0 +1,36 @@
+{% extends "home.html" %}
+
+{% block title %} 
+  Class Shell 
+{% endblock %}
+
+{% block content %}
+
+  <div class="container mt-4">
+    <div class="text-center mb-4">
+      <h2>Welcome back, {{ user.username }}!</h2>
+    </div>
+    <div class="row gap-3">
+      {% if class_shells %}
+        {% for class_shell in class_shells %}
+          <div class="card" style="width: 18rem">
+            <div class="card-body">
+              <h5 class="card-title">{{ class_shell.course_name }}</h5>
+              <div class="container">
+                <div class="row">
+                  <div class="col-sm">{{ class_shell.section_number }}</div>
+                  <div class="col-sm">{{ class_shell.semester }}</div>
+                  <div class="col-sm">{{ class_shell.year }}</div>
+                </div>
+              </div>
+              <a href="{% url 'student:go_to_course' class_shell.id %}" class="btn btn-secondary">Go to course</a>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No courses available. Please create a new class shell.</p>
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock %}
