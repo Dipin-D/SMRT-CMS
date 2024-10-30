@@ -1,8 +1,11 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+
 
 class ClassShell(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    students_with_access = models.ManyToManyField(get_user_model(), blank=True, related_name="accessible_classes")
     course_name = models.CharField(max_length=100)
     section_number = models.IntegerField()
     semester = models.CharField(max_length=50)
@@ -101,3 +104,5 @@ class ExerciseQuestion(BaseQuestion):
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
 class ExerciseAnswer(BaseAnswer): 
     question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE, related_name='answers')
+
+

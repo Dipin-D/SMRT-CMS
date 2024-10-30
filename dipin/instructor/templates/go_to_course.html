@@ -13,7 +13,7 @@
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('exercise')">Exercise</button>
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('quiz')">Quiz</button>
                 <button class="btn btn-outline-primary btn-lg" onclick="loadContent('assignment')">Assignment</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('other')">Other</button>
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('other')">student_list</button>
             </div>
         </div>
 
@@ -41,7 +41,7 @@
 
             <!-- Section for Other, hidden by default -->
             <div id="other-content" class="content-section" style="display: none;">
-                <h1>Other Section Coming Soon</h1>
+                {% include 'student_list.html' %}
             </div>
         </div>
     </div>

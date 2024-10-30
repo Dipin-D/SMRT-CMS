@@ -40,7 +40,7 @@ def front_page(request):
 
 def redirect_based_on_role(user):
     if user.is_student:
-        return redirect('student:demo')
+        return redirect('student:course_list')
     elif user.is_instructor:
         return redirect('instructor:class_shell_list')
     else:

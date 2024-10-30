@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ClassShellForm, CourseFileForm, CourseForm, QuizForm, QuestionForm, AssignmentForm, AssignmentFileForm, ExerciseForm, ExerciseQuestionForm
 from .models import ClassShell, CourseFile, Course, Question, Quiz, Assignment, AssignmentFile, Exercise, ExerciseQuestion
 from django.views import View
+from accounts.models import CustomUser
+
 
 def create_class_shell(request):
     if request.method == 'POST':
@@ -22,12 +24,19 @@ def class_shell_list(request):
 class GoToCourseView(View):
     def get(self, request, class_shell_id):
         class_shell = get_object_or_404(ClassShell, id=class_shell_id)
+        if request.user.is_student and request.user not in class_shell.students_with_access.all():
+            return redirect('no_access')
         lectures = Course.objects.filter(class_shell=class_shell)
         quizzes = Quiz.objects.filter(class_shell=class_shell)
         exercises = Exercise.objects.filter(class_shell=class_shell)
         assignments = Assignment.objects.filter(class_shell=class_shell)
         files = CourseFile.objects.filter(class_shell=class_shell)
         assignment_files=AssignmentFile.objects.filter(class_shell=class_shell)
+        
+        students = CustomUser.objects.filter(is_student=True)
+        students_with_access = class_shell.students_with_access.values_list('id', flat=True)  # Get IDs with access
+
+
 
         lecture_form = CourseForm()
         lecture_file_form = CourseFileForm()
@@ -47,7 +56,10 @@ class GoToCourseView(View):
             'assignments':assignments,
             'exercises': exercises, 
             'files': files,
-            'assignment_files':assignment_files
+            'assignment_files':assignment_files,
+            'students':students,
+            'students_with_access': students_with_access,
+
         })
 
     def post(self, request, class_shell_id):
@@ -63,6 +75,10 @@ class GoToCourseView(View):
         exercise_id = request.POST.get('exercise_id')  
         assignment_id = request.POST.get('assignment_id')
 
+        if 'update_access' in request.POST:
+            selected_student_ids = request.POST.getlist('access_student_ids')
+            selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
+            class_shell.students_with_access.set(selected_students)
         # Handle lecture
         if 'add_lecture' in request.POST and lecture_form.is_valid():
             self.handle_add_lecture(lecture_form, class_shell, request.user)
@@ -95,6 +111,7 @@ class GoToCourseView(View):
             self.handle_delete_assignment(assignment_id, class_shell)
 
         return redirect('instructor:go_to_course', class_shell_id=class_shell_id)
+    
 
     #ASSIGMENT
     def handle_add_assignment(self, form, class_shell, user):
@@ -256,6 +273,14 @@ class QuizDetailView(View):
             question_instance = question_form.save(commit=False)
             question_instance.quiz = quiz
             question_instance.save()
+            # Save the answer choices and correct answer for multiple choice qn
+            if Question.type=='multiple_choice':
+                question_instance.choice_1 = question_form.cleaned_data.get('choice_1')
+                question_instance.choice_2 = question_form.cleaned_data.get('choice_2')
+                question_instance.choice_3 = question_form.cleaned_data.get('choice_3')
+                question_instance.choice_4 = question_form.cleaned_data.get('choice_4')
+                question_instance.correct_answer = question_form.cleaned_data.get('correct_answer')
+                question_instance.save()
         elif 'delete_question' in request.POST:
             question_id = request.POST.get('question_id')
             self.handle_delete_question(question_id)
@@ -297,3 +322,5 @@ class ExerciseDetailView(View):
     def handle_delete_question(self, exercise_question_id):
         exercise_question = get_object_or_404(ExerciseQuestion, id=exercise_question_id)  
         exercise_question.delete()
+
+
