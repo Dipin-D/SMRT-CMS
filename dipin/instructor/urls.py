@@ -6,7 +6,8 @@ from .views import (
     class_shell_list,
     create_class_shell,
     QuizDetailView,
-    ExerciseDetailView
+    ExerciseDetailView,
+    
 )
 
 app_name = 'instructor'
@@ -21,4 +22,6 @@ urlpatterns = [
     path('exercises/<int:class_shell_id>/', GoToCourseView.as_view(), name='exercises'),
     path('exercise/<int:class_shell_id>/<int:exercise_id>/', ExerciseDetailView.as_view(), name='go_to_exercise'),
     path('class-shell/<int:class_shell_id>/assignments/', GoToCourseView.as_view(), name='assignment'),
+    path('students/', GoToCourseView.as_view(), name='student_list'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

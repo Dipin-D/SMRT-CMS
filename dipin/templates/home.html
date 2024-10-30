@@ -80,7 +80,7 @@
           </li>
         {% elif user.is_student %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'student:demo' %}">Dashboard</a>
+            <a class="nav-link" href="{% url 'student:course_list' %}">Dashboard</a>
           </li>
           {% else %}
           <li class="nav-item">
