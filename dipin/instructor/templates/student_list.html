@@ -1,0 +1,36 @@
+<h3 class="text-center mb-4">Manage Student Access</h3>
+
+<form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}" class="container">
+    {% csrf_token %}
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Student</th>
+                <th scope="col">Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.username }}</td>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="access_student_ids" value="{{ student.id }}"
+                            {% if student.id in students_with_access %}checked{% endif %}>
+                        <label class="form-check-label">
+                            {% if student.id in students_with_access %}
+                                <span class="text-success">Access Granted</span>
+                            {% else %}
+                                <span class="text-danger">No Access</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center">
+        <button type="submit" name="update_access" class="btn btn-primary">Update Access</button>
+    </div>
+</form>

@@ -1,0 +1,64 @@
+{% extends "home.html" %}
+
+{% block title %}
+  Course Materials for {{ class_shell.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <!-- Leftmost column with buttons -->
+        <div class="col-md-3">
+            <div class="d-grid gap-4">
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('lecture')">Lectures</button>
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('exercise')">Exercises</button>
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('quiz')">Quizzes</button>
+                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('assignment')">Assignments</button>
+            </div>
+        </div>
+
+        <!-- Right content area -->
+        <div class="col-md-9">
+            <!-- Section for Lectures, hidden by default -->
+            <div id="lecture-content" class="content-section" style="display: none;">
+                {% include 'view_lecture.html' %}
+            </div>
+
+            <!-- Section for Exercises, hidden by default -->
+            <div id="exercise-content" class="content-section" style="display: none;">
+                {% include 'take_exercise.html' %}
+            </div>
+
+            <!-- Section for Quizzes, hidden by default -->
+            <div id="quiz-content" class="content-section" style="display: none;">
+                {% include 'quiz_list.html' %}
+            </div>
+
+            <!-- Section for Assignments, hidden by default -->
+            <div id="assignment-content" class="content-section" style="display: none;">
+                {% include 'do_assignment.html' %}
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    function loadContent(contentType) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        // Show the selected content section
+        document.getElementById(`${contentType}-content`).style.display = 'block';
+
+        // Store the selected tab in local storage
+        localStorage.setItem('activeTab', contentType);
+    }
+
+    // Load the appropriate content section based on local storage or default to 'lecture'
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeTab = localStorage.getItem('activeTab') || 'lecture';  // Default to 'lecture'
+        loadContent(activeTab);
+    });
+</script>
+{% endblock %}
