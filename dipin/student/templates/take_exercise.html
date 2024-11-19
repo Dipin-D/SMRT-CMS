@@ -1,0 +1,21 @@
+<h2 class="mt-4">Exercises for {{ class_shell.course_name }}</h2>
+
+<!-- List of Existing Exercises -->
+<ul class="list-group mt-3">
+    {% for exercise in exercises %}
+        <li class="list-group-item mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ exercise.title }}</strong>
+                </div>
+
+                <!-- Go to Exercise Button -->
+                <a href="{% url 'student:attempt_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}" class="btn" style="background-color: maroon; color: white;">
+                    Attempt Exercise
+                </a>
+            </div>
+        </li>
+    {% empty %}
+        <li class="list-group-item">No exercises available at the moment.</li>
+    {% endfor %}
+</ul>

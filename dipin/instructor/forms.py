@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClassShell, CourseFile, Course, Question, Quiz, Answer, Exercise, Assignment, AssignmentFile, BaseQuestion, ExerciseQuestion  
+from .models import ClassShell, CourseFile, Course, Question, Quiz, Exercise, Assignment, AssignmentFile, BaseQuestion, ExerciseQuestion  
 
 class ClassShellForm(forms.ModelForm):
     class Meta:
@@ -44,33 +44,17 @@ class ExerciseForm(forms.ModelForm):  # Corrected spelling here
 class BaseQuestionForm(forms.ModelForm):
     class Meta:
         model = BaseQuestion
-        fields = ['text', 'type']
-
-    answer_1 = forms.CharField(label='Answer 1', max_length=200, required=False)
-    answer_2 = forms.CharField(label='Answer 2', max_length=200, required=False)
-    answer_3 = forms.CharField(label='Answer 3', max_length=200, required=False)
-    answer_4 = forms.CharField(label='Answer 4', max_length=200, required=False)
-
-    correct_answer = forms.ChoiceField(
-        label='Correct Answer',
-        choices=[
-            ('1', 'Answer 1'),
-            ('2', 'Answer 2'),
-            ('3', 'Answer 3'),
-            ('4', 'Answer 4'),
-        ],
-        required=False
-    )
-    
-    true_false_answer = forms.ChoiceField(
-        label='Correct Answer',
-        choices=[
-            ('true', 'True'),
-            ('false', 'False'),
-        ],
-        required=False
-    )
-
+        fields = ['text', 'type', 'choice_1', 'choice_2', 'choice_3', 'choice_4','mark','mcq_answer','tf_answer']
+    mcq_answer = forms.ChoiceField(choices=[
+        ('1', 'Choice 1'),
+        ('2', 'Choice 2'),
+        ('3', 'Choice 3'),
+        ('4', 'Choice 4'),
+    ], required=False)   
+    tf_answer = forms.ChoiceField(choices=[
+        ('True', 'True'),  
+        ('False', 'False'),  
+    ], required=False)  
     essay_answer = forms.CharField(label='Essay Answer', widget=forms.Textarea, required=False)
 
 class QuestionForm(BaseQuestionForm):

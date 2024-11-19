@@ -5,14 +5,41 @@ Register
 {% endblock %}
 
 {% block content %}
-<h2>Register Here:</h2>
+<div class="container" style="padding-top: 3rem;">
+    <div class="text-center" style="max-width: 400px; margin: auto; padding: 3rem; background: #f8f9fa; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);">
+        <h2 style="color: #8A2C3B;">Register Here:</h2> 
 
-<form method="post" action="{% url 'accounts:register' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-success" type="submit">Register</button>
-</form>
+        <form method="post" action="{% url 'accounts:register' %}" class="d-inline-block text-start">
+            {% csrf_token %}
+            {{ form.as_p }}
 
-<p>Already have an account? <a href="{% url 'accounts:login' %}">Login Here</a></p>
+            <div class="d-flex justify-content-center">
+                <button class="btn custom-button btn-lg d-inline-flex align-items-center mt-3" type="submit" style="border-radius: 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); padding: 10px 20px;">
+                    Register
+                </button>
+            </div>
+        </form>
 
+        <p class="mt-3" style="font-weight: 500;">Already have an account? <a href="{% url 'accounts:login' %}" style="color: #8A2C3B;">Login Here</a></p> <!-- Updated color here -->
+    </div>
+</div>
+
+<style>
+    .custom-button {
+        background-color: #8A2C3B; 
+        color: white;
+        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 5px;
+        padding: 15px 20px; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .custom-button:hover {
+        color: white;
+        background-color: #7A2B3B; 
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+</style>
 {% endblock %}

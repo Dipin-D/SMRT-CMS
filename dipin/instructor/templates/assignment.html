@@ -1,8 +1,9 @@
 <h2>Manage Assignments for {{ class_shell.course_name }}</h2>
 
 <!-- Button to Show the New Assignment Form -->
-<button id="add-assignment" class="btn btn-primary">Add Assignment</button>
-
+<div class="mt-3 mb-3">
+<button id="add-assignment" class="btn" style="background-color: maroon; color: white;" id="add-content">Add Assignment</button>
+</div>
 <!-- New Assignment Content Form -->
 <form method="post" enctype="multipart/form-data" id="new-assignment-form" style="display: none;" class="mt-4">
     {% csrf_token %}

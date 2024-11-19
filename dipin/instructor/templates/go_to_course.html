@@ -5,20 +5,49 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+        .custom-button {
+            background-color: #8A2C3B; 
+            color: white; 
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            border: none; 
+            border-radius: 5px; 
+            padding: 15px 20px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            width: 100%; 
+            font-size: 16px; 
+        }
+
+        .custom-button:hover {
+            background-color: #7A2B3B; 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
+        }
+
+        .content-section {
+            padding: 20px; 
+            background-color: #f8f9fa; 
+            border-radius: 9px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+        }
+    </style>
+
     <div class="row">
         <!-- Leftmost column with buttons -->
         <div class="col-md-3">
             <div class="d-grid gap-4">
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('lecture')">Lectures</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('exercise')">Exercise</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('quiz')">Quiz</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('assignment')">Assignment</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('other')">student_list</button>
+                <button class="mt-3 custom-button" onclick="loadContent('lecture')">Lectures</button>
+                <button class="custom-button" onclick="loadContent('exercise')">Exercises</button>
+                <button class="custom-button" onclick="loadContent('quiz')">Quizzes</button>
+                <button class="custom-button" onclick="loadContent('assignment')">Assignments</button>
+                <button class="custom-button" onclick="loadContent('other')">Student List</button>
+                <button class="custom-button" onclick="loadContent('student_submissions')">Student Submissions</button>
             </div>
         </div>
 
         <!-- Right content area -->
-        <div class="col-md-9">
+        <div class="col-md-9 mt-3">
             <!-- Section for Lectures, hidden by default -->
             <div id="lecture-content" class="content-section" style="display: none;">
                 {% include 'lecture.html' %}
@@ -42,6 +71,9 @@
             <!-- Section for Other, hidden by default -->
             <div id="other-content" class="content-section" style="display: none;">
                 {% include 'student_list.html' %}
+            </div>
+            <div id="student_submissions-content" class="content-section" style="display: none;">
+                {% include 'student_submissions.html' %}
             </div>
         </div>
     </div>

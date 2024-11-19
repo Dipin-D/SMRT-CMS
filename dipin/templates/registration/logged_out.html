@@ -5,6 +5,27 @@ Logout
 {% endblock %}
 
 {% block content %}
-<p> You have been logged out?<a href="{% url 'accounts:login' %}">Login Here</a>
+<div class="container" style="padding-top: 3rem;">
+    <div class="text-center" style="max-width: 400px; margin: auto; padding: 3rem; background: #f8f9fa; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);">
+        <!-- Title -->
+        <h2 style="color: #dc3545;">Logout</h2>
 
+        <p>You have been logged out.</p>
+
+        <!-- Login Link -->
+        <p style="font-weight: 500;">Want to log back in? <a href="{% url 'accounts:login' %}" style="color: #007bff;">Login Here</a></p>
+    </div>
+</div>
+
+<style>
+    a {
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        color: #0056b3; 
+    }
+</style>
 {% endblock %}
