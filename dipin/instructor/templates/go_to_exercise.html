@@ -8,63 +8,69 @@
 <h4>Manage Questions for {{ exercise.title }}</h4>
 <div class="container mt-4">
 
-  <!-- Add/Edit Question Form -->
-  <form method="POST" id="question-form">
-    {% csrf_token %}
-    
+<!-- Add/Edit Question Form -->
+<form method="POST" id="question-form">
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    {{ question_form.text.label }} {{ question_form.text }}
+  </div>
+  
+  <div class="mb-3">
+    {{ question_form.type.label }}
+    <select name="type" id="question_type" class="form-select">
+      <option value="multiple_choice" {% if question_form.type.value == "multiple_choice" %}selected{% endif %}>Multiple Choice</option>
+      <option value="true_false" {% if question_form.type.value == "true_false" %}selected{% endif %}>True/False</option>
+      <option value="essay" {% if question_form.type.value == "essay" %}selected{% endif %}>Essay</option>
+    </select>
+  </div>
+
+  <!-- Marks Field -->
+  <div class="mb-3">
+    {{ question_form.mark.label }} {{ question_form.mark }}
+  </div>
+  
+  <!-- Fields for Multiple Choice Questions -->
+  <div id="multiple_choice_fields" style="display: block;">
+    <div class="mb-2">
+      {{ question_form.choice_1.label }} {{ question_form.choice_1 }}
+    </div>
+    <div class="mb-2">
+      {{ question_form.choice_2.label }} {{ question_form.choice_2 }}
+    </div>
+    <div class="mb-2">
+      {{ question_form.choice_3.label }} {{ question_form.choice_3 }}
+    </div>
+    <div class="mb-2">
+      {{ question_form.choice_4.label }} {{ question_form.choice_4 }}
+    </div>
     <div class="mb-3">
-      {{ question_form.text.label }} {{ question_form.text }}
+      {{ question_form.mcq_answer.label }} {{ question_form.mcq_answer }}
     </div>
-    
+  </div>
+
+  <!-- Fields for True/False Questions -->
+  <div id="true_false_fields" style="display: none;">
     <div class="mb-3">
-      {{ question_form.type.label }} 
-      <select name="type" id="question_type" class="form-select">
-        <option value="multiple_choice" {% if question_form.type.value == "multiple_choice" %}selected{% endif %}>Multiple Choice</option>
-        <option value="true_false" {% if question_form.type.value == "true_false" %}selected{% endif %}>True/False</option>
-        <option value="essay" {% if question_form.type.value == "essay" %}selected{% endif %}>Essay</option>
-      </select>
+      {{ question_form.tf_answer.label }} {{ question_form.tf_answer }}
     </div>
-    
-    <!-- Fields for Multiple Choice Questions -->
-    <div id="multiple_choice_fields" style="{% if question_form.type.value == 'multiple_choice' %}display: block;{% else %}display: none;{% endif %}">
-      <div class="mb-2">
-        {{ question_form.answer_1.label }} {{ question_form.answer_1 }}
-      </div>
-      <div class="mb-2">
-        {{ question_form.answer_2.label }} {{ question_form.answer_2 }}
-      </div>
-      <div class="mb-2">
-        {{ question_form.answer_3.label }} {{ question_form.answer_3 }}
-      </div>
-      <div class="mb-2">
-        {{ question_form.answer_4.label }} {{ question_form.answer_4 }}
-      </div>
-      <div class="mb-3">
-        {{ question_form.correct_answer.label }} {{ question_form.correct_answer }}
-      </div>
-    </div>
+  </div>
 
-    <!-- Fields for True/False Questions -->
-    <div id="true_false_fields" style="{% if question_form.type.value == 'true_false' %}display: block;{% else %}display: none;{% endif %}">
-      <div class="mb-3">
-        {{ question_form.true_false_answer.label }} {{ question_form.true_false_answer }}
-      </div>
+  <!-- Fields for Essay Questions -->
+  <div id="essay_fields" style="display: none;">
+    <div class="mb-3">
+      {{ question_form.essay_answer.label }} {{ question_form.essay_answer }}
     </div>
+  </div>
 
-    <!-- Fields for Essay Questions -->
-    <div id="essay_fields" style="{% if question_form.type.value == 'essay' %}display: block;{% else %}display: none;{% endif %}">
-      <div class="mb-3">
-        {{ question_form.essay_answer.label }} {{ question_form.essay_answer }}
-      </div>
-    </div>
+  <input type="hidden" name="exerciseQuestion_id" id="edit-question-id" value=""> <!-- Hidden input for editing question -->
+  
+  <div class="mt-3">
+    <button type="submit" name="add_question" class="btn btn-primary">Add Question</button>
+    <button type="submit" name="edit_question" class="btn btn-warning">Update Question</button>
+  </div>
+</form>
 
-    <input type="hidden" name="exerciseQuestion_id" id="edit-question-id" value=""> <!-- Hidden input for editing question -->
-    
-    <div class="mt-3">
-      <button type="submit" name="add_question" class="btn btn-primary">Add Question</button>
-      <button type="submit" name="edit_question" class="btn btn-warning">Update Question</button>
-    </div>
-  </form>
 
   <h5 class="mt-4">Existing Questions</h5>
   <div class="list-group">
@@ -78,15 +84,15 @@
                   data-text="{{ question.text }}" 
                   data-type="{{ question.type }}"
                   {% if question.type == 'multiple_choice' %} 
-                    data-answer1="{{ question.answer_1 }}" 
-                    data-answer2="{{ question.answer_2 }}" 
-                    data-answer3="{{ question.answer_3 }}" 
-                    data-answer4="{{ question.answer_4 }}" 
-                    data-correct="{{ question.correct_answer }}"
+                    data-choice1="{{ question.choice_1 }}" 
+                    data-choice2="{{ question.choice_2 }}" 
+                    data-choice3="{{ question.choice_3 }}" 
+                    data-choice4="{{ question.choice_4 }}" 
+                    data-mcq_answer="{{ question.mcq_answer }}"
                   {% elif question.type == 'true_false' %} 
-                    data-answer="{{ question.true_false_answer }}"
+                    data-tf_answer="{{ question.tf_answer }}"
                   {% elif question.type == 'essay' %}
-                    data-answer="{{ question.essay_answer }}"
+                    data-essay_answer="{{ question.essay_answer }}"
                   {% endif %}>
             Edit
           </button>
@@ -132,6 +138,11 @@
     }
   });
 
+  // Trigger change event on page load to set Multiple Choice as the default
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('question_type').dispatchEvent(new Event('change'));
+  });
+
   // Existing edit button logic to pre-fill the form
   document.querySelectorAll('.edit-button').forEach(button => {
     button.addEventListener('click', function() {
@@ -151,21 +162,21 @@
 
       // Handle multiple-choice questions
       if (questionType === 'multiple_choice') {
-        document.getElementById('id_answer_1').value = this.getAttribute('data-answer1');
-        document.getElementById('id_answer_2').value = this.getAttribute('data-answer2');
-        document.getElementById('id_answer_3').value = this.getAttribute('data-answer3');
-        document.getElementById('id_answer_4').value = this.getAttribute('data-answer4');
-        document.querySelector('select[name="correct_answer"]').value = this.getAttribute('data-correct');
+        document.getElementById('id_choice_1').value = this.getAttribute('data-choice1');
+        document.getElementById('id_choice_2').value = this.getAttribute('data-choice2');
+        document.getElementById('id_choice_3').value = this.getAttribute('data-choice3');
+        document.getElementById('id_choice_4').value = this.getAttribute('data-choice4');
+        document.querySelector('select[name="mcq_answer"]').value = this.getAttribute('data-mcq_answer');
       }
 
       // Handle true/false questions
       if (questionType === 'true_false') {
-        document.getElementById('id_true_false_answer').value = this.getAttribute('data-answer'); // Fill the true/false answer
+        document.getElementById('id_tf_answer').value = this.getAttribute('data-tf_answer');
       }
 
       // Handle essay questions
       if (questionType === 'essay') {
-        document.getElementById('id_essay_answer').value = this.getAttribute('data-answer'); // Fill the essay answer
+        document.getElementById('id_essay_answer').value = this.getAttribute('data-essay_answer');
       }
     });
   });

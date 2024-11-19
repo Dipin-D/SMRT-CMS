@@ -1,8 +1,9 @@
 <h2>Manage Lecture for {{ class_shell.course_name }}</h2>
 
 <!-- Button to Show the New Lecture Form -->
-<button class="btn btn-primary btn-block mt-4" id="add-content">Add Content</button>
-
+<div class="mt-3 mb-3">
+<button class="btn" style="background-color: maroon; color: white;" id="add-content">Add Content</button>
+</div>
 <!-- List of Lectures -->
 <ul class="list-group mt-3">
     {% for lecture in lectures %}
@@ -88,7 +89,7 @@
         <input type="file" name="file" id="new_file_upload" class="form-control">
     </div>
     <input type="hidden" name="lecture_id" value="" id="new_lecture_id">
-    <button type="submit" name="add_lecture" class="btn btn-primary">Add Content</button>
+    <button type="submit" name="add_lecture" class="btn" style="background-color: maroon; color: white;">Add Content</button>
 </form>
 
 <!-- Simple JavaScript to Toggle Forms -->

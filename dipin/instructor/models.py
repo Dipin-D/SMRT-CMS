@@ -59,17 +59,19 @@ class AssignmentFile(BaseFile):
         return self.assignment_file.name
 
 class BaseQuestion(models.Model):
-    text = models.CharField(max_length=255)
-    answer = models.CharField(max_length=5)
-    type = models.CharField(max_length=20)
+    text= models.CharField(max_length=255,null=True)
+    type = models.CharField(max_length=255)
+    answer = models.CharField(max_length=255)
+    mark = models.IntegerField(default=5)
 
-    class Meta:
-        abstract = True  
-    def __str__(self):
-        return self.text
-class BaseAnswer(models.Model):
-    text = models.CharField(max_length=200)
-    is_correct = models.BooleanField(default=False)
+    # Fields for multiple-choice questions
+    choice_1 = models.CharField(max_length=255, blank=True,null=True)
+    choice_2 = models.CharField(max_length=255, blank=True,null=True)
+    choice_3 = models.CharField(max_length=255, blank=True,null=True)
+    choice_4 = models.CharField(max_length=255, blank=True,null=True)
+    mcq_answer = models.CharField(max_length=255, blank=True, null=True)
+    # Field for true/false questions
+    tf_answer = models.BooleanField(null=True, blank=True)
 
     class Meta:
         abstract = True  
@@ -87,8 +89,6 @@ class Quiz(models.Model):
 
 class Question(BaseQuestion):  
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-class Answer(BaseAnswer):  
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
 
 class Exercise(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exercises')
@@ -102,7 +102,6 @@ class Exercise(models.Model):
 
 class ExerciseQuestion(BaseQuestion):  
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-class ExerciseAnswer(BaseAnswer): 
-    question = models.ForeignKey(ExerciseQuestion, on_delete=models.CASCADE, related_name='answers')
+
 
 

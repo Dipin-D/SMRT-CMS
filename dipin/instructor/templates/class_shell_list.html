@@ -6,28 +6,53 @@
 
 {% block content %}
 
-  <div class="container mt-4">
+<style>
+    .custom-button {
+        background-color: #61162D;
+        border: none;
+    }
+
+    .custom-button:hover {
+        background-color: #7A2B3B; 
+        transform: translateY(-3px); 
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
+    }
+</style>
+
+<div class="container mt-4">
     <div class="text-center mb-4">
-      <h2>Welcome back, {{ user.username }}!</h2>
+        <h2>Welcome back, {{ user.username }}!</h2>
     </div>
-    <a href="{% url 'instructor:create_class_shell' %}" class="btn btn-primary mb-3">Create New Class Shell</a>
+    <a href="{% url 'instructor:create_class_shell' %}" class="btn btn-secondary mb-3 custom-button">Create New Class Shell</a>
     <div class="row gap-3">
-      {% for class_shell in class_shells %}
-        <div class="card" style="width: 18rem">
-          <div class="card-body">
-            <h5 class="card-title">{{ class_shell.course_name }}</h5>
-            <div class="container">
-              <div class="row">
-                <div class="col-sm">{{ class_shell.section_number }}</div>
-                <div class="col-sm">{{ class_shell.semester }}</div>
-                <div class="col-sm">{{ class_shell.year }}</div>
-              </div>
+        {% if class_shells %}
+            {% for class_shell in class_shells %}
+                <div class="col-md-4"> 
+                    <div class="card shadow-sm" style="border-radius: 10px; border: none;">
+                        <div class="card-body d-flex flex-column justify-content-between" style="height: 100%;">
+                            <div class="text-center mb-3">
+                                <h5 class="card-title" style="color: #61162D;">{{ class_shell.course_name }}</h5>
+                            </div>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col" style="color: #4e1323;">Section-{{ class_shell.section_number }}</div>
+                                    <div class="col" style="color: #4e1323;">Semester-{{ class_shell.semester }}</div>
+                                    <div class="col" style="color: #4e1323;">Year-{{ class_shell.year }}</div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{% url 'instructor:go_to_course' class_shell.id %}" class="btn btn-secondary custom-button">Go to course</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col text-center"> 
+                <p>No courses available.</p>
             </div>
-            <a href="{% url 'instructor:go_to_course' class_shell.id %}" class="btn btn-secondary">Go to course</a>
-          </div>
-        </div>
-      {% endfor %}
+        {% endif %}
     </div>
-  </div>
+</div>
 
 {% endblock %}

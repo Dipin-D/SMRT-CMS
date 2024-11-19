@@ -1,3 +1,4 @@
+
 {% extends "home.html" %}
 
 {% block title %}
@@ -5,60 +6,83 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+        .custom-button {
+            background-color: #8A2C3B; 
+            color: white; 
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            border: none; 
+            border-radius: 5px; 
+            padding: 15px 20px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            width: 100%; /* Make the buttons full width */
+            font-size: 16px; /* Increase font size for better readability */
+        }
+
+        .custom-button:hover {
+            background-color: #7A2B3B; 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
+        }
+
+        .content-section {
+            padding: 20px; 
+            background-color: #f8f9fa; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+        }
+    </style>
+
     <div class="row">
-        <!-- Leftmost column with buttons -->
         <div class="col-md-3">
             <div class="d-grid gap-4">
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('lecture')">Lectures</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('exercise')">Exercises</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('quiz')">Quizzes</button>
-                <button class="btn btn-outline-primary btn-lg" onclick="loadContent('assignment')">Assignments</button>
+                <button class="custom-button" onclick="loadContent('lecture')">Lectures</button>
+                <button class="custom-button" onclick="loadContent('exercise')">Exercises</button>
+                <button class="custom-button" onclick="loadContent('quiz')">Quizzes</button>
+                <button class="custom-button" onclick="loadContent('assignment')">Assignments</button>
+                <button class="custom-button" onclick="loadContent('assignment')">Grades</button>
             </div>
         </div>
 
-        <!-- Right content area -->
-        <div class="col-md-9">
-            <!-- Section for Lectures, hidden by default -->
+        <div class="col-md-9" style="padding-top: 20px;">
             <div id="lecture-content" class="content-section" style="display: none;">
                 {% include 'view_lecture.html' %}
             </div>
 
-            <!-- Section for Exercises, hidden by default -->
             <div id="exercise-content" class="content-section" style="display: none;">
                 {% include 'take_exercise.html' %}
             </div>
 
-            <!-- Section for Quizzes, hidden by default -->
             <div id="quiz-content" class="content-section" style="display: none;">
                 {% include 'quiz_list.html' %}
             </div>
 
-            <!-- Section for Assignments, hidden by default -->
             <div id="assignment-content" class="content-section" style="display: none;">
                 {% include 'do_assignment.html' %}
             </div>
 
+            <div id="Grades-content" class="content-section" style="display: none;">
+                {% include 'Grades.html' %}
+            </div>
         </div>
     </div>
 
 <script>
     function loadContent(contentType) {
-        // Hide all sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
 
-        // Show the selected content section
         document.getElementById(`${contentType}-content`).style.display = 'block';
 
-        // Store the selected tab in local storage
         localStorage.setItem('activeTab', contentType);
     }
 
-    // Load the appropriate content section based on local storage or default to 'lecture'
     document.addEventListener('DOMContentLoaded', function() {
-        const activeTab = localStorage.getItem('activeTab') || 'lecture';  // Default to 'lecture'
+        const activeTab = localStorage.getItem('activeTab') || 'lecture';
         loadContent(activeTab);
     });
 </script>
+
 {% endblock %}

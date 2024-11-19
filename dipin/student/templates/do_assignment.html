@@ -1,0 +1,81 @@
+<h2>Assignments for {{ class_shell.course_name }}</h2>
+
+<!-- List of Assignments -->
+<ul class="list-group mt-3">
+    {% for assignment in assignments %}
+        <li class="list-group-item mt-4">
+            <strong>{{ assignment.title }}</strong>
+            <p>{{ assignment.text }}</p>
+
+            <!-- Display Files for this Assignment -->
+            <ul class="list-group mt-3">
+                {% for assignment_file in assignment.assignment_files.all %}
+                    <li>
+                        <a href="{{ assignment_file.assignment_file.url }}" target="_blank">{{ assignment_file.assignment_file.name }}</a>
+                    </li>
+                {% empty %}
+                    <li>No files available for this assignment.</li>
+                {% endfor %}
+            </ul>
+
+            <!-- Button to Toggle Submission View -->
+            {% if assignment.id in submitted_assignment_ids %}
+                <button class="btn mt-3" style="background-color: maroon; color: white;" onclick="toggleSubmission({{ assignment.id }})">Show Submitted Work</button>
+                
+                <!-- Display the Submitted Work -->
+                <div id="submission_{{ assignment.id }}" class="submitted-work" style="display: none; margin-top: 10px;">
+                    <p><strong>Submitted Text:</strong> 
+                        {% for submission in assignment.submissions.all %}
+                            {% if submission.student == user %}
+                                {{ submission.submission_text }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+
+                    <!-- Display Submitted File for this Assignment -->
+                    <ul class="list-group mt-3">
+                        {% for submission in assignment.submissions.all %}
+                            {% if submission.student == user %}
+                                {% if submission.submission_file %}
+                                    <li>
+                                        <a href="{{ submission.submission_file.url }}" target="_blank">{{ submission.submission_file.name }}</a>
+                                    </li>
+                                {% else %}
+                                    <li>No file submitted.</li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <!-- Submission Form -->
+                <form method="post" enctype="multipart/form-data" class="mt-3">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="submission_content_{{ assignment.id }}">Your Submission</label>
+                        <textarea name="submission_text" id="submission_content_{{ assignment.id }}" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="submission_file_{{ assignment.id }}">Upload File (Optional)</label>
+                        <input type="file" name="submission_file" id="submission_file_{{ assignment.id }}" class="form-control">  
+                    </div>
+                    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                    <button type="submit" name="submit_assignment" class="btn" style="background-color: maroon; color: white;">Submit Assignment</button>
+                </form>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item">No assignments available.</li>
+    {% endfor %}
+</ul>
+
+<script>
+    function toggleSubmission(assignmentId) {
+        var submissionDiv = document.getElementById("submission_" + assignmentId);
+        if (submissionDiv.style.display === "none") {
+            submissionDiv.style.display = "block";
+        } else {
+            submissionDiv.style.display = "none";
+        }
+    }
+</script>
