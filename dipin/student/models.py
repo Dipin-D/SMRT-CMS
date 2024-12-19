@@ -10,7 +10,7 @@ class AssignmentSubmission(models.Model):
     submitted_on = models.DateTimeField(auto_now_add=True)
     graded = models.BooleanField(default=False)
     grade = models.FloatField(null=True, blank=True)
-
+  
     def __str__(self):
         return f"Submission by {self.student} for {self.assignment}"
 
@@ -21,11 +21,14 @@ class QuizAttempt(models.Model):
     score = models.FloatField(default=0)
     total_marks = models.FloatField()
     attempted_on = models.DateTimeField(auto_now_add=True)
+    graded = models.BooleanField(default=False)
+    grade = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.student} - {self.quiz} - {self.score}/{self.total_marks}"
 
 class QuestionAttempt(models.Model):
+    class_shell = models.ForeignKey(ClassShell, on_delete=models.CASCADE)
     quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="question_attempts")
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="attempts")
     student_answer = models.TextField()
@@ -42,6 +45,8 @@ class ExerciseAttempt(models.Model):
     score = models.FloatField(default=0)
     total_marks = models.FloatField()
     attempted_on = models.DateTimeField(auto_now_add=True)
+    graded = models.BooleanField(default=False)
+    grade = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.student} - {self.exercise} - {self.score}/{self.total_marks}"

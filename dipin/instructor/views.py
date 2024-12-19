@@ -1,8 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ClassShellForm, CourseFileForm, CourseForm, QuizForm, QuestionForm, AssignmentForm, AssignmentFileForm, ExerciseForm, ExerciseQuestionForm
 from .models import ClassShell, CourseFile, Course, Question, Quiz, Assignment, AssignmentFile, Exercise, ExerciseQuestion
+from student.models import AssignmentSubmission, QuizAttempt, ExerciseAttempt
 from django.views import View
 from accounts.models import CustomUser
+from django.contrib import messages
+from itertools import chain
+
+
 
 
 def create_class_shell(request):
@@ -35,8 +40,19 @@ class GoToCourseView(View):
         
         students = CustomUser.objects.filter(is_student=True)
         students_with_access = class_shell.students_with_access.values_list('id', flat=True)  # Get IDs with access
+        
+        ungraded_submissions = {
+                'assignments': AssignmentSubmission.objects.filter(graded=False, assignment__class_shell=class_shell),
+                'quizzes': QuizAttempt.objects.filter(graded=False, quiz__class_shell=class_shell),
+                'exercises': ExerciseAttempt.objects.filter(graded=False, exercise__class_shell=class_shell),
+            }
+        print(ungraded_submissions)
 
-
+        graded_submissions = {
+            'assignments': AssignmentSubmission.objects.filter(graded=True, assignment__class_shell=class_shell),
+            'quizzes': QuizAttempt.objects.filter(graded=True, quiz__class_shell=class_shell),
+            'exercises': ExerciseAttempt.objects.filter(graded=True, exercise__class_shell=class_shell),
+        }
 
         lecture_form = CourseForm()
         lecture_file_form = CourseFileForm()
@@ -59,7 +75,8 @@ class GoToCourseView(View):
             'assignment_files':assignment_files,
             'students':students,
             'students_with_access': students_with_access,
-
+            'ungraded_submissions': ungraded_submissions,
+            'graded_submissions': graded_submissions
         })
 
     def post(self, request, class_shell_id):
@@ -74,6 +91,7 @@ class GoToCourseView(View):
         quiz_id = request.POST.get('quiz_id')
         exercise_id = request.POST.get('exercise_id')  
         assignment_id = request.POST.get('assignment_id')
+        submission_id = request.POST.get("submission_id")
 
         if 'update_access' in request.POST:
             selected_student_ids = request.POST.getlist('access_student_ids')
@@ -108,9 +126,34 @@ class GoToCourseView(View):
             self.handle_edit_assignment(request, class_shell, assignment_id)
         elif 'delete_assignment' in request.POST and assignment_id:
             self.handle_delete_assignment(assignment_id, class_shell)
-
+        #handle submission grading
+        if 'grade_submission' in request.POST and submission_id:
+            self.handle_manage_submissions(request, submission_id)
         return redirect('instructor:go_to_course', class_shell_id=class_shell_id)
-    
+
+    #grading
+    def handle_manage_submissions(self, request, submission_id):
+            submission = get_object_or_404(chain(AssignmentSubmission.objects.all(), QuizAttempt.objects.all(), ExerciseAttempt.objects.all()), 
+                id=submission_id)
+            if request.method == "POST":
+                grade = request.POST.get("grade")                
+                if not grade:
+                    messages.error(request, "Grade cannot be empty.")
+                else:
+                    try:
+                        grade = float(grade)
+                        
+                        if grade < 0 or grade > 100:
+                            messages.error(request, "Grade must be between 0 and 100.")
+                        else:
+                            submission.grade = grade
+                            submission.graded = True
+                            submission.save()
+                            messages.success(request, "Grade has been successfully saved.")
+                            
+                    except ValueError:
+                        messages.error(request, "Please enter a valid grade between 0 and 100.")
+                        
 
     #ASSIGMENT
     def handle_add_assignment(self, form, class_shell, user):

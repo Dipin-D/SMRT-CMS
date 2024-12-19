@@ -8,9 +8,7 @@ from django.views import View
 
 def course_list(request):
     student = request.user
-    class_shells = ClassShell.objects.filter(students_with_access=student)
-    print(f'Student: {request.user}, Accessible Class Shells: {class_shells}')
-    
+    class_shells = ClassShell.objects.filter(students_with_access=student)    
     return render(request, 'course_list.html', {'class_shells': class_shells})
 
 class go_to_course_student(View):
