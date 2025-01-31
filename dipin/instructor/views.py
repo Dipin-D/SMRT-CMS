@@ -7,9 +7,6 @@ from accounts.models import CustomUser
 from django.contrib import messages
 from itertools import chain
 
-
-
-
 def create_class_shell(request):
     if request.method == 'POST':
         form = ClassShellForm(request.POST)
@@ -46,7 +43,6 @@ class GoToCourseView(View):
                 'quizzes': QuizAttempt.objects.filter(graded=False, quiz__class_shell=class_shell),
                 'exercises': ExerciseAttempt.objects.filter(graded=False, exercise__class_shell=class_shell),
             }
-        print(ungraded_submissions)
 
         graded_submissions = {
             'assignments': AssignmentSubmission.objects.filter(graded=True, assignment__class_shell=class_shell),
@@ -115,7 +111,8 @@ class GoToCourseView(View):
         # Handle exercise operations
         if 'add_exercise' in request.POST and exercise_form.is_valid():  
             self.handle_add_exercise(exercise_form, class_shell, request.user)
-
+        elif 'edit_exercise' in request.POST and exercise_id:
+            self.handle_edit_exercise(request, exercise_id, class_shell)
         elif 'delete_exercise' in request.POST and exercise_id:
             self.handle_delete_exercise(exercise_id, class_shell)
 
@@ -133,27 +130,31 @@ class GoToCourseView(View):
 
     #grading
     def handle_manage_submissions(self, request, submission_id):
-            submission = get_object_or_404(chain(AssignmentSubmission.objects.all(), QuizAttempt.objects.all(), ExerciseAttempt.objects.all()), 
-                id=submission_id)
-            if request.method == "POST":
-                grade = request.POST.get("grade")                
-                if not grade:
-                    messages.error(request, "Grade cannot be empty.")
-                else:
-                    try:
-                        grade = float(grade)
-                        
-                        if grade < 0 or grade > 100:
-                            messages.error(request, "Grade must be between 0 and 100.")
-                        else:
-                            submission.grade = grade
-                            submission.graded = True
-                            submission.save()
-                            messages.success(request, "Grade has been successfully saved.")
-                            
-                    except ValueError:
-                        messages.error(request, "Please enter a valid grade between 0 and 100.")
-                        
+        submission = None
+
+        for model in [AssignmentSubmission, QuizAttempt, ExerciseAttempt]:
+            try:
+                submission = model.objects.get(id=submission_id)
+                break
+            except model.DoesNotExist:
+                continue
+
+        if request.method == "POST":
+            grade = request.POST.get("grade")                
+            if not grade:
+                messages.error(request, "Grade cannot be empty.")
+            else:
+                try:
+                    grade = float(grade)
+                    if grade < 0 or grade > 100:
+                        messages.error(request, "Grade must be between 0 and 100.")
+                    else:
+                        submission.grade = grade
+                        submission.graded = True
+                        submission.save()
+                        messages.success(request, "Grade has been successfully saved.")
+                except ValueError:
+                    messages.error(request, "Please enter a valid grade between 0 and 100.")                    
 
     #ASSIGMENT
     def handle_add_assignment(self, form, class_shell, user):
@@ -182,6 +183,7 @@ class GoToCourseView(View):
             assignment_instance = assignment_form.save(commit=False)
             assignment_instance.user = request.user
             assignment_instance.class_shell = class_shell
+            assignment_instance.due_date = request.POST.get("due_date")
             assignment_instance.save()
 
             # Handle optional file upload during assignment editing
@@ -258,7 +260,7 @@ class GoToCourseView(View):
     def handle_delete_lecture(self, lecture_id, class_shell):
         lecture = get_object_or_404(Course, id=lecture_id, class_shell=class_shell)
         lecture.delete()
-
+#quiz
     def handle_add_quiz(self, form, class_shell, user):
         quiz_instance = form.save(commit=False)
         quiz_instance.user = user
@@ -273,6 +275,7 @@ class GoToCourseView(View):
             quiz_instance = get_object_or_404(Quiz, id=quiz_id)
             quiz_instance.title = request.POST.get('title')
             quiz_instance.grading_percentage = request.POST.get('grading_percentage')
+            quiz_instance.due_date = request.POST.get("due_date")
             quiz_instance.save()
 
 
@@ -285,6 +288,16 @@ class GoToCourseView(View):
         exercise_instance.user = user
         exercise_instance.class_shell = class_shell
         exercise_instance.save()
+    def handle_edit_exercise(self, request, exercise_id, class_shell):
+        exercise_instance = get_object_or_404(Exercise, id=exercise_id, class_shell=class_shell)
+        exercise_form = ExerciseForm(request.POST, instance=exercise_instance)
+
+        if exercise_form.is_valid():
+            exercise_instance = exercise_form.save(commit=False)
+            exercise_instance.title = request.POST.get('title')
+            exercise_instance.grading_percentage = request.POST.get('grading_percentage')
+            exercise_instance.due_date = request.POST.get("due_date")  
+            exercise_instance.save()
 
     def handle_delete_exercise(self, exercise_id, class_shell):
         exercise_instance = get_object_or_404(Exercise, id=exercise_id, class_shell=class_shell)  # Correct model
@@ -388,5 +401,88 @@ class ExerciseDetailView(View):
     def handle_delete_question(self, exercise_question_id):
         exercise_question = get_object_or_404(ExerciseQuestion, id=exercise_question_id)  
         exercise_question.delete()
+
+class QuizGradeView(View):
+    def get(self, request, submission_id):
+        submission = get_object_or_404(QuizAttempt, id=submission_id)
+        
+        question_attempts = submission.question_attempts.all()  
+        total_marks = submission.total_marks 
+        score = submission.grade  
+        
+        class_shell = submission.quiz.class_shell  
+        
+        return render(request, "quiz_grade.html", {
+            "quiz": submission.quiz,  
+            "question_attempts": question_attempts, 
+            "total_marks": total_marks,  
+            "score": score,  
+            "class_shell": class_shell  
+        })
+    def post(self, request, submission_id):
+        submission = get_object_or_404(QuizAttempt, id=submission_id)
+        
+        grade = request.POST.get("grade")
+        
+        if grade:
+            try:
+                grade = float(grade)
+                if 0 <= grade <= submission.total_marks:
+                    submission.grade = grade
+                    submission.graded = True  # Mark as graded
+                    submission.save()
+                    messages.success(request, "Grade has been successfully saved.")
+                else:
+                    messages.error(request, "Grade must be between 0 and the total marks.")
+            except ValueError:
+                messages.error(request, "Please enter a valid grade.")
+        else:
+            messages.error(request, "Grade cannot be empty.")
+        
+        return redirect('instructor:quiz_grade', submission_id=submission.id)
+class ExerciseGradeView(View):
+    def get(self, request, submission_id):
+        submission = get_object_or_404(ExerciseAttempt, id=submission_id)
+        
+        question_attempts = submission.question_attempts.all()  
+        total_marks = submission.total_marks 
+        score = submission.grade  
+        
+        class_shell = submission.exercise.class_shell  
+        
+        return render(request, "exercise_grade.html", {
+            "exercise": submission.exercise,  
+            "question_attempts": question_attempts, 
+            "total_marks": total_marks,  
+            "score": score,  
+            "class_shell": class_shell  
+        })
+    
+    def post(self, request, submission_id):
+        submission = get_object_or_404(ExerciseAttempt, id=submission_id)
+        
+        grade = request.POST.get("grade")
+        
+        if grade:
+            try:
+                grade = float(grade)
+                if 0 <= grade <= submission.total_marks:
+                    submission.grade = grade
+                    submission.graded = True  # Mark as graded
+                    submission.save()
+                    messages.success(request, "Grade has been successfully saved.")
+                else:
+                    messages.error(request, "Grade must be between 0 and the total marks.")
+            except ValueError:
+                messages.error(request, "Please enter a valid grade.")
+        else:
+            messages.error(request, "Grade cannot be empty.")
+        
+        return redirect('instructor:exercise_grade', submission_id=submission.id)
+
+
+
+
+
 
 

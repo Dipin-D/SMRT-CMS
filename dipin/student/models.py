@@ -28,7 +28,6 @@ class QuizAttempt(models.Model):
         return f"{self.student} - {self.quiz} - {self.score}/{self.total_marks}"
 
 class QuestionAttempt(models.Model):
-    class_shell = models.ForeignKey(ClassShell, on_delete=models.CASCADE)
     quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="question_attempts")
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="attempts")
     student_answer = models.TextField()

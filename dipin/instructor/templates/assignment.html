@@ -2,8 +2,9 @@
 
 <!-- Button to Show the New Assignment Form -->
 <div class="mt-3 mb-3">
-<button id="add-assignment" class="btn" style="background-color: maroon; color: white;" id="add-content">Add Assignment</button>
+    <button id="add-assignment" class="btn" style="background-color: maroon; color: white;" id="add-content">Add Assignment</button>
 </div>
+
 <!-- New Assignment Content Form -->
 <form method="post" enctype="multipart/form-data" id="new-assignment-form" style="display: none;" class="mt-4">
     {% csrf_token %}
@@ -14,6 +15,14 @@
     <div class="form-group">
         <label for="new_assignment_content">Content</label>
         <textarea name="text" id="new_assignment_content" class="form-control" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="new_assignment_due_date">Due Date</label>
+        <input type="date" name="due_date" id="new_assignment_due_date" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="new_assignment_total_marks">Total Marks</label>
+        <input type="number" name="total_marks" id="new_assignment_total_marks" class="form-control" required min="1">
     </div>
     <div class="form-group">
         <label for="new_assignment_file">Upload File (Optional)</label>
@@ -28,6 +37,8 @@
         <li class="list-group-item mt-4">
             <strong>{{ assignment.title }}</strong>
             <p>{{ assignment.text }}</p>
+            <p><strong>Due Date:</strong> {{ assignment.due_date }}</p>
+            <p><strong>Total Marks:</strong> {{ assignment.total_marks }}</p>  <!-- Display Total Marks -->
 
             <!-- Display Files for this Assignment -->
             <ul class="list-group mt-3">
@@ -52,7 +63,19 @@
                     <label for="assignment_content_{{ assignment.id }}">Content</label>
                     <textarea name="text" id="assignment_content_{{ assignment.id }}" class="form-control" required>{{ assignment.text }}</textarea>
                 </div>
-                
+
+                <!-- Due Date Field for Editing -->
+                <div class="form-group">
+                    <label for="assignment_due_date_{{ assignment.id }}">Due Date</label>
+                    <input type="date" name="due_date" id="assignment_due_date_{{ assignment.id }}" class="form-control" value="{{ assignment.due_date }}" required>
+                </div>
+
+                <!-- Total Marks Field for Editing -->
+                <div class="form-group">
+                    <label for="assignment_total_marks_{{ assignment.id }}">Total Marks</label>
+                    <input type="number" name="total_marks" id="assignment_total_marks_{{ assignment.id }}" class="form-control" value="{{ assignment.total_marks }}" required min="1">
+                </div>
+
                 <!-- Display existing file with option to remove -->
                 <div class="form-group">
                     <label>Existing File:</label>
@@ -72,7 +95,7 @@
                         <p>No existing files for this assignment.</p>
                     {% endif %}
                 </div>
-                
+
                 <!-- New file upload option for editing -->
                 <div class="form-group">
                     <label for="edit_assignment_file_{{ assignment.id }}">Upload New File (Optional)</label>
@@ -84,7 +107,6 @@
             </form>
 
             <!-- Edit and Delete Buttons -->
-            <!-- Add the missing class to the Edit button -->
             <button class="btn btn-warning btn-sm edit-assignment-btn" data-assignment-id="{{ assignment.id }}">Edit</button>
             <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
                 {% csrf_token %}
@@ -108,8 +130,9 @@
         if (newAssignmentForm.style.display === 'block') {
             document.getElementById('new_assignment_title').value = '';
             document.getElementById('new_assignment_content').value = '';
+            document.getElementById('new_assignment_due_date').value = '';  // Reset due date
+            document.getElementById('new_assignment_total_marks').value = '';  // Reset total marks
             document.getElementById('new_assignment_file').value = '';
-            document.getElementById('new_assignment_id').value = ''; // Reset hidden assignment ID
         }
     });
 
