@@ -41,7 +41,7 @@
                 <button class="custom-button" onclick="loadContent('exercise')">Exercises</button>
                 <button class="custom-button" onclick="loadContent('quiz')">Quizzes</button>
                 <button class="custom-button" onclick="loadContent('assignment')">Assignments</button>
-                <button class="custom-button" onclick="loadContent('assignment')">Grades</button>
+                <button class="custom-button" onclick="loadContent('grade')">Grades</button>
             </div>
         </div>
 
@@ -62,7 +62,7 @@
                 {% include 'do_assignment.html' %}
             </div>
 
-            <div id="Grades-content" class="content-section" style="display: none;">
+            <div id="grade-content" class="content-section" style="display: none;">
                 {% include 'Grades.html' %}
             </div>
         </div>

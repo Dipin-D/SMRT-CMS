@@ -1,28 +1,22 @@
 {% extends "home.html" %}
 
 {% block title %}
-  Quiz: {{ quiz.title }}
+  Exercise: {{ exercise.title }}
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h4 class="mb-4 text-center">Quiz: {{ quiz.title }}</h4>
+    <h4 class="mb-4 text-center">Exercise: {{ exercise.title }}</h4>
 
     <!-- Instructor can view student submission and grade -->
     <div class="mt-4">
-      <h5 class="text-center">Submitted Quiz Review</h5>
+      <h5 class="text-center">Submitted Exercise Review</h5>
       <ul class="list-group">
         {% for attempt in question_attempts %}
           <li class="list-group-item mb-3">
-            <p><strong>Question:</strong> {{ attempt.question.text }}</p>
+            <p><strong>Question:</strong> {{ attempt.exercise_question.text }}</p>
             <p><strong>Student's Answer:</strong> {{ attempt.student_answer }}</p>
-            <p><strong>Correct Answer:</strong> 
-              {% if attempt.question.type == "multiple_choice" %}
-                 {{ attempt.question.mcq_answer }}
-              {% elif attempt.question.type == "true_false" %}
-                {{ attempt.question.tf_answer }}
-              {% endif %}
-            </p>
+            <p><strong>Correct Answer:</strong> {{ attempt.exercise_question.correct_answer }}</p>
             <p class="
             {% if attempt.is_correct %}
               text-success

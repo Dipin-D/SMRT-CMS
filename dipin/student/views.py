@@ -3,6 +3,7 @@ from instructor.models import ClassShell, Course, Quiz, Assignment, Exercise, Qu
 from .models import QuizAttempt, QuestionAttempt,AssignmentSubmission, ExerciseQuestionAttempt, ExerciseAttempt
 from accounts.models import CustomUser
 from django.views import View
+from django.utils import timezone
 
 
 
@@ -22,15 +23,39 @@ class go_to_course_student(View):
         quizzes = Quiz.objects.filter(class_shell=class_shell)
         exercises = Exercise.objects.filter(class_shell=class_shell)
         assignments = Assignment.objects.filter(class_shell=class_shell)
-        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list('assignment', 'submission_text', 'submission_file')
+        now = timezone.now()
 
+        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list('assignment', 'submission_text', 'submission_file', 'grade')
         submitted_assignments_info = [
-            {'assignment_id': submission[0], 'submission_text': submission[1], 'submission_file': submission[2]}
+            {'assignment_id': submission[0], 'submission_text': submission[1], 'submission_file': submission[2], 'grade': submission[3], 'total_marks': Assignment.objects.get(id=submission[0]).total_marks }
             for submission in submitted_assignments
         ]
         submitted_assignment_ids = set(
-        AssignmentSubmission.objects.filter(student=request.user)
-        .values_list('assignment', flat=True)
+            AssignmentSubmission.objects.filter(student=request.user)
+            .values_list('assignment', flat=True)
+        )
+        
+        # Get submitted quizzes with their scores
+        submitted_quizzes = QuizAttempt.objects.filter(student=request.user, quiz__class_shell=class_shell)
+        submitted_quizzes_info = [
+            {'quiz_id': quiz_attempt.quiz.id, 'score': quiz_attempt.score, 'total_marks': quiz_attempt.total_marks}
+            for quiz_attempt in submitted_quizzes
+        ]
+        print(submitted_quizzes_info)
+
+        submitted_quiz_ids = set(
+            submitted_quizzes.values_list('quiz', flat=True)
+        )
+        
+        # Get submitted exercises with their scores
+        submitted_exercises = ExerciseAttempt.objects.filter(student=request.user, exercise__class_shell=class_shell)
+        submitted_exercises_info = [
+            {'exercise_id': exercise_attempt.exercise.id, 'score': exercise_attempt.score, 'total_marks': exercise_attempt.total_marks}
+            for exercise_attempt in submitted_exercises
+        ]
+        
+        submitted_exercise_ids = set(
+            submitted_exercises.values_list('exercise', flat=True)
         )
         
         return render(request, 'go_to_course_student.html', {
@@ -40,10 +65,16 @@ class go_to_course_student(View):
             'assignments': assignments,
             'exercises': exercises,
             'files': files,
-            'submitted_assignments': submitted_assignments,
-            'submitted_assignments_info':submitted_assignments_info,
-            'submitted_assignment_ids':submitted_assignment_ids,
+            'submitted_assignments_info': submitted_assignments_info,
+            'submitted_assignment_ids': submitted_assignment_ids,
+            'submitted_quizzes_info': submitted_quizzes_info,
+            'submitted_quiz_ids': submitted_quiz_ids,
+            'submitted_exercises_info': submitted_exercises_info,
+            'submitted_exercise_ids': submitted_exercise_ids,
+            'now':now,
         })
+
+
     def post(self, request, class_shell_id):
         assignment_id = request.POST.get('assignment_id')
         assignment = get_object_or_404(Assignment, id=assignment_id)

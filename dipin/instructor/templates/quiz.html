@@ -19,6 +19,10 @@
                     <label for="new_grading_percentage">Grading Percentage</label>
                     <input type="number" name="grading_percentage" id="new_grading_percentage" class="form-control" step="0.01" min="0" max="100" required>
                 </div>
+                <div class="form-group">
+                    <label for="new_due_date">Due Date</label>
+                    <input type="date" name="due_date" id="new_due_date" class="form-control" required>
+                </div>
                 <button type="submit" name="add_quiz" class="btn btn-success">Add Quiz</button>
             </form>
         </div>
@@ -30,7 +34,7 @@
     {% for quiz in quizzes %}
         <li class="list-group-item mt-4">
             <div class="d-flex justify-content-between align-items-center">
-                <strong>{{ quiz.title }}</strong> (Grading Percentage: {{ quiz.grading_percentage }}%)
+                <strong>{{ quiz.title }}</strong> (Grading Percentage: {{ quiz.grading_percentage }}%) - Due Date: {{ quiz.due_date }}
 
                 <div>
                     <!-- Edit Quiz Form -->
@@ -44,6 +48,10 @@
                             <div class="form-group">
                                 <label for="quiz_grading_percentage_{{ quiz.id }}">Grading Percentage</label>
                                 <input type="number" name="grading_percentage" id="quiz_grading_percentage_{{ quiz.id }}" class="form-control" value="{{ quiz.grading_percentage }}" step="0.01" min="0" max="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz_due_date_{{ quiz.id }}">Due Date</label>
+                                <input type="date" name="due_date" id="quiz_due_date_{{ quiz.id }}" class="form-control" value="{{ quiz.due_date|date:'Y-m-d' }}" required>
                             </div>
                             <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
                             <button type="submit" name="edit_quiz" class="btn btn-primary">Save Changes</button>
@@ -79,6 +87,7 @@
         if (newQuizForm.style.display === 'block') {
             document.getElementById('new_quiz_title').value = '';
             document.getElementById('new_grading_percentage').value = '';
+            document.getElementById('new_due_date').value = '';
         }
     });
 

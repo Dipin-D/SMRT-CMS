@@ -12,7 +12,16 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    {{ exercise_form.as_p }}
+                    <label for="new_exercise_title">Title</label>
+                    <input type="text" name="title" id="new_exercise_title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_grading_percentage">Grading Percentage</label>
+                    <input type="number" name="grading_percentage" id="new_grading_percentage" class="form-control" step="0.01" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_due_date">Due Date</label>
+                    <input type="date" name="due_date" id="new_due_date" class="form-control" required>
                 </div>
                 <button type="submit" name="add_exercise" class="btn btn-success">Create</button>
             </form>
@@ -25,7 +34,9 @@
     {% for exercise in exercises %}
         <li class="list-group-item">
             <div class="d-flex justify-content-between align-items-center">
-                <strong>{{ exercise.title }}</strong>
+                <strong>{{ exercise.title }}</strong> 
+                (Grading Percentage: {{ exercise.grading_percentage }}%) - 
+                Due Date: {{ exercise.due_date }}
 
                 <div>
                     <!-- Edit Button -->
@@ -54,6 +65,10 @@
                     <div class="form-group">
                         <label for="grading_percentage_{{ exercise.id }}">Grading Percentage</label>
                         <input type="number" name="grading_percentage" id="grading_percentage_{{ exercise.id }}" class="form-control" value="{{ exercise.grading_percentage }}" placeholder="Edit Grading Percentage" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="due_date_{{ exercise.id }}">Due Date</label>
+                        <input type="date" name="due_date" id="due_date_{{ exercise.id }}" class="form-control" value="{{ exercise.due_date|date:'Y-m-d' }}" required>
                     </div>
                     <button type="submit" name="edit_exercise" class="btn btn-primary mt-2">Save</button>
                     <input type="hidden" name="exercise_id" value="{{ exercise.id }}">

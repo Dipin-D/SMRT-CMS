@@ -20,7 +20,7 @@ class CourseForm(forms.ModelForm):
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['text', 'title']
+        fields = ['text', 'title', 'due_date','total_marks']
     text = forms.CharField(widget=forms.Textarea(attrs={'cols': 40, 'rows': 10}))
 
 class AssignmentFileForm(forms.ModelForm):
@@ -32,13 +32,13 @@ class AssignmentFileForm(forms.ModelForm):
 class QuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        fields = ['title', 'grading_percentage']
+        fields = ['title', 'grading_percentage', 'due_date']
 
 # Exercise Form
 class ExerciseForm(forms.ModelForm):  # Corrected spelling here
     class Meta:
         model = Exercise
-        fields = ['title', 'grading_percentage']
+        fields = ['title', 'grading_percentage', 'due_date']
 
 # Base Question Form
 class BaseQuestionForm(forms.ModelForm):
