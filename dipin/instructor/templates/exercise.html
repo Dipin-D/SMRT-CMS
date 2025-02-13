@@ -23,6 +23,14 @@
                     <label for="new_due_date">Due Date</label>
                     <input type="date" name="due_date" id="new_due_date" class="form-control" required>
                 </div>
+                <div class="form-group">
+                    <label for="new_max_attempts">Max Attempts</label>
+                    <input type="number" name="max_attempts" id="new_max_attempts" class="form-control" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_timer">Timer</label>
+                    <input type="number" name="timer" id="new_timer" class="form-control" min="1" required>
+                </div>
                 <button type="submit" name="add_exercise" class="btn btn-success">Create</button>
             </form>
         </div>
@@ -35,8 +43,7 @@
         <li class="list-group-item">
             <div class="d-flex justify-content-between align-items-center">
                 <strong>{{ exercise.title }}</strong> 
-                (Grading Percentage: {{ exercise.grading_percentage }}%) - 
-                Due Date: {{ exercise.due_date }}
+                (Grading: {{ exercise.grading_percentage }}%) - Due: {{ exercise.due_date }}, timer {{exercise.timer}} mins
 
                 <div>
                     <!-- Edit Button -->
@@ -69,6 +76,14 @@
                     <div class="form-group">
                         <label for="due_date_{{ exercise.id }}">Due Date</label>
                         <input type="date" name="due_date" id="due_date_{{ exercise.id }}" class="form-control" value="{{ exercise.due_date|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="max_attempts_{{ exercise.id }}">Max Attempts_</label>
+                        <input type="number" name="max_attempts" id="max_attempts_{{ exercise.id }}" class="form-control" value="{{ exercise.max_attempts }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="timer_{{ exercise.id }}">Timer</label>
+                        <input type="number" name="timer" id="timer_{{ exercise.id }}" class="form-control" value="{{ exercise.timer }}" required>
                     </div>
                     <button type="submit" name="edit_exercise" class="btn btn-primary mt-2">Save</button>
                     <input type="hidden" name="exercise_id" value="{{ exercise.id }}">

@@ -20,7 +20,7 @@ class CourseForm(forms.ModelForm):
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['text', 'title', 'due_date','total_marks']
+        fields = ['text', 'title', 'due_date','total_marks', 'max_attempts']
     text = forms.CharField(widget=forms.Textarea(attrs={'cols': 40, 'rows': 10}))
 
 class AssignmentFileForm(forms.ModelForm):
@@ -32,13 +32,13 @@ class AssignmentFileForm(forms.ModelForm):
 class QuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        fields = ['title', 'grading_percentage', 'due_date']
+        fields = ['title', 'grading_percentage', 'due_date', 'max_attempts', 'timer']
 
 # Exercise Form
 class ExerciseForm(forms.ModelForm):  # Corrected spelling here
     class Meta:
         model = Exercise
-        fields = ['title', 'grading_percentage', 'due_date']
+        fields = ['title', 'grading_percentage', 'due_date', 'max_attempts', 'timer']
 
 # Base Question Form
 class BaseQuestionForm(forms.ModelForm):
@@ -46,10 +46,10 @@ class BaseQuestionForm(forms.ModelForm):
         model = BaseQuestion
         fields = ['text', 'type', 'choice_1', 'choice_2', 'choice_3', 'choice_4','mark','mcq_answer','tf_answer']
     mcq_answer = forms.ChoiceField(choices=[
-        ('1', 'Choice 1'),
-        ('2', 'Choice 2'),
-        ('3', 'Choice 3'),
-        ('4', 'Choice 4'),
+        ('Choice 1', 'Choice 1'),
+        ('Choice 2', 'Choice 2'),
+        ('Choice 3', 'Choice 3'),
+        ('Choice 4', 'Choice 4'),
     ], required=False)   
     tf_answer = forms.ChoiceField(choices=[
         ('True', 'True'),  

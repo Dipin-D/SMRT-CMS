@@ -43,6 +43,8 @@
                 <button class="custom-button" onclick="loadContent('assignment')">Assignments</button>
                 <button class="custom-button" onclick="loadContent('other')">Student List</button>
                 <button class="custom-button" onclick="loadContent('student_submissions')">Student Submissions</button>
+                <button class="custom-button" onclick="loadContent('analytics')">Analytics</button>
+
             </div>
         </div>
 
@@ -74,6 +76,9 @@
             </div>
             <div id="student_submissions-content" class="content-section" style="display: none;">
                 {% include 'student_submissions.html' %}
+            </div>
+            <div id="analytics-content" class="content-section" style="display: none;">
+                {% include 'analytics.html' %}
             </div>
         </div>
     </div>

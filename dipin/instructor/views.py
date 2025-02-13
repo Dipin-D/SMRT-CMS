@@ -5,23 +5,47 @@ from student.models import AssignmentSubmission, QuizAttempt, ExerciseAttempt
 from django.views import View
 from accounts.models import CustomUser
 from django.contrib import messages
-from itertools import chain
 
-def create_class_shell(request):
-    if request.method == 'POST':
-        form = ClassShellForm(request.POST)
-        if form.is_valid():
-            class_shell = form.save(commit=False)
-            class_shell.user = request.user
-            class_shell.save()
-            return redirect('instructor:class_shell_list')
-    else:
-        form = ClassShellForm()
-    return render(request, 'create_class_shell.html', {'form': form})
 
 def class_shell_list(request):
+    edit_class_shell = None
+    form = ClassShellForm(request.POST or None)
+
+    if request.method == 'POST':
+        class_shell_id = request.POST.get('class_shell_id')
+        
+        if class_shell_id:  # Editing or deleting
+            class_shell = get_object_or_404(ClassShell, pk=class_shell_id, user=request.user)
+            
+            if 'edit' in request.POST:
+                form = ClassShellForm(instance=class_shell)
+                edit_class_shell = class_shell  # Set the class shell being edited
+
+            elif 'update' in request.POST:
+                form = ClassShellForm(request.POST, instance=class_shell)
+                if form.is_valid():
+                    form.save()
+                    return redirect('instructor:class_shell_list')
+
+            elif 'delete' in request.POST:
+                class_shell.delete()
+                return redirect('instructor:class_shell_list')
+        
+        else:  # Creating a new class shell
+            form = ClassShellForm(request.POST)
+            if form.is_valid():
+                class_shell = form.save(commit=False)
+                class_shell.user = request.user
+                class_shell.save()
+                return redirect('instructor:class_shell_list')
+
     class_shells = ClassShell.objects.filter(user=request.user)
-    return render(request, 'class_shell_list.html', {'class_shells': class_shells})
+    return render(request, 'class_shell_list.html', {
+        'class_shells': class_shells,
+        'edit_class_shell': edit_class_shell,
+        'form': form,
+    })
+
 
 class GoToCourseView(View):
     def get(self, request, class_shell_id):
@@ -184,6 +208,7 @@ class GoToCourseView(View):
             assignment_instance.user = request.user
             assignment_instance.class_shell = class_shell
             assignment_instance.due_date = request.POST.get("due_date")
+            assignment_instance.max_attempts = request.POST.get("max_attempts")
             assignment_instance.save()
 
             # Handle optional file upload during assignment editing
@@ -265,7 +290,7 @@ class GoToCourseView(View):
         quiz_instance = form.save(commit=False)
         quiz_instance.user = user
         quiz_instance.class_shell = class_shell
-        quiz_instance.save()
+        quiz_instance.save() 
     
     def handle_edit_quiz(self, request, quiz_id, class_shell):
         quiz_instance = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
@@ -276,8 +301,9 @@ class GoToCourseView(View):
             quiz_instance.title = request.POST.get('title')
             quiz_instance.grading_percentage = request.POST.get('grading_percentage')
             quiz_instance.due_date = request.POST.get("due_date")
+            quiz_instance.max_attempts = request.POST.get("max_attempts")
+            quiz_instance.timer = request.POST.get("timer")
             quiz_instance.save()
-
 
     def handle_delete_quiz(self, quiz_id, class_shell):
         quiz_instance = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
@@ -296,7 +322,9 @@ class GoToCourseView(View):
             exercise_instance = exercise_form.save(commit=False)
             exercise_instance.title = request.POST.get('title')
             exercise_instance.grading_percentage = request.POST.get('grading_percentage')
-            exercise_instance.due_date = request.POST.get("due_date")  
+            exercise_instance.due_date = request.POST.get("due_date") 
+            exercise_instance.max_attempts = request.POST.get("max_attempts")
+            exercise_instance.timer = request.POST.get("timer")
             exercise_instance.save()
 
     def handle_delete_exercise(self, exercise_id, class_shell):
@@ -324,7 +352,19 @@ class QuizDetailView(View):
             question_instance = question_form.save(commit=False)
             question_instance.quiz = quiz
             if question_instance.type == 'multiple_choice':
-                question_instance.tf_answer = None  
+                question_instance.choice_1 = question_form.cleaned_data['choice_1']
+                question_instance.choice_2 = question_form.cleaned_data['choice_2']
+                question_instance.choice_3 = question_form.cleaned_data['choice_3']
+                question_instance.choice_4 = question_form.cleaned_data['choice_4']
+                mcq_answer = question_form.cleaned_data['mcq_answer'].strip()
+                if mcq_answer == 'Choice 1':
+                    question_instance.mcq_answer = question_instance.choice_1  
+                elif mcq_answer == 'Choice 2':
+                    question_instance.mcq_answer = question_instance.choice_2  
+                elif mcq_answer == 'Choice 3':
+                    question_instance.mcq_answer = question_instance.choice_3  
+                elif mcq_answer == 'Choice 4':
+                    question_instance.mcq_answer = question_instance.choice_4  
                 question_instance.save()
             elif question_instance.type == 'true_false':
                 question_instance.mcq_answer = None  
@@ -384,10 +424,24 @@ class ExerciseDetailView(View):
         if 'add_question' in request.POST and question_form.is_valid():
             exercise_question_instance = question_form.save(commit=False)
             exercise_question_instance.exercise = exercise
-            if exercise_question_instance.type == 'multiple_choice':
-                exercise_question_instance.tf_answer = None  
-                exercise_question_instance.save()
-            elif exercise_question_instance.type == 'true_false':
+        if exercise_question_instance.type == 'multiple_choice':
+            exercise_question_instance.choice_1 = question_form.cleaned_data['choice_1']
+            exercise_question_instance.choice_2 = question_form.cleaned_data['choice_2']
+            exercise_question_instance.choice_3 = question_form.cleaned_data['choice_3']
+            exercise_question_instance.choice_4 = question_form.cleaned_data['choice_4']
+            mcq_answer = question_form.cleaned_data['mcq_answer'].strip()            
+            if mcq_answer == 'Choice 1':
+                exercise_question_instance.mcq_answer = exercise_question_instance.choice_1
+            elif mcq_answer == 'Choice 2':
+                exercise_question_instance.mcq_answer = exercise_question_instance.choice_2
+            elif mcq_answer == 'Choice 3':
+                exercise_question_instance.mcq_answer = exercise_question_instance.choice_3
+            elif mcq_answer == 'Choice 4':
+                exercise_question_instance.mcq_answer = exercise_question_instance.choice_4
+            exercise_question_instance.tf_answer = None  
+            exercise_question_instance.save()
+
+        elif exercise_question_instance.type == 'true_false':
                 exercise_question_instance.mcq_answer = None  
                 exercise_question_instance.save()
         elif 'delete_question' in request.POST:

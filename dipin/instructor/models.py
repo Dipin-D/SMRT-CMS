@@ -36,6 +36,8 @@ class Assignment(BaseContent):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assignments')
     due_date = models.DateTimeField(null=True, blank=True)
     total_marks = models.IntegerField(default=5)
+    max_attempts = models.IntegerField(default=3)
+
 
 
 # Base FILE Model for CourseFile and AssignmentFile
@@ -87,6 +89,8 @@ class Quiz(models.Model):
     title = models.CharField(max_length=200)
     grading_percentage = models.FloatField(default=10)
     due_date = models.DateTimeField(null=True, blank=True)
+    max_attempts = models.IntegerField(default=3)
+    timer = models.PositiveIntegerField(default=30)
 
     def __str__(self):
         return self.title
@@ -100,7 +104,8 @@ class Exercise(models.Model):
     title = models.CharField(max_length=200)
     grading_percentage = models.FloatField(default=10)
     due_date = models.DateTimeField(null=True, blank=True)
-
+    max_attempts = models.IntegerField(default=3)
+    timer = models.PositiveIntegerField(default=30)
 
     def __str__(self):
         return self.title

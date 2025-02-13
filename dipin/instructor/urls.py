@@ -4,7 +4,6 @@ from django.conf.urls.static import static
 from .views import (
     GoToCourseView,
     class_shell_list,
-    create_class_shell,
     QuizDetailView,
     ExerciseDetailView,
     QuizGradeView,
@@ -16,7 +15,6 @@ app_name = 'instructor'
 
 urlpatterns = [
     path('', class_shell_list, name='class_shell_list'),
-    path('create/', create_class_shell, name='create_class_shell'),
     path('course/<int:class_shell_id>/', GoToCourseView.as_view(), name='go_to_course'),
     path('quizlist/<int:class_shell_id>/', GoToCourseView.as_view(), name='quizlist'),
     path('create_quiz/<int:class_shell_id>/', GoToCourseView.as_view(), name='create_quiz'),

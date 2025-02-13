@@ -23,6 +23,14 @@
                     <label for="new_due_date">Due Date</label>
                     <input type="date" name="due_date" id="new_due_date" class="form-control" required>
                 </div>
+                <div class="form-group">
+                    <label for="new_max_attempts">Max Attempts</label>
+                    <input type="number" name="max_attempts" id="new_max_attempts" class="form-control" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_timer"> Timer-Minutes </label>
+                    <input type="number" name="timer" id="new_timer" class="form-control" min="1" required>
+                </div>
                 <button type="submit" name="add_quiz" class="btn btn-success">Add Quiz</button>
             </form>
         </div>
@@ -34,7 +42,7 @@
     {% for quiz in quizzes %}
         <li class="list-group-item mt-4">
             <div class="d-flex justify-content-between align-items-center">
-                <strong>{{ quiz.title }}</strong> (Grading Percentage: {{ quiz.grading_percentage }}%) - Due Date: {{ quiz.due_date }}
+                <strong>{{ quiz.title }}</strong> (Grading: {{ quiz.grading_percentage }}%) - Due {{ quiz.due_date }} , timer {{quiz.timer}} mins
 
                 <div>
                     <!-- Edit Quiz Form -->
@@ -46,12 +54,20 @@
                                 <input type="text" name="title" id="quiz_title_{{ quiz.id }}" class="form-control" value="{{ quiz.title }}" required>
                             </div>
                             <div class="form-group">
-                                <label for="quiz_grading_percentage_{{ quiz.id }}">Grading Percentage</label>
+                                <label for="quiz_grading_percentage_{{ quiz.id }}">Grading%</label>
                                 <input type="number" name="grading_percentage" id="quiz_grading_percentage_{{ quiz.id }}" class="form-control" value="{{ quiz.grading_percentage }}" step="0.01" min="0" max="100" required>
                             </div>
                             <div class="form-group">
                                 <label for="quiz_due_date_{{ quiz.id }}">Due Date</label>
                                 <input type="date" name="due_date" id="quiz_due_date_{{ quiz.id }}" class="form-control" value="{{ quiz.due_date|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz_max_attempts_{{ quiz.id }}">Max Attempts</label>
+                                <input type="number" name="max_attempts" id="quiz_max_attempts_{{ quiz.id }}" class="form-control" value="{{ quiz.max_attempts }}" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz_timer_{{ quiz.id }}"> Timer - Minutes</label>
+                                <input type="number" name="timer" id="quiz_timer_{{ quiz.id }}" class="form-control" value="{{ quiz.timer }}" min="1" required>
                             </div>
                             <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
                             <button type="submit" name="edit_quiz" class="btn btn-primary">Save Changes</button>
@@ -88,6 +104,7 @@
             document.getElementById('new_quiz_title').value = '';
             document.getElementById('new_grading_percentage').value = '';
             document.getElementById('new_due_date').value = '';
+            document.getElementById('new_max_attempts').value = '';
         }
     });
 

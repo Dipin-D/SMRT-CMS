@@ -44,7 +44,7 @@ def redirect_based_on_role(user):
     elif user.is_instructor:
         return redirect('instructor:class_shell_list')
     else:
-        return redirect('home')  
+        return redirect('front_page')  
 
 
 @login_required
