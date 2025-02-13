@@ -1,0 +1,54 @@
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #e8e8e8;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .stats div {
+            text-align: center;
+        }
+    </style>
+
+<div class="container">
+    <h2>Class Performance Analytics</h2>
+    
+    <div class="stats">
+        <div>
+            <strong>Assignments:</strong> {{ avg_assignment_percentage|floatformat:2 }}%
+        </div>
+        <div>
+            <strong>Quizzes:</strong> {{ avg_quiz_percentage|floatformat:2 }}%
+        </div>
+        <div>
+            <strong>Exercises:</strong> {{ avg_exercise_percentage|floatformat:2 }}%
+        </div>
+        <div>
+            <strong>Overall:</strong> {{ avg_overall_percentage|floatformat:2 }}%
+        </div>
+    </div>
+
+    {{ chart_div|safe }}
+</div>
+

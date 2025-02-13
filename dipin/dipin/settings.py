@@ -133,9 +133,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL='/accounts/login'
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
-
-
-
+OPENAI_API_KEY = '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'
 
 

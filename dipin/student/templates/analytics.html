@@ -1,0 +1,26 @@
+
+    <!-- Plotly JS library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <h1>Analytics for {{ class_shell.course_name }}</h1>
+    
+    {% if not assignments and not quizzes and not exercises %}
+    <p class="no-tasks-message">
+        Take it easy for now! You're in the right spot to check your analytics, but your instructor hasn't assigned any tasks yet.
+    </p>
+    {% else %}
+    
+    <div>
+        <!-- Display overall grade details -->
+        <p><strong>Grade:</strong> {{ grade }}</p>
+        <p><strong>Total Marks:</strong> {{ overall_total_marks }}</p>
+        <p><strong>Score Achieved:</strong> {{ overall_score }}</p>
+        <p><strong>Percentage:</strong> {{ overall_percentage|floatformat:1 }}%</p>
+
+        <!-- Display interactive chart -->
+        <div>
+            {{ interactive_overall_chart|safe }}
+        </div>
+    </div>
+
+    {% endif %}
+

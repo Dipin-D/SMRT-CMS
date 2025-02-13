@@ -25,6 +25,10 @@
         <input type="number" name="total_marks" id="new_assignment_total_marks" class="form-control" required min="1">
     </div>
     <div class="form-group">
+        <label for="new_assignment_max_attempts">Max Attempts</label>
+        <input type="number" name="max_attempts" id="new_assignment_max_attempts" class="form-control" required min="1">
+    </div>
+    <div class="form-group">
         <label for="new_assignment_file">Upload File (Optional)</label>
         <input type="file" name="assignment_file" id="new_assignment_file" class="form-control">  
     </div>
@@ -38,7 +42,8 @@
             <strong>{{ assignment.title }}</strong>
             <p>{{ assignment.text }}</p>
             <p><strong>Due Date:</strong> {{ assignment.due_date }}</p>
-            <p><strong>Total Marks:</strong> {{ assignment.total_marks }}</p>  <!-- Display Total Marks -->
+            <p><strong>Total Marks:</strong> {{ assignment.total_marks }}</p>
+            <p><strong>Max Attempts:</strong> {{ assignment.max_attempts }}</p>  <!-- Display Max Attempts -->
 
             <!-- Display Files for this Assignment -->
             <ul class="list-group mt-3">
@@ -74,6 +79,12 @@
                 <div class="form-group">
                     <label for="assignment_total_marks_{{ assignment.id }}">Total Marks</label>
                     <input type="number" name="total_marks" id="assignment_total_marks_{{ assignment.id }}" class="form-control" value="{{ assignment.total_marks }}" required min="1">
+                </div>
+
+                <!-- Max Attempts Field for Editing -->
+                <div class="form-group">
+                    <label for="assignment_max_attempts_{{ assignment.id }}">Max Attempts</label>
+                    <input type="number" name="max_attempts" id="assignment_max_attempts_{{ assignment.id }}" class="form-control" value="{{ assignment.max_attempts }}" required min="1">
                 </div>
 
                 <!-- Display existing file with option to remove -->
@@ -132,6 +143,7 @@
             document.getElementById('new_assignment_content').value = '';
             document.getElementById('new_assignment_due_date').value = '';  // Reset due date
             document.getElementById('new_assignment_total_marks').value = '';  // Reset total marks
+            document.getElementById('new_assignment_max_attempts').value = '';  // Reset max attempts
             document.getElementById('new_assignment_file').value = '';
         }
     });

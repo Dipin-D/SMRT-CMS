@@ -8,134 +8,167 @@
 <div class="container mt-5">
     <h4 class="mb-4 text-center">Exercise: {{ exercise.title }}</h4>
 
-    {% if already_attempted %}
-      <div class="alert alert-info text-center">
-        <h5>You have already attempted this exercise.</h5>
-        <p>(This is auto graded) Your Score: {{ score }} / {{ total_marks }}</p>
-      </div>
+    <!-- Display attempt information -->
+    <div class="alert alert-secondary text-center">
+        <p><strong>Attempt Number:</strong> {{ current_attempt }} of {{ exercise.max_attempts }}</p>
+        <p><strong>Attempts Left:</strong> {{ attempts_left }}</p>
+    </div>
 
-      {% if view_submitted %}
-        <div class="mt-4">
-          <h5 class="text-center">Submitted Exercise Review</h5>
-          <ul class="list-group">
-            {% for attempt in question_attempts %}
-              <li class="list-group-item mb-3">
-                <p><strong>Question:</strong> {{ attempt.exercise_question.text }}</p>
-                <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
-                <p><strong>Correct Answer:</strong> 
-                  {% if attempt.exercise_question.type == "multiple_choice" %}
-                    {{ attempt.exercise_question.mcq_answer }} 
-                  {% elif attempt.exercise_question.type == "true_false" %}
-                    {{ attempt.exercise_question.tf_answer }} 
-                  {% endif %}
-                </p>
-                <p class="
-                {% if attempt.is_correct %}
-                  text-success
-                {% else %}
-                  text-danger
-                {% endif %}
-              ">
-                {% if attempt.is_correct %}
-                  ✅ Correct
-                {% else %}
-                  ❌ Incorrect
-                {% endif %}
-              </p>
-              </li>
-            {% endfor %}
-          </ul>
-          <div class="text-center mt-4">
-            <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-primary btn-sm">
-              Go back
-            </a>
-          </div>
+    {% if max_attempts_reached %}
+        <div class="alert alert-danger text-center">
+            <h5>Maximum Attempts Reached!</h5>
+            <p>You have no attempts left for this exercise.</p>
         </div>
-      {% else %}
-        <div class="text-center mt-4">
-          <form method="get">
-            <button type="submit" name="view" value="true" class="btn btn-secondary btn-sm">
-              View Submitted Exercise
-            </button>
-          </form>
+    {% endif %}
+
+    {% if already_attempted %}
+        <div class="alert alert-info text-center">
+            <h5>You have already attempted this exercise.</h5>
+            <p>(This is auto graded) Your Score: {{ score }} / {{ total_marks }}</p>
         </div>
-      {% endif %}
+
+        <!-- Display previous attempts -->
+        {% if previous_attempts %}
+            <div class="mt-4">
+                <h5 class="text-center">Previous Attempts</h5>
+                <ul class="list-group">
+                    {% for attempt in previous_attempts %}
+                        <li class="list-group-item mb-3">
+                            <p><strong>Attempt Number:</strong> {{ attempt.attempt_number }}</p>
+                            <p><strong>Score:</strong> {{ attempt.score }} / {{ total_marks }}</p>
+                            <p><strong>Submitted On:</strong> {{ attempt.created_at }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- View submitted exercise -->
+        {% if view_submitted %}
+            <div class="mt-4">
+                <h5 class="text-center">Submitted Exercise Review</h5>
+                <ul class="list-group">
+                    {% for attempt in question_attempts %}
+                        <li class="list-group-item mb-3">
+                            <p><strong>Question:</strong> {{ attempt.exercise_question.text }}</p>
+                            <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
+                            <p><strong>Correct Answer:</strong> 
+                                {% if attempt.exercise_question.type == "multiple_choice" %}
+                                    {{ attempt.exercise_question.mcq_answer }} 
+                                {% elif attempt.exercise_question.type == "true_false" %}
+                                    {{ attempt.exercise_question.tf_answer }} 
+                                {% endif %}
+                            </p>
+                            <p class="
+                                {% if attempt.is_correct %}
+                                    text-success
+                                {% else %}
+                                    text-danger
+                                {% endif %}
+                            ">
+                                {% if attempt.is_correct %}
+                                    ✅ Correct
+                                {% else %}
+                                    ❌ Incorrect
+                                {% endif %}
+                            </p>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="text-center mt-4">
+                    <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-primary btn-sm">
+                        Go back
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center mt-4">
+                <form method="get">
+                    <button type="submit" name="view" value="true" class="btn btn-secondary btn-sm">
+                        View Submitted Exercise
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
+        <!-- Start a new attempt if attempts are left -->
+        {% if attempts_left > 0 %}
+            <div class="text-center mt-4">
+                <a href="?start_new_attempt=true" class="btn btn-primary btn-lg">
+                    Start Attempt {{ current_attempt }}
+                </a>
+            </div>
+        {% endif %}
 
     {% else %}
-      <p class="mb-4 text-center">Please answer the following questions:</p>
+        <!-- Exercise form for new attempt -->
+        <p class="mb-4 text-center">Please answer the following questions:</p>
 
-      <form method="POST">
-        {% csrf_token %}
-        
-        <div class="row">
-          <div class="col-md-8 offset-md-2">
-            <div class="list-group">
-
-              {% for exercise_question in exercise_questions %}
-                <div class="list-group-item mb-4">
-                  <h5 class="mb-3">{{ exercise_question.text }}</h5>
-
-                  {% if exercise_question.type == "multiple_choice" %}
-                    <div class="mb-3">
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_1_{{ exercise_question.id }}" value="1">
-                        <label class="form-check-label" for="choice_1_{{ exercise_question.id }}">
-                            {{ exercise_question.choice_1 }}
-                        </label>
-                    </div>
-                      <div class="form-check">
-                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_2_{{ exercise_question.id }}" value="2">
-                          <label class="form-check-label" for="choice_2_{{ exercise_question.id }}">
-                              {{ exercise_question.choice_2 }}
-                          </label>
-                      </div>
-                      <div class="form-check">
-                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_3_{{ exercise_question.id }}" value="3">
-                          <label class="form-check-label" for="choice_3_{{ exercise_question.id }}">
-                              {{ exercise_question.choice_3 }}
-                          </label>
-                      </div>
-                      <div class="form-check">
-                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_4_{{ exercise_question.id }}" value="4">
-                          <label class="form-check-label" for="choice_4_{{ exercise_question.id }}">
-                              {{ exercise_question.choice_4 }}
-                          </label>
-                      </div>      
-                    </div>
-
-                  {% elif exercise_question.type == "true_false" %}
-                    <div class="mb-3">
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="true_{{ exercise_question.id }}" value="True">
-                        <label class="form-check-label" for="true_{{ exercise_question.id }}">
-                          True
-                        </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="false_{{ exercise_question.id }}" value="False">
-                        <label class="form-check-label" for="false_{{ exercise_question.id }}">
-                          False
-                        </label>
-                      </div>
-                    </div>
-
-                  {% elif exercise_question.type == "essay" %}
-                    <div class="form-group mb-3">
-                      <label for="answer_{{ exercise_question.id }}">Your Answer:</label>
-                      <textarea name="answer_{{ exercise_question.id }}" rows="4" class="form-control" placeholder="Type your answer here..."></textarea>
-                    </div>
-                  {% endif %}
-                </div>
-              {% endfor %}
-              
-            </div>
-            
-            <div class="text-center mt-4">
-              <button type="submit" class="btn btn-primary btn-lg">Submit Exercise</button>
-            </div>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row">
+              <div class="col-md-8 offset-md-2">
+                  <div class="list-group">
+                      {% for exercise_question in exercise_questions %}
+                          <div class="list-group-item mb-4">
+                              <h5 class="mb-3">{{ exercise_question.text }}</h5>
+                              {% if exercise_question.type == "multiple_choice" %}
+                                  <div class="mb-3">
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_1_{{ exercise_question.id }}" value="{{ exercise_question.choice_1 }}">
+                                          <label class="form-check-label" for="choice_1_{{ exercise_question.id }}">
+                                              {{ exercise_question.choice_1 }}
+                                          </label>
+                                      </div>
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_2_{{ exercise_question.id }}" value="{{ exercise_question.choice_2 }}">
+                                          <label class="form-check-label" for="choice_2_{{ exercise_question.id }}">
+                                              {{ exercise_question.choice_2 }}
+                                          </label>
+                                      </div>
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_3_{{ exercise_question.id }}" value="{{ exercise_question.choice_3 }}">
+                                          <label class="form-check-label" for="choice_3_{{ exercise_question.id }}">
+                                              {{ exercise_question.choice_3 }}
+                                          </label>
+                                      </div>
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_4_{{ exercise_question.id }}" value="{{ exercise_question.choice_4 }}">
+                                          <label class="form-check-label" for="choice_4_{{ exercise_question.id }}">
+                                              {{ exercise_question.choice_4 }}
+                                          </label>
+                                      </div>
+                                  </div>                                
+                              {% elif exercise_question.type == "true_false" %}
+                                  <div class="mb-3">
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="true_{{ exercise_question.id }}" value="True">
+                                          <label class="form-check-label" for="true_{{ exercise_question.id }}">
+                                              True
+                                          </label>
+                                      </div>
+                                      <div class="form-check">
+                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="false_{{ exercise_question.id }}" value="False">
+                                          <label class="form-check-label" for="false_{{ exercise_question.id }}">
+                                              False
+                                          </label>
+                                      </div>
+                                  </div>
+                              {% elif exercise_question.type == "essay" %}
+                                  <div class="form-group mb-3">
+                                      <label for="answer_{{ exercise_question.id }}">Your Answer:</label>
+                                      <textarea name="answer_{{ exercise_question.id }}" rows="4" class="form-control" placeholder="Type your answer here..."></textarea>
+                                  </div>
+                              {% endif %}
+                          </div>
+                      {% endfor %}
+                  </div>
+                  <div class="text-center mt-4">
+                      <button type="submit" class="btn btn-primary btn-lg">Submit Exercise</button>
+                  </div>
+              </div>
           </div>
-        </div>
-      </form>
+        </form>
     {% endif %}
 </div>
 {% endblock %}

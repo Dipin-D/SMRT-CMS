@@ -45,8 +45,15 @@
       {{ question_form.choice_4.label }} {{ question_form.choice_4 }}
     </div>
     <div class="mb-3">
-      {{ question_form.mcq_answer.label }} {{ question_form.mcq_answer }}
-    </div>
+      <label for="id_mcq_answer">{{ question_form.mcq_answer.label }}</label>
+      <select name="mcq_answer" id="id_mcq_answer" class="form-select" required>
+          <option value="" disabled>Select an answer</option>
+          <option value="Choice 1">Choice 1</option>
+          <option value="Choice 2">Choice 2</option>
+          <option value="Choice 3">Choice 3</option>
+          <option value="Choice 4">Choice 4</option>
+      </select>
+   </div>  
   </div>
 
   <!-- Fields for True/False Questions -->
