@@ -7,9 +7,11 @@ Key Features:
 - Instructor dashboard for course management
 - Student dashboard for assignment submissions
 - File upload support
+- Assignment grading
+
 
 Future Updates:
-- Assignment grading
 - Notification system
+- Generative AI Integration
 
-Technologies: Python, Django, Bootstrap, SQLite
+Technologies: Python, Django, Bootstrap, SQLite, HTML/CSS, JavaScript
