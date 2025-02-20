@@ -42,6 +42,7 @@
                 <button class="custom-button" onclick="loadContent('quiz')">Quizzes</button>
                 <button class="custom-button" onclick="loadContent('assignment')">Assignments</button>
                 <button class="custom-button" onclick="loadContent('other')">Student List</button>
+                <button class="custom-button" onclick="loadContent('attendance')">Attendance</button>
                 <button class="custom-button" onclick="loadContent('student_submissions')">Student Submissions</button>
                 <button class="custom-button" onclick="loadContent('analytics')">Analytics</button>
 
@@ -73,6 +74,9 @@
             <!-- Section for Other, hidden by default -->
             <div id="other-content" class="content-section" style="display: none;">
                 {% include 'student_list.html' %}
+            </div>
+            <div id="attendance-content" class="content-section" style="display: none;">
+                {% include 'attendance.html' %}
             </div>
             <div id="student_submissions-content" class="content-section" style="display: none;">
                 {% include 'student_submissions.html' %}

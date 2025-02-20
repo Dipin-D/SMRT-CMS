@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ClassShellForm, CourseFileForm, CourseForm, QuizForm, QuestionForm, AssignmentForm, AssignmentFileForm, ExerciseForm, ExerciseQuestionForm
-from .models import ClassShell, CourseFile, Course, Question, Quiz, Assignment, AssignmentFile, Exercise, ExerciseQuestion
+from .models import ClassShell, CourseFile, Course, Question, Quiz, Assignment, AssignmentFile, Exercise, ExerciseQuestion, Attendance
 from student.models import AssignmentSubmission, QuizAttempt, ExerciseAttempt
 from django.views import View
 from accounts.models import CustomUser
 from django.contrib import messages
+from django.db.models import Avg, Sum
+import plotly.express as px
+import pandas as pd
+from django.utils import timezone
+from datetime import datetime
 
 
 def class_shell_list(request):
@@ -61,7 +66,14 @@ class GoToCourseView(View):
         
         students = CustomUser.objects.filter(is_student=True)
         students_with_access = class_shell.students_with_access.values_list('id', flat=True)  # Get IDs with access
-        
+        #attendance
+        attendance_records = Attendance.objects.filter(class_shell=class_shell).order_by('-date')
+        attendance_grouped = {}
+        for record in attendance_records:
+            if record.date not in attendance_grouped:
+                attendance_grouped[record.date] = []
+            attendance_grouped[record.date].append(record)
+
         ungraded_submissions = {
                 'assignments': AssignmentSubmission.objects.filter(graded=False, assignment__class_shell=class_shell),
                 'quizzes': QuizAttempt.objects.filter(graded=False, quiz__class_shell=class_shell),
@@ -80,6 +92,42 @@ class GoToCourseView(View):
         exercise_form = ExerciseForm()  
         assignment_form = AssignmentForm()
 
+        #analytics section
+        # Graded submissions for each assessment type
+        assignment_subs_graded = AssignmentSubmission.objects.filter(assignment__class_shell=class_shell, graded=True)
+        quiz_subs_graded = QuizAttempt.objects.filter(quiz__class_shell=class_shell, graded=True)
+        exercise_subs_graded = ExerciseAttempt.objects.filter(exercise__class_shell=class_shell, graded=True)
+
+        # Calculate average and total grades (defaulting to 0 if no submissions exist)
+        avg_assignment = assignment_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        total_assignment = assignment_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
+
+        avg_quiz = quiz_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        total_quiz = quiz_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
+
+        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        total_exercise = exercise_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
+
+        # Prepare data for bar chart: Average & Total Grades per Assessment Type
+        data_bar = {
+            'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
+            'Average Grade': [avg_assignment, avg_quiz, avg_exercise],
+            'Total Grade': [total_assignment, total_quiz, total_exercise]
+        }
+        df_bar = pd.DataFrame(data_bar)
+
+        # Create bar chart with both Average and Total Grades
+        fig_bar = px.bar(
+            df_bar,
+            x='Assessment Type',
+            y=['Average Grade', 'Total Grade'],
+            title='Average & Total Grades per Assessment Type',
+            barmode='group',
+            range_y=[0, max(total_assignment, total_quiz, total_exercise, 100)]  # Ensure proper scaling
+        ) 
+        chart_bar = fig_bar.to_html(full_html=False)
+
+
         return render(request, 'go_to_course.html', {
             'lecture_form': lecture_form,
             'lecture_file_form': lecture_file_form,
@@ -96,8 +144,11 @@ class GoToCourseView(View):
             'students':students,
             'students_with_access': students_with_access,
             'ungraded_submissions': ungraded_submissions,
-            'graded_submissions': graded_submissions
-        })
+            'graded_submissions': graded_submissions,
+            'chart_bar': chart_bar,
+            'attendance_grouped': attendance_grouped,
+
+       })
 
     def post(self, request, class_shell_id):
         class_shell = get_object_or_404(ClassShell, id=class_shell_id)
@@ -117,6 +168,25 @@ class GoToCourseView(View):
             selected_student_ids = request.POST.getlist('access_student_ids')
             selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
             class_shell.students_with_access.set(selected_students)
+        if 'take_attendance' in request.POST:
+            try:
+                date_str = request.POST.get('attendance_date')
+                date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                students = class_shell.students_with_access.all()
+
+                for student in students:
+                    status_key = f'status_{student.id}'
+                    status = request.POST.get(status_key, 'present')
+                    Attendance.objects.update_or_create(
+                        student=student,
+                        class_shell=class_shell,
+                        date=date,
+                        defaults={'status': status}
+                    )
+                messages.success(request, 'Attendance recorded successfully!')
+            except Exception as e:
+                messages.error(request, f'Error saving attendance: {str(e)}')
+            return redirect('instructor:go_to_course', class_shell_id=class_shell_id)
         # Handle lecture
         if 'add_lecture' in request.POST and lecture_form.is_valid():
             self.handle_add_lecture(lecture_form, class_shell, request.user)
@@ -533,7 +603,78 @@ class ExerciseGradeView(View):
             messages.error(request, "Grade cannot be empty.")
         
         return redirect('instructor:exercise_grade', submission_id=submission.id)
+class InstructorAnalyticsView(View):
+    def get(self, request):
+        # Get all class shells created by this instructor
+        class_shells = ClassShell.objects.filter(user=request.user)
+        
+        # Filter graded submissions for the instructor's class shells
+        assignment_subs = AssignmentSubmission.objects.filter(
+            assignment__class_shell__in=class_shells, graded=True
+        )
+        quiz_subs = QuizAttempt.objects.filter(
+            quiz__class_shell__in=class_shells, graded=True
+        )
+        exercise_subs = ExerciseAttempt.objects.filter(
+            exercise__class_shell__in=class_shells, graded=True
+        )
 
+        # Calculate average grades (default to 0 if none)
+        avg_assignment = assignment_subs.aggregate(avg=Avg('grade'))['avg'] or 0
+        avg_quiz = quiz_subs.aggregate(avg=Avg('grade'))['avg'] or 0
+        avg_exercise = exercise_subs.aggregate(avg=Avg('grade'))['avg'] or 0
+
+        # Prepare data for a bar chart: Average Grades per Assessment Type
+        data_bar = {
+            'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
+            'Average Grade': [avg_assignment, avg_quiz, avg_exercise]
+        }
+        df_bar = pd.DataFrame(data_bar)
+
+        fig_bar = px.bar(
+            df_bar, 
+            x='Assessment Type', 
+            y='Average Grade', 
+            title='Average Grades per Assessment Type',
+            range_y=[0, 100]  # assuming grades are between 0 and 100
+        )
+        chart_bar = fig_bar.to_html(full_html=False)
+
+        # Also prepare a pie chart for graded vs ungraded submissions
+        graded_count = (
+            assignment_subs.count() + quiz_subs.count() + exercise_subs.count()
+        )
+        # Get ungraded counts from each model for this instructor’s classes
+        ungraded_assignment = AssignmentSubmission.objects.filter(
+            assignment__class_shell__in=class_shells, graded=False
+        ).count()
+        ungraded_quiz = QuizAttempt.objects.filter(
+            quiz__class_shell__in=class_shells, graded=False
+        ).count()
+        ungraded_exercise = ExerciseAttempt.objects.filter(
+            exercise__class_shell__in=class_shells, graded=False
+        ).count()
+        ungraded_count = ungraded_assignment + ungraded_quiz + ungraded_exercise
+
+        data_pie = {
+            'Submission Status': ['Graded', 'Ungraded'],
+            'Count': [graded_count, ungraded_count]
+        }
+        df_pie = pd.DataFrame(data_pie)
+
+        fig_pie = px.pie(
+            df_pie, 
+            names='Submission Status', 
+            values='Count', 
+            title='Graded vs Ungraded Submissions'
+        )
+        chart_pie = fig_pie.to_html(full_html=False)
+
+        context = {
+            'chart_bar': chart_bar,
+            'chart_pie': chart_pie,
+        }
+        return render(request, 'instructor_analytics.html', context)
 
 
 
