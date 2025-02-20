@@ -69,6 +69,8 @@ class GoToCourseView(View):
         #attendance
         attendance_records = Attendance.objects.filter(class_shell=class_shell).order_by('-date')
         attendance_grouped = {}
+        studentwithacceswithname = class_shell.students_with_access.values_list('username', flat=True)
+
         for record in attendance_records:
             if record.date not in attendance_grouped:
                 attendance_grouped[record.date] = []
@@ -147,7 +149,7 @@ class GoToCourseView(View):
             'graded_submissions': graded_submissions,
             'chart_bar': chart_bar,
             'attendance_grouped': attendance_grouped,
-
+            'studentwithacceswithname':studentwithacceswithname,
        })
 
     def post(self, request, class_shell_id):
