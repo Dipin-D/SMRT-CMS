@@ -253,6 +253,7 @@ def attempt_quiz(request, class_shell_id, quiz_id):
             is_correct = False
             if user_answer != 'n/a':
                 if question.type == "multiple_choice":
+                    print('quiz ans', question.mcq_answer )
                     is_correct = (user_answer == question.mcq_answer)
                 elif question.type == "true_false":
                     is_correct = (str(user_answer) == str(question.tf_answer))
@@ -364,6 +365,7 @@ def attempt_exercise(request, class_shell_id, exercise_id):
 
             if exercise_question.type == "multiple_choice":
                 if user_answer:
+                    print(exercise_question.mcq_answer)
                     is_correct = user_answer == str(exercise_question.mcq_answer)
             elif exercise_question.type == "true_false":
                 if user_answer is not None:  
