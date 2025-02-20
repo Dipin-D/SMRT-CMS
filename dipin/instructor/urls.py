@@ -8,7 +8,7 @@ from .views import (
     ExerciseDetailView,
     QuizGradeView,
     ExerciseGradeView,
-    
+    InstructorAnalyticsView,
 )
 
 app_name = 'instructor'
@@ -25,7 +25,5 @@ urlpatterns = [
     path('students/', GoToCourseView.as_view(), name='student_list'),
     path('quiz/grade/<int:submission_id>/', QuizGradeView.as_view(), name='quiz_grade'),
     path('exercise/grade/<int:submission_id>/', ExerciseGradeView.as_view(), name='exercise_grade'),
-
-
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

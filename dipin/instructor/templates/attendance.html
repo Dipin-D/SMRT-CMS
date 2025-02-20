@@ -1,0 +1,109 @@
+<!-- Add attendance section -->
+<div class="attendance-section">
+    <h2>Attendance Management</h2>
+    
+    <!-- Take Attendance Form -->
+    <div class="take-attendance">
+        <form method="post">
+            {% csrf_token %}
+            <!-- Auto-select today's date -->
+            <input type="date" name="attendance_date" value="{% now 'Y-m-d' %}" required>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.username }}</td>
+                        <td>
+                            <!-- Replace dropdown with radio buttons -->
+                            <div class="status-options">
+                                <label>
+                                    <input type="radio" name="status_{{ student.id }}" value="present" checked> Present
+                                </label>
+                                <label>
+                                    <input type="radio" name="status_{{ student.id }}" value="absent"> Absent
+                                </label>
+                                <label>
+                                    <input type="radio" name="status_{{ student.id }}" value="late"> Late
+                                </label>
+                                <label>
+                                    <input type="radio" name="status_{{ student.id }}" value="excused"> Excused
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" name="take_attendance" class="btn" style="background-color: maroon; color: white;">
+                Save Attendance
+            </button>
+        </form>
+    </div>
+
+    <!-- Attendance Records -->
+    <div class="attendance-records">
+        <h3>Attendance History</h3>
+        {% if attendance_grouped %}
+            <!-- Date Selector Dropdown -->
+            <select id="date-selector" onchange="showAttendanceForDate(this.value)">
+                <option value="">Select a date</option>
+                {% for date in attendance_grouped.keys %}
+                    <option value="{{ date|date:'Y-m-d' }}">{{ date|date:"F j, Y" }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Attendance Records Container -->
+            <div id="attendance-records-container">
+                {% for date, records in attendance_grouped.items %}
+                <div class="date-record" id="record-{{ date|date:'Y-m-d' }}" style="display: none;">
+                    <h4>{{ date|date:"F j, Y" }}</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td>{{ record.student.username }}</td>
+                                <td class="status-{{ record.status }}">
+                                    {{ record.get_status_display }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No attendance records found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript to handle date selection -->
+<script>
+    function showAttendanceForDate(selectedDate) {
+        // Hide all date records
+        document.querySelectorAll('.date-record').forEach(function(record) {
+            record.style.display = 'none';
+        });
+
+        // Show the selected date's record
+        if (selectedDate) {
+            const recordElement = document.getElementById(`record-${selectedDate}`);
+            if (recordElement) {
+                recordElement.style.display = 'block';
+            }
+        }
+    }
+</script>

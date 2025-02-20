@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClassShell, CourseFile, Course, Question, Quiz, Exercise, Assignment, AssignmentFile, BaseQuestion, ExerciseQuestion  
+from .models import ClassShell, CourseFile, Course, Question, Quiz, Exercise, Assignment, AssignmentFile, BaseQuestion, ExerciseQuestion,Attendance  
 
 class ClassShellForm(forms.ModelForm):
     class Meta:
@@ -64,3 +64,10 @@ class QuestionForm(BaseQuestionForm):
 class ExerciseQuestionForm(BaseQuestionForm):
     class Meta(BaseQuestionForm.Meta):
         model = ExerciseQuestion  
+class AttendanceForm(forms.ModelForm):
+    class Meta:
+        model = Attendance
+        fields = ['student', 'class_shell', 'date', 'status']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }

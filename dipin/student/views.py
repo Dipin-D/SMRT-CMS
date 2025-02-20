@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from instructor.models import (
-    ClassShell, Course, Quiz, Assignment, Exercise, Question, CourseFile, ExerciseQuestion
+    ClassShell, Course, Quiz, Assignment, Exercise, Question, CourseFile, ExerciseQuestion, Attendance
 )
 from .models import (
     QuizAttempt, QuestionAttempt, AssignmentSubmission, ExerciseQuestionAttempt, ExerciseAttempt
@@ -79,6 +79,18 @@ class go_to_course_student(View):
         # --- Exercises ---
         submitted_exercise_marks = sum(sum(eq.mark for eq in ExerciseQuestion.objects.filter(exercise=exercise)) for exercise in exercises if exercise.id in submitted_exercise_ids)
         submitted_exercise_score = sum(sub['score'] for sub in submitted_exercises_info if sub['score'] is not None)
+        
+        # --- Attendance ---
+        attendance_records = Attendance.objects.filter(student=request.user, class_shell=class_shell)
+        total_attendance_days = attendance_records.count()
+
+        if total_attendance_days > 0:
+            present_days = attendance_records.filter(status__in=['present', 'excused']).count()
+            late_days = attendance_records.filter(status='late').count()
+            attendance_percentage = ((present_days * 1.0) + (late_days * 0.75)) / total_attendance_days * 100
+        else:
+            attendance_percentage = 100  # Default to 100% if no attendance records exist
+
 
         # Calculate overall marks and scores based on submitted items only
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks + submitted_exercise_marks
@@ -137,6 +149,7 @@ class go_to_course_student(View):
             'overall_percentage': overall_percentage,
             'grade': grade,
             'interactive_overall_chart': interactive_overall_chart,
+            'attendance_percentage': attendance_percentage,
         })
 
     def post(self, request, class_shell_id):
