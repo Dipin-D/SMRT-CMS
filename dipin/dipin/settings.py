@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,11 +81,8 @@ WSGI_APPLICATION = 'dipin.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+    'default': dj_database_url.config(
+        default='postgresql://smrt_cms_database_user:Tctny8kd6XAMvLHqbPXjhvSFuBRTshq1@dpg-currscbv2p9s73ap2ong-a.oregon-postgres.render.com/smrt_cms_database')}
 
 
 # Password validation
