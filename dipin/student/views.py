@@ -7,10 +7,11 @@ from .models import (
 )
 from django.views import View
 from django.contrib import messages
-from django.utils import timezone
+from datetime import datetime
 from datetime import timedelta
 import plotly.graph_objects as go
 import plotly.offline as opy
+import pytz
 
 def course_list(request):
     student = request.user
@@ -28,7 +29,8 @@ class go_to_course_student(View):
         quizzes = Quiz.objects.filter(class_shell=class_shell)
         exercises = Exercise.objects.filter(class_shell=class_shell)
         assignments = Assignment.objects.filter(class_shell=class_shell)
-        now = timezone.now()
+        utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+        now = utc_now - timedelta(hours=6)
 
         # --- Assignments ---
         submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
@@ -74,11 +76,11 @@ class go_to_course_student(View):
 
         # --- Quizzes ---
         submitted_quiz_marks = sum(sum(q.mark for q in Question.objects.filter(quiz=quiz)) for quiz in quizzes if quiz.id in submitted_quiz_ids)
-        submitted_quiz_score = sum(sub['score'] for sub in submitted_quizzes_info if sub['score'] is not None)
+        submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
 
         # --- Exercises ---
         submitted_exercise_marks = sum(sum(eq.mark for eq in ExerciseQuestion.objects.filter(exercise=exercise)) for exercise in exercises if exercise.id in submitted_exercise_ids)
-        submitted_exercise_score = sum(sub['score'] for sub in submitted_exercises_info if sub['score'] is not None)
+        submitted_exercise_score = sum(sub['grade'] for sub in submitted_exercises_info if sub['grade'] is not None)
         
         # --- Attendance ---
         attendance_records = Attendance.objects.filter(student=request.user, class_shell=class_shell)
@@ -108,7 +110,7 @@ class go_to_course_student(View):
         fig.add_trace(go.Bar(
             x=categories,
             y=scores,
-            name="Score Achieved",
+            name="Grade Achieved",
             marker_color="#800000",  
             textposition='outside'
         ))

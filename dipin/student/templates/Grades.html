@@ -153,7 +153,11 @@
                         {% if quiz.id in submitted_quiz_ids %}
                             <span class="status-submitted">Submitted</span>
                         {% else %}
+                        {% if quiz.due_date < now %}
+                        <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
+                        {% else %}
                             <span class="not-submitted">Not attempted</span>
+                        {% endif %}
                         {% endif %}
                     </td>
                     <td>
@@ -164,7 +168,7 @@
                                         {% if quiz_submission.grade %}
                                             {{ quiz_submission.grade }} / {{ quiz_submission.total_marks }}
                                         {% else %}
-                                            <span class="no-grade">No grade posted yet</span>
+                                            <span class="no-grade">Submitted -No grade posted yet</span>
                                         {% endif %}
                                     </p>
                                 {% endif %}
@@ -200,7 +204,11 @@
                         {% if exercise.id in submitted_exercise_ids %}
                             <span class="status-submitted">Submitted</span>
                         {% else %}
-                            <span class="not-submitted">Not attempted</span>
+                            {% if exercise.due_date < now %}
+                            <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
+                            {% else %}
+                            <span class="not-submitted">Not attempted</span>{% endif %}
+
                         {% endif %}
                     </td>
                     <td>
@@ -211,7 +219,7 @@
                                         {% if exercise_submission.grade %}
                                             {{ exercise_submission.grade }} / {{ exercise_submission.total_marks }}
                                         {% else %}
-                                            <span class="no-grade">No grade posted yet</span>
+                                            <span class="no-grade">Submitted - No grade posted yet</span>
                                         {% endif %}
                                     </p>
                                 {% endif %}

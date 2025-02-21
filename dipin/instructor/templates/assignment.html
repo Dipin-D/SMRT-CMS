@@ -18,7 +18,7 @@
     </div>
     <div class="form-group">
         <label for="new_assignment_due_date">Due Date</label>
-        <input type="date" name="due_date" id="new_assignment_due_date" class="form-control" required>
+        <input type="datetime-local" name="due_date" id="new_assignment_due_date" class="form-control" required>
     </div>
     <div class="form-group">
         <label for="new_assignment_total_marks">Total Marks</label>
@@ -72,7 +72,7 @@
                 <!-- Due Date Field for Editing -->
                 <div class="form-group">
                     <label for="assignment_due_date_{{ assignment.id }}">Due Date</label>
-                    <input type="date" name="due_date" id="assignment_due_date_{{ assignment.id }}" class="form-control" value="{{ assignment.due_date }}" required>
+                    <input type="datetime-local" name="due_date" id="assignment_due_date_{{ assignment.id }}" class="form-control" value="{{ assignment.due_date }}" required>
                 </div>
 
                 <!-- Total Marks Field for Editing -->
