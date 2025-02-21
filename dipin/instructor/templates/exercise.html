@@ -21,7 +21,7 @@
                 </div>
                 <div class="form-group">
                     <label for="new_due_date">Due Date</label>
-                    <input type="date" name="due_date" id="new_due_date" class="form-control" required>
+                    <input type="datetime-local" name="due_date" id="new_due_date" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label for="new_max_attempts">Max Attempts</label>
@@ -75,7 +75,7 @@
                     </div>
                     <div class="form-group">
                         <label for="due_date_{{ exercise.id }}">Due Date</label>
-                        <input type="date" name="due_date" id="due_date_{{ exercise.id }}" class="form-control" value="{{ exercise.due_date|date:'Y-m-d' }}" required>
+                        <input type="datetime-local" name="due_date" id="due_date_{{ exercise.id }}" class="form-control" value="{{ exercise.due_date|date:'Y-m-d' }}" required>
                     </div>
                     <div class="form-group">
                         <label for="max_attempts_{{ exercise.id }}">Max Attempts_</label>

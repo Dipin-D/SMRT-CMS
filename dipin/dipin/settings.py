@@ -81,10 +81,15 @@ WSGI_APPLICATION = 'dipin.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://smrt_cms_database_user:Tctny8kd6XAMvLHqbPXjhvSFuBRTshq1@dpg-currscbv2p9s73ap2ong-a.oregon-postgres.render.com/smrt_cms_database')}
-
-
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  
+        'NAME': 'PostgreSQL',
+        'USER': 'dipin',
+        'PASSWORD': 'Garima12345',
+        'HOST': 'database-1.c5imq2gggi2q.us-east-1.rds.amazonaws.com',
+        'PORT': '5432',
+    }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

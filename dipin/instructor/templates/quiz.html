@@ -20,9 +20,9 @@
                     <input type="number" name="grading_percentage" id="new_grading_percentage" class="form-control" step="0.01" min="0" max="100" required>
                 </div>
                 <div class="form-group">
-                    <label for="new_due_date">Due Date</label>
-                    <input type="date" name="due_date" id="new_due_date" class="form-control" required>
-                </div>
+                    <label for="new_due_date">Due Date and Time</label>
+                    <input type="datetime-local" name="due_date" id="new_due_date" class="form-control" required>
+                </div>                
                 <div class="form-group">
                     <label for="new_max_attempts">Max Attempts</label>
                     <input type="number" name="max_attempts" id="new_max_attempts" class="form-control" min="1" required>
@@ -58,9 +58,9 @@
                                 <input type="number" name="grading_percentage" id="quiz_grading_percentage_{{ quiz.id }}" class="form-control" value="{{ quiz.grading_percentage }}" step="0.01" min="0" max="100" required>
                             </div>
                             <div class="form-group">
-                                <label for="quiz_due_date_{{ quiz.id }}">Due Date</label>
-                                <input type="date" name="due_date" id="quiz_due_date_{{ quiz.id }}" class="form-control" value="{{ quiz.due_date|date:'Y-m-d' }}" required>
-                            </div>
+                                <label for="quiz_due_date_{{ quiz.id }}">Due Date and Time</label>
+                                <input type="datetime-local" name="due_date" id="quiz_due_date_{{ quiz.id }}" class="form-control" value="{{ quiz.due_date|date:'Y-m-d\TH:i' }}" required>
+                            </div>                            
                             <div class="form-group">
                                 <label for="quiz_max_attempts_{{ quiz.id }}">Max Attempts</label>
                                 <input type="number" name="max_attempts" id="quiz_max_attempts_{{ quiz.id }}" class="form-control" value="{{ quiz.max_attempts }}" min="1" required>
