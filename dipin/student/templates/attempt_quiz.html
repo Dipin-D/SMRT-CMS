@@ -6,21 +6,16 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h4 class="mb-4 text-center">Quiz: {{ quiz.title }}</h4>
-    <div class="alert alert-info text-center">
-        <h5>Time Remaining: <span id="timer"></span></h5>
-    </div>        
+    <h4 class="mb-4 text-center">Quiz: {{ quiz.title }}</h4>      
 
     <!-- Display attempt information -->
     <div class="alert alert-secondary text-center">
-        <p><strong>Attempt Number:</strong> {{ current_attempt }} of {{ quiz.max_attempts }}</p>
         <p><strong>Attempts Left:</strong> {{ attempts_left }}</p>
     </div>
 
     {% if max_attempts_reached %}
         <div class="alert alert-danger text-center">
             <h5>Maximum Attempts Reached!</h5>
-            <p>You have no attempts left for this quiz.</p>
         </div>
     {% endif %}
 
@@ -39,7 +34,8 @@
                         <li class="list-group-item mb-3">
                             <p><strong>Attempt Number:</strong> {{ forloop.counter }}</p>
                             <p><strong>Score:</strong> {{ attempt.score }} / {{ total_marks }}</p>
-                            <p><strong>Submitted On:</strong> {{ attempt.created_at }}</p>
+                            {% load tz %}
+                            <p><strong>Submitted On:</strong> {% timezone 'America/Chicago' %}{{ attempt.attempted_on }}{% endtimezone %}</p>
                         </li>
                     {% endfor %}
                 </ul>
@@ -55,13 +51,6 @@
                         <li class="list-group-item mb-3">
                             <p><strong>Question:</strong> {{ attempt.question.text }}</p>
                             <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
-                            <p><strong>Correct Answer:</strong> 
-                                {% if attempt.question.type == "multiple_choice" %}
-                                    {{ attempt.question.mcq_answer }}
-                                {% elif attempt.question.type == "true_false" %}
-                                    {{ attempt.question.tf_answer }}
-                                {% endif %}
-                            </p>
                             <p class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
                                 {% if attempt.is_correct %}
                                     ✅ Correct
@@ -82,23 +71,31 @@
             <div class="text-center mt-4">
                 <form method="get">
                     <button type="submit" name="view" value="true" class="btn btn-secondary btn-sm">
-                        View Submitted Quiz
+                        View Latest Submitted Quiz
                     </button>
                 </form>
             </div>
+            <div class="text-center mt-4">
+              <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-primary btn-sm">
+                  Go back
+              </a>
+          </div>
         {% endif %}
 
         <!-- Start a new attempt if attempts are left -->
         {% if attempts_left > 0 %}
             <div class="text-center mt-4">
                 <a href="?start_new_attempt=true" class="btn btn-primary btn-lg" id="newAttemptLink">
-                    Start Attempt {{ current_attempt }}
+                    Start New Attempt {{ current_attempt }}
                 </a>
             </div>
         {% endif %}
 
     {% else %}
         <!-- Quiz form for new attempt -->
+        <div class="alert alert-info text-center">
+          <p>Time Remaining: <span id="timer">Loading...</span></p>
+        </div>  
         <p class="mb-4 text-center">Please answer the following questions:</p>
 
         <form id="quiz_form" method="POST" action="{% url 'student:attempt_quiz' class_shell_id=class_shell.id quiz_id=quiz.id %}">
@@ -169,56 +166,140 @@
         </form>
     {% endif %}
 </div>
-
 <script>
-    // Create a unique key for this attempt
-    var uniqueKey = "endTime_quiz_{{ quiz.id }}_attempt_{{ current_attempt }}";
-    
-    // Compute the server's end time (provided by Django) in milliseconds.
-    var serverEndTime = new Date({{ end_time }} * 1000).getTime();
-    
-    // Retrieve any stored end time for this attempt.
-    var storedEndTime = localStorage.getItem(uniqueKey);
-    var endTime;
-    
-    // If there is no stored value—or if the server-provided end time is later—use the server value.
-    if (!storedEndTime || serverEndTime > parseInt(storedEndTime)) {
-        endTime = serverEndTime;
-        localStorage.setItem(uniqueKey, endTime);
-    } else {
-        endTime = parseInt(storedEndTime);
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+      var quizId = "{{ quiz.id }}";
+      var currentAttempt = "{{ current_attempt }}";
+      var uniqueEndTimeKey = "endTime_quiz_" + quizId + "_attempt_" + currentAttempt;
+      var serverEndTime = new Date(Number("{{ end_time }}") * 1000).getTime();
+      
+      // Use stored endTime if available; otherwise, use serverEndTime.
+      var storedEndTime = localStorage.getItem(uniqueEndTimeKey);
+      var endTime;
+      if (storedEndTime && parseInt(storedEndTime, 10) > 0) {
+          endTime = parseInt(storedEndTime, 10);
+      } else {
+          endTime = serverEndTime;
+          localStorage.setItem(uniqueEndTimeKey, endTime);
+      }
   
-    var timerInterval = setInterval(function() {
-        var now = new Date().getTime();
-        var timeRemaining = endTime - now;
-        
-        if (timeRemaining <= 0) {
-            clearInterval(timerInterval);
-            // When time is up, append a hidden field and auto-submit the form.
-            var form = document.getElementById("quiz_form");
-            if (form) {
-                var input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "time_expired";
-                input.value = "true";
-                form.appendChild(input);
-                form.submit();
-            }
-        } else {
-            var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-            document.getElementById("timer").textContent = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-        }
-    }, 1000);
+      function updateTimerDisplay(minutes, seconds) {
+          var timerElement = document.getElementById("timer");
+          if (timerElement) {
+              timerElement.textContent = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+          }
+      }
   
-    // Optional: If the "start new attempt" link is clicked,
-    // remove any stored timer value so that a fresh timer starts.
-    var newAttemptLink = document.getElementById("newAttemptLink");
-    if (newAttemptLink) {
-        newAttemptLink.addEventListener('click', function() {
-            localStorage.removeItem(uniqueKey);
-        });
-    }
-</script>
+      function autoSubmitQuiz() {
+          var form = document.getElementById("quiz_form");
+          if (form && !form.hasAttribute("data-submitted")) {
+              form.setAttribute("data-submitted", "true");
+              var input = document.createElement("input");
+              input.type = "hidden";
+              input.name = "time_expired";
+              input.value = "true";
+              form.appendChild(input);
+              form.submit();
+          }
+      }
+  
+      function startTimer() {
+          var timerInterval = setInterval(function () {
+              var timeRemaining = endTime - new Date().getTime();
+              if (timeRemaining <= 0) {
+                  clearInterval(timerInterval);
+                  updateTimerDisplay(0, 0);
+                  localStorage.setItem("quiz_expired_" + quizId, "true");
+                  autoSubmitQuiz();
+              } else {
+                  var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                  updateTimerDisplay(minutes, seconds);
+              }
+          }, 1000);
+      }
+  
+      // Immediately display the correct time remaining.
+      var initialTimeRemaining = endTime - new Date().getTime();
+      if (initialTimeRemaining < 0) {
+          initialTimeRemaining = 0;
+      }
+      var initialMinutes = Math.floor((initialTimeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+      var initialSeconds = Math.floor((initialTimeRemaining % (1000 * 60)) / 1000);
+      updateTimerDisplay(initialMinutes, initialSeconds);
+  
+      // Auto-submit if the window gains focus and time is expired.
+      window.addEventListener("focus", function () {
+          if (localStorage.getItem("quiz_expired_" + quizId) === "true") {
+              autoSubmitQuiz();
+          }
+      });
+  
+      // Auto-submit on visibility change if time has run out.
+      document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === 'visible' && new Date().getTime() >= endTime) {
+              updateTimerDisplay(0, 0);
+              localStorage.setItem("quiz_expired_" + quizId, "true");
+              autoSubmitQuiz();
+          }
+      });
+  
+      // Calculate the delay until auto-submit.
+      var autoSubmitDelay = endTime - new Date().getTime();
+      if (autoSubmitDelay < 0) autoSubmitDelay = 0;
+  
+      // Use setTimeout as before.
+      setTimeout(function() {
+          updateTimerDisplay(0, 0);
+          localStorage.setItem("quiz_expired_" + quizId, "true");
+          autoSubmitQuiz();
+      }, autoSubmitDelay);
+  
+      // NEW: Use a Web Worker to trigger auto-submit even if the tab is inactive.
+      if (window.Worker) {
+          var workerCode = `
+              self.onmessage = function(e) {
+                  var delay = e.data;
+                  setTimeout(function(){
+                      self.postMessage('timesup');
+                  }, delay);
+              };
+          `;
+          var blob = new Blob([workerCode], { type: "application/javascript" });
+          var workerUrl = URL.createObjectURL(blob);
+          var timerWorker = new Worker(workerUrl);
+          timerWorker.postMessage(autoSubmitDelay);
+          timerWorker.onmessage = function(e) {
+              if (e.data === 'timesup') {
+                  updateTimerDisplay(0, 0);
+                  localStorage.setItem("quiz_expired_" + quizId, "true");
+                  autoSubmitQuiz();
+              }
+          };
+      }
+  
+      // Use an attempt key that includes the current attempt number.
+      var attemptKey = "attempt_in_progress_" + quizId + "_attempt_" + currentAttempt;
+      if (localStorage.getItem(attemptKey) === "true") {
+          var attemptLink = document.getElementById("newAttemptLink");
+          if (attemptLink) {
+              attemptLink.textContent = "Continue Attempt";
+          }
+      }
+  
+      // Mark this attempt as in progress when the user clicks to start it.
+      document.getElementById("newAttemptLink")?.addEventListener("click", function () {
+          localStorage.setItem(attemptKey, "true");
+      });
+  
+      if (new Date().getTime() >= endTime) {
+          updateTimerDisplay(0, 0);
+          localStorage.setItem("quiz_expired_" + quizId, "true");
+          autoSubmitQuiz();
+      } else {
+          startTimer();
+      }
+  });
+  </script>
+  
 {% endblock %}
