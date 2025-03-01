@@ -28,6 +28,7 @@ class go_to_course_student(View):
         lectures = Course.objects.filter(class_shell=class_shell)
         files = CourseFile.objects.filter(class_shell=class_shell)
         quizzes = Quiz.objects.filter(class_shell=class_shell)
+        exercises = Exercise.objects.filter(class_shell=class_shell)
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
@@ -59,6 +60,15 @@ class go_to_course_student(View):
         ]
         submitted_quiz_ids = set(
             submitted_quizzes.values_list('quiz', flat=True)
+        )
+        # --- Exercises ---
+        submitted_exercises = ExerciseAttempt.objects.filter(student=request.user, exercise__class_shell=class_shell)
+        submitted_exercises_info = [
+            { 'grade': exercise_attempt.grade,'exercise_id': exercise_attempt.exercise.id, 'score': exercise_attempt.score, 'total_marks': exercise_attempt.total_marks}
+            for exercise_attempt in submitted_exercises
+        ]
+        submitted_exercise_ids = set(
+            submitted_exercises.values_list('exercise', flat=True)
         )
 
         # --- Attendance ---
@@ -126,12 +136,15 @@ class go_to_course_student(View):
             'class_shell': class_shell,
             'lectures': lectures,
             'quizzes': quizzes,
+            'exercises': exercises,
             'assignments': assignments,
             'files': files,
             'submitted_assignments_info': submitted_assignments_info,
             'submitted_assignment_ids': submitted_assignment_ids,
             'submitted_quizzes_info': submitted_quizzes_info,
             'submitted_quiz_ids': submitted_quiz_ids,
+            'submitted_exercises_info': submitted_exercises_info,
+            'submitted_exercise_ids': submitted_exercise_ids,
             'now': now,
             # Overall grade details for the interactive chart section
             'overall_total_marks': overall_total_marks,
