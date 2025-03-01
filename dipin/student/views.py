@@ -9,6 +9,7 @@ from django.views import View
 from django.contrib import messages
 from datetime import datetime
 from datetime import timedelta
+from django.utils import timezone
 import plotly.graph_objects as go
 import plotly.offline as opy
 import pytz
@@ -27,7 +28,6 @@ class go_to_course_student(View):
         lectures = Course.objects.filter(class_shell=class_shell)
         files = CourseFile.objects.filter(class_shell=class_shell)
         quizzes = Quiz.objects.filter(class_shell=class_shell)
-        exercises = Exercise.objects.filter(class_shell=class_shell)
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
@@ -60,28 +60,7 @@ class go_to_course_student(View):
         submitted_quiz_ids = set(
             submitted_quizzes.values_list('quiz', flat=True)
         )
-        
-        # --- Exercises ---
-        submitted_exercises = ExerciseAttempt.objects.filter(student=request.user, exercise__class_shell=class_shell)
-        submitted_exercises_info = [
-            { 'grade': exercise_attempt.grade,'exercise_id': exercise_attempt.exercise.id, 'score': exercise_attempt.score, 'total_marks': exercise_attempt.total_marks}
-            for exercise_attempt in submitted_exercises
-        ]
-        submitted_exercise_ids = set(
-            submitted_exercises.values_list('exercise', flat=True)
-        )
-        # --- Assignments ---
-        submitted_assignment_marks = sum(a.total_marks for a in assignments if a.id in submitted_assignment_ids)
-        submitted_assignment_score = sum(sub['grade'] for sub in submitted_assignments_info if sub['grade'] is not None)
 
-        # --- Quizzes ---
-        submitted_quiz_marks = sum(sum(q.mark for q in Question.objects.filter(quiz=quiz)) for quiz in quizzes if quiz.id in submitted_quiz_ids)
-        submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
-
-        # --- Exercises ---
-        submitted_exercise_marks = sum(sum(eq.mark for eq in ExerciseQuestion.objects.filter(exercise=exercise)) for exercise in exercises if exercise.id in submitted_exercise_ids)
-        submitted_exercise_score = sum(sub['grade'] for sub in submitted_exercises_info if sub['grade'] is not None)
-        
         # --- Attendance ---
         attendance_records = Attendance.objects.filter(student=request.user, class_shell=class_shell)
         total_attendance_days = attendance_records.count()
@@ -93,18 +72,30 @@ class go_to_course_student(View):
         else:
             attendance_percentage = 100  # Default to 100% if no attendance records exist
 
+        # Calculate the maximum scores for both quizzes and assignments
+        max_assignment_score = max(sub['total_marks'] for sub in submitted_assignments_info) if submitted_assignments_info else 0
+        max_quiz_score = max(sub['total_marks'] for sub in submitted_quizzes_info) if submitted_quizzes_info else 0
 
         # Calculate overall marks and scores based on submitted items only
-        overall_total_marks = submitted_assignment_marks + submitted_quiz_marks + submitted_exercise_marks
-        overall_score = submitted_assignment_score + submitted_quiz_score + submitted_exercise_score
+        submitted_assignment_marks = sum(a.total_marks for a in assignments if a.id in submitted_assignment_ids)
+        submitted_assignment_score = sum(sub['grade'] for sub in submitted_assignments_info if sub['grade'] is not None)
+
+        # --- Quizzes ---
+        submitted_quiz_marks = sum(sum(q.mark for q in Question.objects.filter(quiz=quiz)) for quiz in quizzes if quiz.id in submitted_quiz_ids)
+        submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
+
+        # Calculate overall marks and scores without exercises
+        overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
+        overall_score = submitted_assignment_score + submitted_quiz_score
 
         # Avoid division by zero
         overall_percentage = (overall_score / overall_total_marks) * 100 if overall_total_marks > 0 else 0
         grade = 'A' if overall_percentage >= 90 else 'B' if overall_percentage >= 80 else 'C' if overall_percentage >= 70 else 'D' if overall_percentage >= 60 else 'F'
-        # Categories and values for submitted items
-        categories = ["Assignments", "Quizzes", "Exercises", "Overall"]
-        scores = [submitted_assignment_score, submitted_quiz_score, submitted_exercise_score, overall_score]
-        max_marks = [submitted_assignment_marks, submitted_quiz_marks, submitted_exercise_marks, overall_total_marks]
+
+        # Categories and values for submitted items (without exercises)
+        categories = ["Assignments", "Quizzes", "Overall"]
+        scores = [submitted_assignment_score, submitted_quiz_score, overall_score]
+        max_marks = [submitted_assignment_marks, submitted_quiz_marks, overall_total_marks]
         fig = go.Figure()
 
         fig.add_trace(go.Bar(
@@ -136,14 +127,11 @@ class go_to_course_student(View):
             'lectures': lectures,
             'quizzes': quizzes,
             'assignments': assignments,
-            'exercises': exercises,
             'files': files,
             'submitted_assignments_info': submitted_assignments_info,
             'submitted_assignment_ids': submitted_assignment_ids,
             'submitted_quizzes_info': submitted_quizzes_info,
             'submitted_quiz_ids': submitted_quiz_ids,
-            'submitted_exercises_info': submitted_exercises_info,
-            'submitted_exercise_ids': submitted_exercise_ids,
             'now': now,
             # Overall grade details for the interactive chart section
             'overall_total_marks': overall_total_marks,
@@ -153,6 +141,7 @@ class go_to_course_student(View):
             'interactive_overall_chart': interactive_overall_chart,
             'attendance_percentage': attendance_percentage,
         })
+
 
     def post(self, request, class_shell_id):
         assignment_id = request.POST.get('assignment_id')
@@ -174,10 +163,6 @@ class go_to_course_student(View):
 
 
 def attempt_quiz(request, class_shell_id, quiz_id):
-    from django.shortcuts import render, redirect, get_object_or_404
-    from django.utils import timezone
-    from datetime import timedelta
-    # (Assume your models are imported, e.g., ClassShell, Quiz, Question, QuizAttempt, QuestionAttempt)
 
     class_shell = get_object_or_404(ClassShell, id=class_shell_id)
     quiz = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
@@ -235,11 +220,9 @@ def attempt_quiz(request, class_shell_id, quiz_id):
             }
             return render(request, 'attempt_quiz.html', context)
 
-    # Process submissions (both manual and auto submissions when time expires)
     if request.method == "POST":
         if attempts_left <= 0:
             return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
-
         score = 0
         quiz_attempt = QuizAttempt.objects.create(
             student=request.user,
@@ -323,6 +306,9 @@ def attempt_exercise(request, class_shell_id, exercise_id):
     current_attempt = attempts.count() + 1
     attempts_left = exercise.max_attempts - attempts.count()
     max_attempts_reached = attempts_left <= 0
+    end_time = timezone.now() + timedelta(minutes=exercise.timer)
+
+
 
     # If the student requested to view a submitted exercise, display the latest attempt’s review.
     if "view" in request.GET:
@@ -341,6 +327,8 @@ def attempt_exercise(request, class_shell_id, exercise_id):
                 'current_attempt': current_attempt,
                 'attempts_left': attempts_left,
                 'max_attempts_reached': max_attempts_reached,
+                'end_time': end_time.timestamp(),  # Passed as seconds.
+
             }
             return render(request, 'attempt_exercise.html', context)
     
@@ -364,7 +352,8 @@ def attempt_exercise(request, class_shell_id, exercise_id):
         for exercise_question in exercise_questions:
             user_answer = request.POST.get(f'answer_{exercise_question.id}')
             is_correct = False
-
+            if not user_answer:  
+                    user_answer = 'N/A'
             if exercise_question.type == "multiple_choice":
                 if user_answer:
                     print(exercise_question.mcq_answer)
@@ -405,6 +394,8 @@ def attempt_exercise(request, class_shell_id, exercise_id):
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
+            'end_time': end_time.timestamp(),  # Passed as seconds.
+
         }
         return render(request, 'attempt_exercise.html', context)
 

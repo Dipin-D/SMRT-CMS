@@ -183,55 +183,6 @@
         </table>
     </div>
 
-    <!-- Display Exercise Grades -->
-    <div class="grades-section">
-        <h3>Exercises</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Exercise Title</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for exercise in exercises %}
-                <tr>
-                    <td>{{ exercise.title }}</td>
-                    <td>{{ exercise.due_date }}</td>
-                    <td>
-                        {% if exercise.id in submitted_exercise_ids %}
-                            <span class="status-submitted">Submitted</span>
-                        {% else %}
-                            {% if exercise.due_date < now %}
-                            <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
-                            {% else %}
-                            <span class="not-submitted">Not attempted</span>{% endif %}
 
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if exercise.id in submitted_exercise_ids %}
-                            {% for exercise_submission in submitted_exercises_info %}
-                                {% if exercise_submission.exercise_id == exercise.id %}
-                                    <p>
-                                        {% if exercise_submission.grade %}
-                                            {{ exercise_submission.grade }} / {{ exercise_submission.total_marks }}
-                                        {% else %}
-                                            <span class="no-grade">Submitted - No grade posted yet</span>
-                                        {% endif %}
-                                    </p>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <p class="not-submitted">Not attempted yet</p>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
     {% endif %}
 </div>
