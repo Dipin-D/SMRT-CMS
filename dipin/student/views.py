@@ -13,6 +13,7 @@ from django.utils import timezone
 import plotly.graph_objects as go
 import plotly.offline as opy
 import pytz
+from django.db.models import Max
 
 def course_list(request):
     student = request.user
@@ -32,6 +33,14 @@ class go_to_course_student(View):
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
+        latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
+            .order_by('assignment_id', '-submitted_on')\
+            .distinct('assignment_id')
+
+        latest_quizzes = QuizAttempt.objects.filter(student=request.user)\
+            .order_by('quiz_id', '-attempted_on')\
+            .distinct('quiz_id')
+
 
         # --- Assignments ---
         submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
@@ -81,10 +90,6 @@ class go_to_course_student(View):
             attendance_percentage = ((present_days * 1.0) + (late_days * 0.75)) / total_attendance_days * 100
         else:
             attendance_percentage = 100  # Default to 100% if no attendance records exist
-
-        # Calculate the maximum scores for both quizzes and assignments
-        max_assignment_score = max(sub['total_marks'] for sub in submitted_assignments_info) if submitted_assignments_info else 0
-        max_quiz_score = max(sub['total_marks'] for sub in submitted_quizzes_info) if submitted_quizzes_info else 0
 
         # Calculate overall marks and scores based on submitted items only
         submitted_assignment_marks = sum(a.total_marks for a in assignments if a.id in submitted_assignment_ids)
@@ -146,6 +151,8 @@ class go_to_course_student(View):
             'submitted_exercises_info': submitted_exercises_info,
             'submitted_exercise_ids': submitted_exercise_ids,
             'now': now,
+            'latest_assignments': latest_assignments,
+            "latest_quizzes": latest_quizzes,
             # Overall grade details for the interactive chart section
             'overall_total_marks': overall_total_marks,
             'overall_score': overall_score,

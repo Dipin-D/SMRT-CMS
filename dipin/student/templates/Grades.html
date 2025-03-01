@@ -107,7 +107,7 @@
                     </td>
                     <td>
                         {% if assignment.id in submitted_assignment_ids %}
-                            {% for submission in submitted_assignments_info %}
+                            {% for submission in latest_assignments %}
                                 {% if submission.assignment_id == assignment.id %}
                                     <p>
                                         {% if submission.grade %}
@@ -162,7 +162,7 @@
                     </td>
                     <td>
                         {% if quiz.id in submitted_quiz_ids %}
-                            {% for quiz_submission in submitted_quizzes_info %}
+                            {% for quiz_submission in latest_quizzes %}
                                 {% if quiz_submission.quiz_id == quiz.id %}
                                     <p>
                                         {% if quiz_submission.grade %}
