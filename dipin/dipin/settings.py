@@ -78,19 +78,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dipin.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# aws    DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  
+#         'NAME': 'PostgreSQL',
+#         'USER': 'dipin',
+#         'PASSWORD': 'Garima12345',
+#         'HOST': 'database-1.c5imq2gggi2q.us-east-1.rds.amazonaws.com',
+#         'PORT': '5432',
+#     }
+#     }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  
-        'NAME': 'PostgreSQL',
-        'USER': 'dipin',
-        'PASSWORD': 'Garima12345',
-        'HOST': 'database-1.c5imq2gggi2q.us-east-1.rds.amazonaws.com',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres_5exd',
+        'USER': 'postgres_5exd_user',
+        'PASSWORD': 'ZiYby7LcZOUrgqBWTOELFQSrBHZ1Du8X',  
+        'HOST': 'dpg-cv28fgqn91rc73blv5jg-a.oregon-postgres.render.com',
         'PORT': '5432',
     }
-    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

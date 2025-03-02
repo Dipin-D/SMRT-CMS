@@ -107,11 +107,11 @@
                     </td>
                     <td>
                         {% if assignment.id in submitted_assignment_ids %}
-                            {% for submission in latest_assignments %}
-                                {% if submission.assignment_id == assignment.id %}
+                            {% for submission_info in latest_assignments_info %}
+                                {% if submission_info.assignment_id == assignment.id %}
                                     <p>
-                                        {% if submission.grade %}
-                                            {{ submission.grade }}/{{ submission.total_marks }}
+                                        {% if submission_info.grade %}
+                                            {{ submission_info.grade }}/{{ submission_info.total_marks }}
                                         {% else %}
                                             <span class="no-grade">No grade posted yet</span>
                                         {% endif %}
@@ -162,15 +162,15 @@
                     </td>
                     <td>
                         {% if quiz.id in submitted_quiz_ids %}
-                            {% for quiz_submission in latest_quizzes %}
-                                {% if quiz_submission.quiz_id == quiz.id %}
-                                    <p>
-                                        {% if quiz_submission.grade %}
-                                            {{ quiz_submission.grade }} / {{ quiz_submission.total_marks }}
-                                        {% else %}
-                                            <span class="no-grade">Submitted -No grade posted yet</span>
-                                        {% endif %}
-                                    </p>
+                        {% for quiz_info in latest_quizzes_info %}
+                            {% if quiz_info.quiz_id == quiz.id %}
+                                <p>
+                                    {% if quiz_info.grade %}
+                                        {{ quiz_info.grade }}/{{ quiz_info.total_marks }}
+                                    {% else %}
+                                        <span class="no-grade">No grade posted yet</span>
+                                    {% endif %}
+                                </p>
                                 {% endif %}
                             {% endfor %}
                         {% else %}
