@@ -109,15 +109,13 @@
             <a class="nav-link" href="{% url 'accounts:login' %}">Dashboard</a>
           </li>
         {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.aamu.edu/" target="_blank">Institutional Page</a>
+        </li>      
         <li class="nav-item">
-          <a class="nav-link" href="#">Learning Objects</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Tutorials</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Community</a>
-        </li>
+          <a class="nav-link" href="https://www.aamu.edu/calendar/" target="_blank">Calendar</a>
+          </li>    
+  
         {% if user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'accounts:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>

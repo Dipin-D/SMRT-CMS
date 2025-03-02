@@ -50,3 +50,4 @@ def redirect_based_on_role(user):
 @login_required
 def profile(request):
      return redirect_based_on_role(request.user)
+

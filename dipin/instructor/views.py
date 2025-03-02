@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.db.models import Avg, Sum
 import plotly.express as px
 import pandas as pd
-from django.utils import timezone
 from datetime import datetime
 
 

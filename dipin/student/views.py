@@ -36,11 +36,29 @@ class go_to_course_student(View):
         latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
             .order_by('assignment_id', '-submitted_on')\
             .distinct('assignment_id')
+        latest_assignments_info = [
+            {
+                'assignment_id': submission.assignment.id,  
+                'submission_text': submission.submission_text,
+                'submission_file': submission.submission_file,
+                'grade': submission.grade,
+                'total_marks': submission.assignment.total_marks if submission.assignment else None
+            }
+            for submission in latest_assignments
+        ]
 
         latest_quizzes = QuizAttempt.objects.filter(student=request.user)\
             .order_by('quiz_id', '-attempted_on')\
             .distinct('quiz_id')
-
+        latest_quizzes_info = [
+            {
+                'quiz_id': quiz_attempt.quiz.id,
+                'grade': quiz_attempt.grade,
+                'score': quiz_attempt.score,
+                'total_marks': quiz_attempt.quiz.total_marks if quiz_attempt.quiz else None
+            }
+            for quiz_attempt in latest_quizzes
+        ]
 
         # --- Assignments ---
         submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
@@ -153,6 +171,8 @@ class go_to_course_student(View):
             'now': now,
             'latest_assignments': latest_assignments,
             "latest_quizzes": latest_quizzes,
+            'latest_assignments_info': latest_assignments_info,
+            'latest_quizzes_info': latest_quizzes_info,
             # Overall grade details for the interactive chart section
             'overall_total_marks': overall_total_marks,
             'overall_score': overall_score,
