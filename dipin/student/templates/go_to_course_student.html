@@ -114,9 +114,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const activeTab = localStorage.getItem('activeTab') || 'lecture';
-        loadContent(activeTab, { currentTarget: document.querySelector('.custom-button') });
+        let activeTab = localStorage.getItem('activeTab');
+    
+        // If no active tab is stored, set 'lecture' as default (only the first time)
+        if (!activeTab) {
+            activeTab = 'lecture';
+            localStorage.setItem('activeTab', 'lecture');
+        }
+    
+        const button = document.querySelector(`.custom-button:nth-child(${getTabIndex(activeTab)})`);
+        loadContent(activeTab, { currentTarget: button });
     });
+    
+    function getTabIndex(contentType) {
+        const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'grade', 'analytics'];
+        return tabOrder.indexOf(contentType) + 1;
+    }
+    
 
     function createRipple(event) {
         const button = event.currentTarget;

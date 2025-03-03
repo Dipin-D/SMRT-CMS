@@ -162,7 +162,7 @@
                     </td>
                     <td>
                         {% if quiz.id in submitted_quiz_ids %}
-                        {% for quiz_info in latest_quizzes_info %}
+                        {% for quiz_info in latest_quizzes %}
                             {% if quiz_info.quiz_id == quiz.id %}
                                 <p>
                                     {% if quiz_info.grade %}

@@ -176,12 +176,14 @@
         </form>
     {% endif %}
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var exerciseId = "{{ exercise.id }}";
         var currentAttempt = "{{ current_attempt }}";
         var uniqueEndTimeKey = "endTime_exercise_" + exerciseId + "_attempt_" + currentAttempt;
         var serverEndTime = new Date(Number("{{ end_time }}") * 1000).getTime();
+    
         // Use stored endTime if available; otherwise, use serverEndTime.
         var storedEndTime = localStorage.getItem(uniqueEndTimeKey);
         var endTime;
@@ -266,30 +268,49 @@
     
         // NEW: Use a Web Worker to trigger auto-submit even if the tab is inactive.
         if (window.Worker) {
-            var workerCode = `
-                onmessage = function(e) {
-                    var timeRemaining = e.data.endTime - new Date().getTime();
-                    if (timeRemaining <= 0) {
-                        postMessage({ action: "submit" });
-                    }
-                }
-            `;
-            var workerBlob = new Blob([workerCode], { type: "application/javascript" });
-            var worker = new Worker(URL.createObjectURL(workerBlob));
-    
-            worker.postMessage({ endTime: endTime });
-    
-            worker.onmessage = function (e) {
-                if (e.data.action === "submit") {
+            var workerCode = 
+                self.onmessage = function(e) {
+                    var delay = e.data;
+                    setTimeout(function(){
+                        self.postMessage('timesup');
+                    }, delay);
+                };
+            ;
+            var blob = new Blob([workerCode], { type: "application/javascript" });
+            var workerUrl = URL.createObjectURL(blob);
+            var timerWorker = new Worker(workerUrl);
+            timerWorker.postMessage(autoSubmitDelay);
+            timerWorker.onmessage = function(e) {
+                if (e.data === 'timesup') {
+                    updateTimerDisplay(0, 0);
+                    localStorage.setItem("exercise_expired_" + exerciseId, "true");
                     autoSubmitExercise();
                 }
             };
         }
     
-        // Start the timer when the page is ready
-        startTimer();
-    });    
-    </script>
+        // Use an attempt key that includes the current attempt number.
+        var attemptKey = "attempt_in_progress_" + exerciseId + "_attempt_" + currentAttempt;
+        if (localStorage.getItem(attemptKey) === "true") {
+            var attemptLink = document.getElementById("newAttemptLink");
+            if (attemptLink) {
+                attemptLink.textContent = "Continue Attempt";
+            }
+        }
     
+        // Mark this attempt as in progress when the user clicks to start it.
+        document.getElementById("newAttemptLink")?.addEventListener("click", function () {
+            localStorage.setItem(attemptKey, "true");
+        });
+    
+        if (new Date().getTime() >= endTime) {
+            updateTimerDisplay(0, 0);
+            localStorage.setItem("exercise_expired_" + exerciseId, "true");
+            autoSubmitExercise();
+        } else {
+            startTimer();
+        }
+    });
+    </script>
   {% endblock %}
   

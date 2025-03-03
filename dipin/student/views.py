@@ -50,15 +50,6 @@ class go_to_course_student(View):
         latest_quizzes = QuizAttempt.objects.filter(student=request.user)\
             .order_by('quiz_id', '-attempted_on')\
             .distinct('quiz_id')
-        latest_quizzes_info = [
-            {
-                'quiz_id': quiz_attempt.quiz.id,
-                'grade': quiz_attempt.grade,
-                'score': quiz_attempt.score,
-                'total_marks': quiz_attempt.quiz.total_marks if quiz_attempt.quiz else None
-            }
-            for quiz_attempt in latest_quizzes
-        ]
 
         # --- Assignments ---
         submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
@@ -172,7 +163,6 @@ class go_to_course_student(View):
             'latest_assignments': latest_assignments,
             "latest_quizzes": latest_quizzes,
             'latest_assignments_info': latest_assignments_info,
-            'latest_quizzes_info': latest_quizzes_info,
             # Overall grade details for the interactive chart section
             'overall_total_marks': overall_total_marks,
             'overall_score': overall_score,
@@ -470,5 +460,7 @@ def attempt_exercise(request, class_shell_id, exercise_id):
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
+            'end_time': end_time.timestamp(),  # Passed as seconds.
+
         }
         return render(request, 'attempt_exercise.html', context)
