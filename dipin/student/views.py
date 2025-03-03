@@ -204,13 +204,14 @@ def attempt_quiz(request, class_shell_id, quiz_id):
     current_attempt = attempts.count() + 1
     attempts_left = quiz.max_attempts - attempts.count()
     max_attempts_reached = (attempts_left <= 0)
+    end_time = timezone.now() + timedelta(minutes=quiz.timer)
+
 
     # NEW ATTEMPT: when a student clicks a "start new attempt" link.
     if "start_new_attempt" in request.GET:
         if attempts_left <= 0:
             return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
         # Calculate a new end time.
-        end_time = timezone.now() + timedelta(minutes=quiz.timer)
         context = {
             'quiz': quiz,
             'questions': questions,
@@ -232,7 +233,6 @@ def attempt_quiz(request, class_shell_id, quiz_id):
         if attempts.exists():
             # Compute highest score among all attempts.
             highest_score = max(attempt.score for attempt in attempts)
-            # For review, you might still want to list all question attempts from the last submission
             attempt_to_view = attempts.last()
             question_attempts = QuestionAttempt.objects.filter(quiz_attempt=attempt_to_view)
             context = {
@@ -305,7 +305,6 @@ def attempt_quiz(request, class_shell_id, quiz_id):
         return render(request, 'attempt_quiz.html', context)
     else:
         # First GET request to start the quiz.
-        end_time = timezone.now() + timedelta(minutes=quiz.timer)
         context = {
             'quiz': quiz,
             'questions': questions,
