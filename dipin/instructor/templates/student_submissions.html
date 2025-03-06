@@ -1,19 +1,4 @@
 <style>
-    .custom-button {
-        background: #8A2C3B;
-        color: #fff;
-        border-radius: 20px;
-        padding: 6px 12px;
-        font-size: 14px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: .3s;
-        width: auto;
-    }
-
-    .custom-button:hover {
-        background: #9B3E51;
-        transform: translateY(-2px);
-    }
 
     .container {
         font-size: 14px;
@@ -109,7 +94,7 @@
     <h3>Ungraded Submissions</h3>
 
 <!-- Collapsible for Assignments -->
-<button class="collapsible">Assignments</button>
+<button class="collapsible custom-button mt-3 mb-3 ml-3">Assignments</button>
 <div class="collapsible-content table-container">
     <table>
         <thead>
@@ -175,7 +160,7 @@
 
 
 <!-- Collapsible for Quizzes -->
-<button class="collapsible">Quizzes</button>
+<button class="collapsible custom-button mt-3 mb-3 ml-3">Quizzes</button>
 <div class="collapsible-content table-container">
     <table>
         <thead>
@@ -193,7 +178,7 @@
                 <td>{{ quiz.student.username }}</td>
                 <td>{{ quiz.score }}</td>
                 <td>
-                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button">View Details to Grade</a>
+                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button btn-sm">View Details to Grade</a>
                 </td>
             </tr>
             {% endfor %}

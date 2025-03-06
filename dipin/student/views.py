@@ -13,7 +13,6 @@ from django.utils import timezone
 import plotly.graph_objects as go
 import plotly.offline as opy
 import pytz
-from django.db.models import Max
 
 def course_list(request):
     student = request.user
@@ -174,23 +173,23 @@ class go_to_course_student(View):
 
 
     def post(self, request, class_shell_id):
+        # Handle form submission for assignments
         assignment_id = request.POST.get('assignment_id')
-        assignment = get_object_or_404(Assignment, id=assignment_id)
+        if assignment_id:
+            assignment = get_object_or_404(Assignment, id=assignment_id)
+            submission_text = request.POST.get('submission_text')
+            submission_file = request.FILES.get('submission_file')
 
-        submission_text = request.POST.get('submission_text')
-        submission_file = request.FILES.get('submission_file')
+            assignment_submission = AssignmentSubmission(
+                assignment=assignment,
+                student=request.user,
+                submission_text=submission_text,
+            )
 
-        assignment_submission = AssignmentSubmission(
-            assignment=assignment,
-            student=request.user,
-            submission_text=submission_text,
-        )
-
-        if submission_file:
-            assignment_submission.submission_file = submission_file    
-        assignment_submission.save()
-        return redirect('student:go_to_course', class_shell_id=class_shell_id)
-
+            if submission_file:
+                assignment_submission.submission_file = submission_file    
+            assignment_submission.save()
+            return redirect('student:go_to_course', class_shell_id=class_shell_id)
 
 def attempt_quiz(request, class_shell_id, quiz_id):
 
