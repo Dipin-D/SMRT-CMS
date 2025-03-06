@@ -5,74 +5,38 @@
 {% endblock %}
 
 {% block content %}
-    <style>
-        .custom-button {
-            position: relative;
-            overflow: hidden;
-            background-color: #8A2C3B;
-            color: white;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            border: none;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold; /* Make the text stand out */
-            text-transform: uppercase; /* Add uppercase text */
-        }
-
-        .custom-button:hover {
-            background-color: #7A2B3B;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .custom-button:active {
-            transform: scale(0.95);
-        }
-
-        .custom-button.active {
-            background-color:rgb(74, 3, 16); /* Darker color when active */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-        }
-
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .content-section {
-            padding: 20px; 
-            background-color: #f8f9fa; 
-            border-radius: 9px; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-        }
-    </style>
 
     <div class="row">
-        <div class="col-md-3">
-            <div class="d-grid gap-4">
-                <button class="mt-2 custom-button" onclick="loadContent('lecture', event)">Lectures</button>
-                <button class="custom-button" onclick="loadContent('exercise', event)">Exercises</button>
-                <button class="custom-button" onclick="loadContent('quiz', event)">Quizzes</button>
-                <button class="custom-button" onclick="loadContent('assignment', event)">Assignments</button>
-                <button class="custom-button" onclick="loadContent('grade', event)">Grades</button>
-                <button class="custom-button" onclick="loadContent('analytics', event)">Analytics</button>
+        <div class="col-md-3 mt-3">
+            <div class="d-grid gap-4"> 
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('lecture', event)">
+                    <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
+                </button>
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('exercise', event)">
+                    <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
+                </button>                
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('quiz', event)">
+                    <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
+                </button>                
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('assignment', event)">
+                    <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
+                </button>
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('grade', event)">
+                    <i class="fas fa-graduation-cap fs-5"></i> <span>Grades</span>
+                </button>
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('analytics', event)">
+                    <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
+                </button>
+                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('ide', event)">
+                    <i class="fas fa-laptop-code fs-5"></i> <span>IDE</span>
+                </button>                
             </div>
         </div>
+    
+        
+        <!-- Add Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
 
         <div class="col-md-9 mt-3">
             <div id="lecture-content" class="content-section" style="display: none;">
@@ -92,6 +56,9 @@
             </div>
             <div id="analytics-content" class="content-section" style="display: none;">
                 {% include 'student_analytics.html' %}
+            </div>
+            <div id="ide-content" class="content-section" style="display: none;">
+                {% include 'ide.html' %}
             </div>
         </div>
     </div>

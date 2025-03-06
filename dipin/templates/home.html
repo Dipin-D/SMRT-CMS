@@ -10,11 +10,10 @@
     crossorigin="anonymous"
   />
   <style>
-    body {
-      background-color: #f0f0f0; 
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); 
-      min-height: 100vh; 
+    html {
+      margin: 0;
     }
+
 
     .offcanvas-menu {
       position: fixed;
@@ -50,9 +49,9 @@
       color: #ffffff;
     }
     .navbar-toggler .navbar-toggler-icon {
-    background-color: white; 
-    border-radius: 5px; 
-}
+      background-color: white; 
+      border-radius: 5px; 
+    }
 
     .offcanvas-header {
       padding: 1rem;
@@ -76,64 +75,311 @@
       border: none;
       font-size: 1.2rem;
     }
+    .content-container {
+      flex-grow: 1;
+      padding-left: 0.5rem;  
+      padding-right: 0.5rem;
+        .custom-button {
+            background-color: #61162D;
+            border: none;
+            padding: 10px 20px !important;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: auto; 
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+      
+        .custom-button:hover {
+            background-color: #7A2B3B; 
+            transform: translateY(-3px); 
+            color: #fff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+      
+        .custom-button:focus::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: ripple 0.6s linear;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+      
+        .edit-button, .delete-button {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+      
+        .edit-button {
+            background-color:rgb(255, 164, 7);
+        }
+      
+        .edit-button:hover {
+            background-color: #E0A800;
+        }
+      
+        .edit-button:focus::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: ripple 0.6s linear;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+      
+        .delete-button {
+            background-color:rgb(164, 0, 16);
+        }
+      
+        .delete-button:hover {
+            background-color: #C82333;
+        }
+      
+        .delete-button:focus::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: ripple 0.6s linear;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+      
+        .form-container {
+            position: fixed;
+            right: 0;
+            top: 80px;
+            width: 30%;
+            padding: 20px;
+            background-color: #f8f9fa;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 10;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+      
+        .form-container.show {
+            transform: translateX(0);
+        }
+      
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+        }
+      
+        .hover-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .card-title {
+          font-size: 20px;
+          font-weight: bold;
+          color: #61162D;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+      
+        .card-body {
+          color: #424242;
+        }
+        .card {
+          background: linear-gradient(145deg, #F5F5F5, #61162D);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
+          border-radius: 12px;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+      
+        .card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+        }
+      
+      
+        .card-body .container .row .col {
+          background: rgba(245, 245, 245, 0.9);
+          padding: 12px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 500;
+          color: #61162D;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          border: 1px solid rgba(97, 22, 45, 0.1);
+        }
+        .card-body .container .row .col:hover {
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+      
+        .card-body .container .row {
+          gap: 1.2rem;
+        }
+        .content-section {
+          padding: 20px; 
+          background-color: #f8f9fa;
+          min-height: 85vh;
+          border-radius: 9px; 
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+  }
+  
   </style>
   <title>{% block title %}Dipin's Project{% endblock %}</title>
-</head>
-<body>
   <!-- Navbar with centered brand and off-canvas toggle -->
-  <nav class="navbar d-flex align-items-center justify-content-between px-3">
+</head>
+
+  <!-- Main content container -->
+  <body class="d-flex flex-column min-vh-100">
+    <nav class="navbar d-flex align-items-center justify-content-between px-3">
       <button class="navbar-toggler" onclick="document.getElementById('offcanvasMenu').classList.toggle('open');">
         <span class="navbar-toggler-icon bi bi-list" style="color: white;"></span>
       </button>
-      <a class="navbar-brand mx-auto" href="{% url 'accounts:login' %}">SMART CMS</a>
-  </nav>
+      <a class="navbar-brand mx-auto" href="{% if user.is_authenticated %}
+                                                {% if user.is_instructor %}{% url 'instructor:class_shell_list' %}
+                                                {% elif user.is_student %}{% url 'student:course_list' %}
+                                                {% else %}{% url 'accounts:login' %} 
+                                                {% endif %}
+                                              {% else %}{% url 'accounts:login' %}{% endif %}">
+        SMART CMS
+      </a>
+      </nav>
 
-  <!-- Off-canvas menu -->
-  <div id="offcanvasMenu" class="offcanvas-menu">
-    <div class="offcanvas-header d-flex justify-content-between align-items-center">
-      <h5 class="offcanvas-title">SMART CMS</h5>
-      <button class="btn-close" onclick="document.getElementById('offcanvasMenu').classList.remove('open');" aria-label="Close">&times;</button>
-    </div>
-    <div class="offcanvas-body">
-      <ul class="navbar-nav">
-        {% if user.is_instructor %}
+      <!-- Off-canvas menu -->
+    <div id="offcanvasMenu" class="offcanvas-menu">
+      <div class="offcanvas-header d-flex justify-content-between align-items-center">
+        <h5 class="offcanvas-title">SMART CMS</h5>
+        <button class="btn-close" onclick="document.getElementById('offcanvasMenu').classList.remove('open');" aria-label="Close">&times;</button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav">
+          {% if user.is_instructor %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'instructor:class_shell_list' %}">
+                <i class="fas fa-chalkboard-teacher fs-5"></i> <span class="ms-2">Courses</span>
+              </a>
+            </li>
+          {% elif user.is_student %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'student:course_list' %}">
+                <i class="fas fa-book-open fs-5"></i> <span class="ms-2">Courses</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:login' %}">
+                <i class="fas fa-sign-in-alt fs-5"></i> <span class="ms-2">Courses</span>
+              </a>
+            </li>
+          {% endif %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'instructor:class_shell_list' %}">Dashboard</a>
-          </li>
-        {% elif user.is_student %}
+            <a class="nav-link" href="https://www.aamu.edu/" target="_blank">
+              <i class="fas fa-university fs-5"></i> <span class="ms-2">Institutional Page</span>
+            </a>
+          </li>      
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'student:course_list' %}">Dashboard</a>
-          </li>
-        {% else %}
+            <a class="nav-link" href="https://www.aamu.edu/calendar/" target="_blank">
+              <i class="fas fa-calendar-alt fs-5"></i> <span class="ms-2">Calendar</span>
+            </a>
+          </li>  
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:login' %}">Dashboard</a>
-          </li>
-        {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" href="https://www.aamu.edu/" target="_blank">Institutional Page</a>
-        </li>      
-        <li class="nav-item">
-          <a class="nav-link" href="https://www.aamu.edu/calendar/" target="_blank">Calendar</a>
-          </li>    
-  
-        {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-            <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display: none;">
-              {% csrf_token %}
-            </form>
-          </li>
-        {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-          </li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
+            <a class="nav-link" href="https://www.aamu.edu/about/visit-us/index.html" target="_blank">
+              <i class="fas fa-map-marker-alt fs-5"></i> <span class="ms-2">Campus Maps</span>
+            </a>
+          </li>  
 
-  <!-- Main content container -->
-  <div class="container">{% block content %}{% endblock %}</div>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="fas fa-sign-out-alt fs-5"></i> <span class="ms-2">Logout</span>
+              </a>
+              <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display: none;">
+                {% csrf_token %}
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:login' %}">
+                <i class="fas fa-sign-in-alt fs-5"></i> <span class="ms-2">Login</span>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+
+
+  <div class="content-container">
+    {% block content %}{% endblock %}
+    </div>
+    <!-- Footer -->
+    <footer class="footer mt-3 mb-0 pt-3 text-center" style="background-color: #61162D; color: white;">
+    <div class="container">
+      <div class="row">
+        <!-- Copyright Section -->
+        <div class="col-md-4">
+          <p class="mb-1">&copy; 2025 SMART CMS</p>
+        </div>
+        
+        <!-- Links Section with Icons -->
+        <div class="col-md-4 text-center">
+          <a href="https://www.aamu.edu/" target="_blank" class="text-light text-decoration-none">
+            <i class="fas fa-school footer-icon"></i> AAMU Page
+          </a> |
+          <a href="https://www.linkedin.com/school/aamu1875/posts/?feedView=all" target="_blank" class="text-light text-decoration-none">
+            <i class="fab fa-linkedin footer-icon"></i> AAMU LinkedIn
+          </a> |
+          <a href="https://x.com/aamuedu" target="_blank" class="text-light text-decoration-none">
+            <i class="fab fa-twitter footer-icon"></i> AAMU X
+          </a>
+        </div>
+        
+        <!-- Designer Section -->
+        <div class="col-md-4 text-end">
+          <p class="mb-2">Designed by <a href="https://dipindawadi.com.np/" class="text-light text-decoration-none" target="_blank"><strong>Dipin Dawadi</strong></a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Font Awesome Script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 
 </body>
 </html>
