@@ -8,9 +8,7 @@
 
 
 <div class="container mt-4">
-    <div class="text-center mb-4">
-        <h2>Welcome back, {{ user.username }}!</h2>
-    </div>
+        <h2 class="text-center mb-4 card-title">Welcome back, {{ user.username }}!</h2>
 
     <!-- Button to show Create form -->
     <button id="show-create-form" class="btn btn-success custom-button mb-3">Create New Class Shell</button>
@@ -23,13 +21,12 @@
                     <div class="card shadow-sm hover-card" style="border-radius: 10px; border: none;">
                         <div class="card-body d-flex flex-column justify-content-between" style="height: 100%;">
                             <div class="text-center mb-3">
-                                <h5 class="card-title" style="color: #61162D;">{{ class_shell.course_name }}</h5>
+                                <h5 class="card-title" style="color: #61162D;">{{ class_shell.course_name }} - {{ class_shell.section_number }}</h5>
                             </div>
                             <div class="container">
                                 <div class="row">
-                                    <div class="col" style="color: #4e1323;">Section-{{ class_shell.section_number }}</div>
-                                    <div class="col" style="color: #4e1323;">Semester-{{ class_shell.semester }}</div>
-                                    <div class="col" style="color: #4e1323;">Year-{{ class_shell.year }}</div>
+                                    <div class="col" style="color: #4e1323;">{{ class_shell.semester }}</div>
+                                    <div class="col" style="color: #4e1323;">{{ class_shell.year }}</div>
                                 </div>
                             </div>
                             <div class="text-center mt-3">
