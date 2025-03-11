@@ -1,4 +1,4 @@
-<h2>Manage Lecture for {{ class_shell.course_name }}</h2>
+<h2 class="text-center mb-4 card-title">Manage Lecture for {{ class_shell.course_name }}</h2>
 
 <!-- Button to Show the New Lecture Form -->
 <div class="mt-3 mb-3">
@@ -7,9 +7,22 @@
 <!-- List of Lectures -->
 <ul class="list-group mt-3">
     {% for lecture in lectures %}
-        <li class="list-group-item mt-4">
-            <strong>{{ lecture.title }}</strong>
+    <li class="list-group-item mt-4 card d-flex justify-content-between">
+        <div>
+        <strong>{{ lecture.title }}</strong>
+                        
+            <!-- Edit and Delete Buttons -->
+            <button class="edit-button btn btn-sm" data-lecture-id="{{ lecture.id }}">Edit</button>
+            <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this lecture?');">
+                {% csrf_token %}
+                <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
+                <button type="submit" name="delete_lecture" class="delete-button btn btn-sm">Delete</button>
+            </form>
+        </div>
+
             <p>{{ lecture.text }}</p>
+        </div>
+
 
             <!-- Display Files for this Lecture -->
             <ul class="list-group mt-3">
@@ -57,15 +70,7 @@
                 </div>
                 
                 <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
-                <button type="submit" name="edit_lecture" class="custom-button">Save Changes</button>
-            </form>
-
-            <!-- Edit and Delete Buttons -->
-            <button class="edit-button" data-lecture-id="{{ lecture.id }}">Edit</button>
-            <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this lecture?');">
-                {% csrf_token %}
-                <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
-                <button type="submit" name="delete_lecture" class="delete-button">Delete</button>
+                <button type="submit" name="edit_lecture" class="custom-button mb-3">Save Changes</button>
             </form>
         </li>
     {% empty %}
@@ -74,7 +79,7 @@
 </ul>
 
 <!-- New Lecture Content Form -->
-<form method="post" enctype="multipart/form-data" id="new-content-form" style="display: none;" class="mt-4">
+<form method="post" enctype="multipart/form-data" id="new-content-form" style="display: none;" class="mt-4 card">
     {% csrf_token %}
     <div class="form-group">
         <label for="new_lecture_title">Title</label>
@@ -89,7 +94,7 @@
         <input type="file" name="file" id="new_file_upload" class="form-control">
     </div>
     <input type="hidden" name="lecture_id" value="" id="new_lecture_id">
-    <button type="submit" name="add_lecture" class="btn" style="background-color: maroon; color: white;">Add Content</button>
+    <button type="submit" name="add_lecture" class="custom-button mt-3">Add Content</button>
 </form>
 
 <!-- Simple JavaScript to Toggle Forms -->

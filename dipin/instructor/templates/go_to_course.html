@@ -6,18 +6,20 @@
 
 {% block content %}
 
-    <div class="row">
-        <!-- Leftmost column with buttons -->
-        <div class="col-md-3 mt-3">
+<div class="container-fluid">
+    <div class="row" style="min-height: 100vh;">
+        <!-- Sidebar on the left -->
+        <div class="col-2 bg-light d-flex flex-column p-2" 
+             style="min-height: 100vh; overflow-y: auto; min-width: 200px;">
             <div class="d-grid gap-4">
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('lecture', event)">
                     <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
                 </button>
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('exercise', event)">
-                    <i class="fas fa-dumbbell fs-5"></i> <span>Exercises</span>
+                    <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
                 </button>
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('quiz', event)">
-                    <i class="fas fa-question-circle fs-5"></i> <span>Quizzes</span>
+                    <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
                 </button>
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('assignment', event)">
                     <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
@@ -29,7 +31,7 @@
                     <i class="fas fa-calendar-check fs-5"></i> <span>Attendance</span>
                 </button>
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('student_submissions', event)">
-                    <i class="fas fa-upload fs-5"></i> <span>Student Submissions</span>
+                    <i class="fas fa-upload fs-5"></i> <span>Submissions</span>
                 </button>
                 <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('analytics', event)">
                     <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
@@ -42,7 +44,7 @@
         
 
         <!-- Right content area -->
-        <div class="col-md-9 mt-3">
+        <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
             <div id="lecture-content" class="content-section" style="display: none;">
                 {% include 'lecture.html' %}
             </div>
@@ -67,7 +69,7 @@
             <div id="student_submissions-content" class="content-section" style="display: none;">
                 {% include 'student_submissions.html' %}
             </div>
-           
+        </div>
         </div>
     </div>
 
@@ -107,20 +109,6 @@
         }
         
     
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const ripple = document.createElement("span");
-            const rect = button.getBoundingClientRect();
-    
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
-            ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
-            ripple.classList.add("ripple");
-    
-            button.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
     </script>
 {% endblock %}
     

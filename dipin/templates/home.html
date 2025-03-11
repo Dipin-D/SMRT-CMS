@@ -75,6 +75,42 @@
       border: none;
       font-size: 1.2rem;
     }
+    /* Loading Spinner Styles */
+    .loading-spinner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999; /* Ensure it's on top of everything */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .loading-spinner.active {
+      background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .spinner {
+      border: 4px solid rgba(97, 22, 45, 0.3); /* Light border color */
+      border-top: 4px solid #61162D; /* Spinner color */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     .content-container {
       flex-grow: 1;
       padding-left: 0.5rem;  
@@ -200,9 +236,6 @@
           text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
       
-        .card-body {
-          color: #424242;
-        }
         .card {
           background: linear-gradient(145deg, #F5F5F5, #61162D);
           box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
@@ -236,10 +269,8 @@
           gap: 1.2rem;
         }
         .content-section {
-          padding: 20px; 
+          padding: 10px; 
           background-color: #f8f9fa;
-          min-height: 85vh;
-          border-radius: 9px; 
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
       }
 
@@ -257,6 +288,7 @@
             opacity: 0;
         }
     }
+    
   }
   
   </style>
@@ -266,6 +298,11 @@
 
   <!-- Main content container -->
   <body class="d-flex flex-column min-vh-100">
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner active">
+      <div class="spinner"></div>
+    </div>
+
     <nav class="navbar d-flex align-items-center justify-content-between px-3">
       <button class="navbar-toggler" onclick="document.getElementById('offcanvasMenu').classList.toggle('open');">
         <span class="navbar-toggler-icon bi bi-list" style="color: white;"></span>
@@ -324,14 +361,14 @@
           </li>  
 
           {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+          <li class="nav-item">
+            <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; color: #ffffff;">
                 <i class="fas fa-sign-out-alt fs-5"></i> <span class="ms-2">Logout</span>
-              </a>
-              <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display: none;">
-                {% csrf_token %}
-              </form>
-            </li>
+              </button>
+            </form>
+          </li>
           {% else %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'accounts:login' %}">
@@ -380,6 +417,34 @@
 
   <!-- Font Awesome Script -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  <script>
+    // Show the spinner immediately when any link is clicked
+    document.addEventListener('click', function (event) {
+      // Check if the clicked element is an anchor tag with an href attribute
+      const target = event.target.closest('a[href]');
+      if (target) {
+        // Prevent the default navigation behavior temporarily
+        event.preventDefault();
+  
+        // Show the spinner
+        const spinner = document.getElementById('loading-spinner');
+        spinner.classList.add('active');
+        console.log('Navigation started. Showing spinner...');
+  
+        // Allow the navigation to proceed after a short delay
+        setTimeout(function () {
+          window.location.href = target.href; // Navigate to the new page
+        }, 100); // Small delay to ensure the spinner is visible
+      }
+    });
+  
+    // Hide the spinner when the new page is fully loaded
+    window.addEventListener('load', function () {
+      const spinner = document.getElementById('loading-spinner');
+      spinner.classList.remove('active'); // Hide the spinner
+      console.log('New page fully loaded. Hiding spinner...');
+    });
+  </script>
 
 </body>
 </html>
