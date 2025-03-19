@@ -6,67 +6,65 @@
 
 {% block content %}
 
+
 <div class="container-fluid">
     <div class="row" style="min-height: 100vh;">
         <!-- Sidebar on the left -->
         <div class="col-2 bg-light d-flex flex-column p-2" 
              style="min-height: 100vh; overflow-y: auto; min-width: 200px;">
             <div class="d-grid gap-4">
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('lecture', event)">
+                <button class="custom-button" onclick="loadContent('lecture', event)">
                     <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('exercise', event)">
+                <button class="custom-button" onclick="loadContent('exercise', event)">
                     <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('quiz', event)">
+                <button class="custom-button" onclick="loadContent('quiz', event)">
                     <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('assignment', event)">
+                <button class="custom-button" onclick="loadContent('assignment', event)">
                     <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('other', event)">
+                <button class="custom-button " onclick="loadContent('other', event)">
                     <i class="fas fa-users fs-5"></i> <span>Student List</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('attendance', event)">
+                <button class="custom-button" onclick="loadContent('attendance', event)">
                     <i class="fas fa-calendar-check fs-5"></i> <span>Attendance</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('student_submissions', event)">
+                <button class="custom-button" onclick="loadContent('student_submissions', event)">
                     <i class="fas fa-upload fs-5"></i> <span>Submissions</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('analytics', event)">
+                <button class="custom-button" onclick="loadContent('analytics', event)">
                     <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
                 </button>
             </div>
         </div>
         
-        <!-- Add Font Awesome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        
 
         <!-- Right content area -->
         <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
-            <div id="lecture-content" class="content-section" style="display: none;">
+            <div id="lecture-content" class="content-section">
                 {% include 'lecture.html' %}
             </div>
-            <div id="exercise-content" class="content-section" style="display: none;">
+            <div id="exercise-content" class="content-section">
                 {% include 'exercise.html' %}
             </div>
-            <div id="quiz-content" class="content-section" style="display: none;">
+            <div id="quiz-content" class="content-section" >
                 {% include 'quiz.html' %}
             </div>
-            <div id="assignment-content" class="content-section" style="display: none;">
+            <div id="assignment-content" class="content-section">
                 {% include 'assignment.html' %}
             </div>
-            <div id="other-content" class="content-section" style="display: none;">
+            <div id="other-content" class="content-section" >
                 {% include 'student_list.html' %}
             </div>
-            <div id="attendance-content" class="content-section" style="display: none;">
+            <div id="attendance-content" class="content-section" >
                 {% include 'attendance.html' %}
             </div>
-            <div id="analytics-content" class="content-section" style="display: none;">
+            <div id="analytics-content" class="content-section" >
                 {% include 'analytics.html' %}
             </div>
-            <div id="student_submissions-content" class="content-section" style="display: none;">
+            <div id="student_submissions-content" class="content-section">
                 {% include 'student_submissions.html' %}
             </div>
         </div>
@@ -81,9 +79,7 @@
     
             document.getElementById(`${contentType}-content`).style.display = 'block';
             localStorage.setItem('activeTab', contentType);
-            createRipple(event);
     
-            // Manage active button state
             document.querySelectorAll('.custom-button').forEach(button => {
                 button.classList.remove('active');
             });
@@ -91,24 +87,21 @@
         }
     
         document.addEventListener('DOMContentLoaded', function() {
-            let activeTab = localStorage.getItem('activeTab');
-        
-            // If no active tab is stored, set 'lecture' as default (only the first time)
-            if (!activeTab) {
-                activeTab = 'lecture';
-                localStorage.setItem('activeTab', 'lecture');
-            }
-        
+            let activeTab = localStorage.getItem('activeTab') || 'lecture';
+            localStorage.setItem('activeTab', activeTab);
+
+            document.querySelectorAll('.custom-button').forEach(button => {
+                button.classList.add('general-button');
+            });
+    
             const button = document.querySelector(`.custom-button:nth-child(${getTabIndex(activeTab)})`);
             loadContent(activeTab, { currentTarget: button });
         });
-        
+    
         function getTabIndex(contentType) {
-            const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'grade', 'analytics'];
+            const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'other', 'attendance','student_submissions', 'analytics'];
             return tabOrder.indexOf(contentType) + 1;
         }
-        
-    
     </script>
-{% endblock %}
     
+    {% endblock %}

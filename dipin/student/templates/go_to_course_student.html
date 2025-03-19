@@ -11,25 +11,25 @@
         <div class="col-2 bg-light d-flex flex-column p-2" 
              style="min-height: 100vh; overflow-y: auto; min-width: 200px;">
             <div class="d-grid gap-4">
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('lecture', event)">
+                <button class="custom-button" onclick="loadContent('lecture', event)">
                     <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('exercise', event)">
+                <button class="custom-button" onclick="loadContent('exercise', event)">
                     <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('quiz', event)">
+                <button class="custom-button" onclick="loadContent('quiz', event)">
                     <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('assignment', event)">
+                <button class="custom-button" onclick="loadContent('assignment', event)">
                     <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('grade', event)">
+                <button class="custom-button" onclick="loadContent('grade', event)">
                     <i class="fas fa-graduation-cap fs-5"></i> <span>Grades</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('analytics', event)">
+                <button class="custom-button" onclick="loadContent('analytics', event)">
                     <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
                 </button>
-                <button class="custom-button d-flex align-items-center justify-content-start gap-2 w-100" onclick="loadContent('ide', event)">
+                <button class="custom-button" onclick="loadContent('ide', event)">
                     <i class="fas fa-laptop-code"></i> <span>IDE</span>
                 </button>
             </div>
@@ -37,25 +37,25 @@
 
         <!-- Content area on the right -->
         <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
-            <div id="lecture-content" class="content-section" style="display: none;">
+            <div id="lecture-content" class="content-section">
                 {% include 'view_lecture.html' %}
             </div>
-            <div id="exercise-content" class="content-section" style="display: none;">
+            <div id="exercise-content" class="content-section">
                 {% include 'take_exercise.html' %}
             </div>
-            <div id="quiz-content" class="content-section" style="display: none;">
+            <div id="quiz-content" class="content-section">
                 {% include 'quiz_list.html' %}
             </div>
-            <div id="assignment-content" class="content-section" style="display: none;">
+            <div id="assignment-content" class="content-section">
                 {% include 'do_assignment.html' %}
             </div>
-            <div id="grade-content" class="content-section" style="display: none;">
+            <div id="grade-content" class="content-section">
                 {% include 'Grades.html' %}
             </div>
-            <div id="analytics-content" class="content-section" style="display: none;">
+            <div id="analytics-content" class="content-section">
                 {% include 'student_analytics.html' %}
             </div>
-            <div id="ide-content" class="content-section" style="display: none;">
+            <div id="ide-content" class="content-section">
                 {% include 'ide.html' %}
             </div>
         </div>
@@ -70,7 +70,6 @@
 
         document.getElementById(`${contentType}-content`).style.display = 'block';
         localStorage.setItem('activeTab', contentType);
-        createRipple(event);
 
         document.querySelectorAll('.custom-button').forEach(button => {
             button.classList.remove('active');
@@ -79,21 +78,25 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        let activeTab = localStorage.getItem('activeTab');
-    
-        if (!activeTab) {
-            activeTab = 'lecture';
-            localStorage.setItem('activeTab', 'lecture');
-        }
-    
+        let activeTab = localStorage.getItem('activeTab') || 'lecture';
+        localStorage.setItem('activeTab', activeTab);
+
+        // Apply general-button class to all custom buttons
+        document.querySelectorAll('.custom-button').forEach(button => {
+            button.classList.add('general-button');
+        });
+
         const button = document.querySelector(`.custom-button:nth-child(${getTabIndex(activeTab)})`);
-        loadContent(activeTab, { currentTarget: button });
+        if (button) {
+            loadContent(activeTab, { currentTarget: button });
+        }
     });
-    
+
     function getTabIndex(contentType) {
         const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'grade', 'analytics', 'ide'];
         return tabOrder.indexOf(contentType) + 1;
     }
 </script>
+
 
 {% endblock %}
