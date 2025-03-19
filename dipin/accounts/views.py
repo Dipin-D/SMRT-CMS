@@ -3,6 +3,8 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+
 
 def register(request):
     if request.method == 'POST':
@@ -36,6 +38,16 @@ def front_page(request):
         form = AuthenticationForm()  # Initialize the form for GET requests and any other requests
 
     return render(request, 'registration/login.html', {'form': form})
+
+def guest_login(request):
+
+    user = authenticate(username='dipin', password='dipin123')
+
+    if user is not None:
+        login(request, user)
+        return redirect('student:course_list')
+    else:
+        return redirect('front_page')  
     
 
 def redirect_based_on_role(user):

@@ -5,31 +5,26 @@
 {% endblock %}
 
 {% block content %}
-
+ 
 <div class="container d-flex flex-column flex-grow-1 mt-4">
   <div class="text-center mb-4">
     <h2 style="color: #61162D;">Welcome back, {{ user.username }}!</h2>
   </div>
-  <div class="row gap-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
     {% if class_shells %}
       {% for class_shell in class_shells %}
-        <div class="col-md-4">
-          <div class="card hover-card d-flex flex-column">
+      <div class="col-md-2"> 
+        <div class="card hover-card d-flex flex-column" style="width: 250px; height: 270px;">
             <img src="https://picsum.photos/600/400?random={{ forloop.counter }}" class="card-img-top" style="height: 100px;" alt="Course Image">
-            <div class="card-body d-flex flex-column justify-content-between">
-              <div class="text-center mb-3">
-                <h5 class="card-title">{{ class_shell.course_name }}</h5>
-              </div>
+            <div class="card-body d-flex flex-column justify-content-between text-center">
+              <div class="card-title">{{ class_shell.course_name }}-{{ class_shell.section_number }}</div>
               <div class="container">
                 <div class="row">
-                  <div class="col">Section-{{ class_shell.section_number }}</div>
-                  <div class="col">Semester-{{ class_shell.semester }}</div>
-                  <div class="col">Year-{{ class_shell.year }}</div>
+                  <div class="col">{{ class_shell.semester }}</div>
+                  <div class="col">{{ class_shell.year }}</div>
                 </div>
               </div>
-              <div class="text-center mt-3">
-                <a href="{% url 'student:go_to_course' class_shell.id %}" class="btn custom-button">Go to course</a>
-              </div>
+              <a href="{% url 'student:go_to_course' class_shell.id %}" class="btn custom-button mt-2">Go to course</a>
             </div>
           </div>
         </div>
@@ -40,6 +35,7 @@
       </div>
     {% endif %}
   </div>
+  
 </div>
 
 {% endblock %}
