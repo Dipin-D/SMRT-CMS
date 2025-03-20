@@ -5,6 +5,82 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    @media (max-width: 1200px) {
+    .custom-button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    .custom-button i {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .custom-button {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+    .custom-button i {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .col-2 {
+        min-width: 150px !important;
+    }
+    .custom-button {
+        font-size: 0.7rem;
+        padding: 5px;
+    }
+    .custom-button i {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-2 {
+        min-width: 120px !important;
+    }
+    .custom-button {
+        font-size: 0.6rem;
+        padding: 4px;
+    }
+    .custom-button i {
+        font-size: 0.6rem;
+    }
+    @media (max-width: 1200px) {
+        .col {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .col {
+            font-size: 0.8rem;
+            padding: 6px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .col {
+            font-size: 0.7rem;
+            padding: 5px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .col {
+            font-size: 0.6rem;
+            padding: 4px;
+        }
+    }
+    
+}
+
+</style>
 <div class="container-fluid">
     <div class="row" style="min-height: 100vh;">
         <!-- Sidebar on the left -->
