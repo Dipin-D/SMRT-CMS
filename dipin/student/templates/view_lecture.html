@@ -1,7 +1,7 @@
-<h2 class="text-center mb-4 card-title">Lecture for {{ class_shell.course_name }}</h2>
+<h2 class="text-center card-title">Lecture for {{ class_shell.course_name }}</h2>
 
 <!-- List of Lectures -->
-<ul class="list-group mt-3">
+<ul class="list-group">
     {% for lecture in lectures %}
         <li class="list-group-item mt-4 p-3 border rounded card">
             <h5><strong>{{ lecture.title }}</strong></h5>

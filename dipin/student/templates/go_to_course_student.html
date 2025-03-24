@@ -6,109 +6,53 @@
 
 {% block content %}
 <style>
-    @media (max-width: 1200px) {
-    .custom-button {
-        font-size: 0.9rem;
-        padding: 8px;
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+        padding: 10px;
     }
-    .custom-button i {
-        font-size: 0.9rem;
-    }
-}
 
-@media (max-width: 992px) {
-    .custom-button {
-        font-size: 0.8rem;
-        padding: 6px;
-    }
-    .custom-button i {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .col-2 {
-        min-width: 150px !important;
-    }
-    .custom-button {
-        font-size: 0.7rem;
-        padding: 5px;
-    }
-    .custom-button i {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .col-2 {
-        min-width: 120px !important;
-    }
-    .custom-button {
-        font-size: 0.6rem;
-        padding: 4px;
-    }
-    .custom-button i {
-        font-size: 0.6rem;
-    }
-    @media (max-width: 1200px) {
-        .col {
-            font-size: 0.9rem;
-            padding: 8px;
-        }
-    }
-    
-    @media (max-width: 992px) {
-        .col {
-            font-size: 0.8rem;
-            padding: 6px;
-        }
-    }
-    
     @media (max-width: 768px) {
-        .col {
-            font-size: 0.7rem;
-            padding: 5px;
+        .sidebar {
+            min-width: 150px;
         }
     }
-    
-    @media (max-width: 576px) {
-        .col {
-            font-size: 0.6rem;
-            padding: 4px;
-        }
-    }
-    
-}
 
+    @media (max-width: 576px) {
+        .sidebar {
+            min-width: 120px;
+        }
+    }
 </style>
+
 <div class="container-fluid">
     <div class="row" style="min-height: 100vh;">
         <!-- Sidebar on the left -->
-        <div class="col-2 bg-light d-flex flex-column p-2" 
-             style="min-height: 100vh; overflow-y: auto; min-width: 200px;">
-            <div class="d-grid gap-4">
-                <button class="custom-button" onclick="loadContent('lecture', event)">
-                    <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('exercise', event)">
-                    <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('quiz', event)">
-                    <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('assignment', event)">
-                    <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('grade', event)">
-                    <i class="fas fa-graduation-cap fs-5"></i> <span>Grades</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('analytics', event)">
-                    <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('ide', event)">
-                    <i class="fas fa-laptop-code"></i> <span>IDE</span>
-                </button>
-            </div>
+        <div class="col-2 sidebar">
+            <button class="custom-button btn btn-sm" onclick="loadContent('lecture', event)">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Lectures</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('exercise', event)">
+                <i class="fas fa-tasks"></i> <span>Exercises</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('quiz', event)">
+                <i class="fas fa-clipboard-list"></i> <span>Quizzes</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('assignment', event)">
+                <i class="fas fa-file-alt"></i> <span>Assignments</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('grade', event)">
+                <i class="fas fa-graduation-cap"></i> <span>Grades</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('analytics', event)">
+                <i class="fas fa-chart-bar"></i> <span>Analytics</span>
+            </button>
+            <button class="custom-button btn btn-sm" onclick="loadContent('ide', event)">
+                <i class="fas fa-laptop-code"></i> <span>IDE</span>
+            </button>
+            
         </div>
 
         <!-- Content area on the right -->
@@ -137,6 +81,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     function loadContent(contentType, event) {

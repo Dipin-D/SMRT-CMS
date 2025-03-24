@@ -3,17 +3,17 @@
 <!-- List of Existing Exercises -->
 <div class="row mt-3">
     {% for exercise in exercises %}
-        <div class="col-md-6">
+        <div class="col-12">
             <div class="card shadow-sm mb-3 border-0">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-1"><strong>{{ exercise.title }}</strong></h5>
+                        <p class="mb-1"><strong>{{ exercise.title }}</strong></p>
                     </div>
 
                     <!-- Go to Exercise Button -->
                     <a href="{% url 'student:attempt_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}" 
                     class="btn btn-sm btn-light text-maroon">
-                    <i class="fas fa-play"></i> Attempt Exercise
+                    <i class="fas fa-play"></i> Attempt 
                     </a>
                 </div>
             </div>

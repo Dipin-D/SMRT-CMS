@@ -116,26 +116,27 @@
       padding-left: 0.5rem;  
       padding-right: 0.5rem;
         .custom-button {
-          background-color: #61162D;
-          border: none;
-          padding: 10px 20px !important;
-          color: #fff;
-          font-weight: bold;
-          border-radius: 5px;
-          position: relative;
-          overflow: hidden;
-          display: inline-block;
-          width: auto; 
-          transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            background-color: #61162D;
+            border: none;
+            padding: 10px 20px !important;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: auto; 
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-size: 1rem; /* Default font size */
         }
-      
+    
         .custom-button:hover {
             background-color: #7A2B3B; 
             transform: translateY(-3px); 
             color: #fff;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
-      
+    
         .custom-button:focus::after {
             content: "";
             position: absolute;
@@ -148,7 +149,31 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
-      
+        /* When screen width is below 768px, make the button and text smaller */
+        @media (max-width: 768px) {
+            .custom-button {
+                padding: 8px 16px;  /* Smaller padding */
+                font-size: 0.9rem;   /* Smaller text size */
+            }
+        }
+
+        /* When screen width is below 576px, make the button and text even smaller */
+        @media (max-width: 576px) {
+            .custom-button {
+                padding: 6px 12px;  /* Even smaller padding */
+                font-size: 0.8rem;   /* Even smaller text size */
+            }
+        }
+
+        /* When screen width is below 375px, make the button and text even more compact */
+        @media (max-width: 375px) {
+            .custom-button {
+                padding: 4px 10px;  /* Smaller padding */
+                font-size: 0.7rem;   /* Even smaller text size */
+            }
+        }
+
+    
         .edit-button, .delete-button {
             border: none;
             padding: 5px 10px;
@@ -267,13 +292,11 @@
           gap: 0.5rem;
         }
         .content-section {
-          padding: 10px; 
           background-color: #f8f9fa;
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
           display: none;
-          height: calc(100vh - 16px);
+          height: calc(100vh);
           overflow-y: auto;
-        
       }
 
     .general-button {
@@ -437,7 +460,7 @@
       
       <!-- Designer Section -->
       <div class="col-md-3 text-md-end mb-2 mb-md-0">
-        <p class="mb-0">Designed by <a href="https://dipindawadi.com.np/" class="text-light text-decoration-none" target="_blank"><strong>Dipin Dawadi</strong></a></p>
+        <p class="mb-0">Developed by <a href="https://dipindawadi.com.np/" class="text-light text-decoration-none" target="_blank">Dipin Dawadi</a></p>
       </div>
     </div>
   </div>
