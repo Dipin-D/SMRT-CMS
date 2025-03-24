@@ -203,7 +203,6 @@ def attempt_quiz(request, class_shell_id, quiz_id):
     current_attempt = attempts.count() + 1
     attempts_left = quiz.max_attempts - attempts.count()
     max_attempts_reached = (attempts_left <= 0)
-    end_time = timezone.now() + timedelta(minutes=quiz.timer)
 
 
     # NEW ATTEMPT: when a student clicks a "start new attempt" link.
@@ -223,7 +222,6 @@ def attempt_quiz(request, class_shell_id, quiz_id):
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-            'end_time': end_time.timestamp(),  # Passed as seconds.
         }
         return render(request, 'attempt_quiz.html', context)
 
@@ -316,9 +314,38 @@ def attempt_quiz(request, class_shell_id, quiz_id):
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-            'end_time': end_time.timestamp(),  # Passed as seconds.
         }
         return render(request, 'attempt_quiz.html', context)
+
+
+
+def while_quiz(request, class_shell_id, quiz_id):
+    class_shell = get_object_or_404(ClassShell, id=class_shell_id)
+    quiz = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
+    questions = Question.objects.filter(quiz=quiz)
+
+    attempts = QuizAttempt.objects.filter(student=request.user, quiz=quiz).order_by('attempt_number')
+    current_attempt = attempts.count() + 1 
+
+    if 'quiz_attempt_number' not in request.session or request.session['quiz_attempt_number'] != current_attempt:
+        end_time = timezone.now() + timedelta(minutes=quiz.timer)
+        request.session['quiz_end_time'] = end_time.isoformat()  
+        request.session['quiz_attempt_number'] = current_attempt  
+    else:
+        end_time = timezone.datetime.fromisoformat(request.session['quiz_end_time'])
+
+    current_time = timezone.now()
+    remaining_time = max(0, int((end_time - current_time).total_seconds()))
+
+    return render(request, 'while_quiz.html', {
+        'class_shell_id': class_shell_id,
+        'quiz_id': quiz_id,
+        'questions': questions,
+        'remaining_time': remaining_time,
+        'current_attempt': current_attempt,
+    })
+
+
 
 
 def attempt_exercise(request, class_shell_id, exercise_id): 
@@ -335,7 +362,6 @@ def attempt_exercise(request, class_shell_id, exercise_id):
     attempts_left = exercise.max_attempts - attempts.count()
     max_attempts_reached = attempts_left <= 0
     end_time = timezone.now() + timedelta(minutes=exercise.timer)
-
 
 
     # If the student requested to view a submitted exercise, display the latest attempt’s review.

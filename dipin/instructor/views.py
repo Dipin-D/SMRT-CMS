@@ -185,9 +185,14 @@ class GoToCourseView(View):
         submission_id = request.POST.get("submission_id")
 
         if 'update_access' in request.POST:
-            selected_student_ids = request.POST.getlist('access_student_ids')
-            selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
-            class_shell.students_with_access.set(selected_students)
+            if 'grant_all' in request.POST:  
+                selected_students = CustomUser.objects.filter(is_student=True)  
+            else:
+                selected_student_ids = request.POST.getlist('access_student_ids')
+                selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
+
+            class_shell.students_with_access.set(selected_students) 
+
         if 'take_attendance' in request.POST:
             try:
                 date_str = request.POST.get('attendance_date')

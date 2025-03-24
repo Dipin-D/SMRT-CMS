@@ -3,190 +3,215 @@
         font-family: Arial, sans-serif;
         margin: 20px;
     }
+
     .grades-header {
         font-size: 24px;
         color: #333;
-        margin-bottom: 20px;
-    }
-    .grades-section {
         margin-bottom: 30px;
     }
+
+    .grades-section {
+        margin-bottom: 30px;
+        border: none;
+    }
+
     .grades-section h3 {
-        font-size: 20px;
-        color: #555;
+        font-size: 22px;
+        color: #333;
         margin-bottom: 15px;
     }
+
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
     }
+
     th, td {
         border: 1px solid #ddd;
         padding: 12px 15px;
         text-align: left;
     }
+
     th {
         background-color: #f4f4f4;
         color: #333;
     }
+
     td {
         background-color: #fff;
     }
+
     tr:nth-child(even) {
         background-color: #f9f9f9;
     }
+
     .no-grade {
         color: #1045f4;
         font-weight: bold;
     }
+
     .not-submitted {
         color: #888;
     }
+
     .status-submitted {
         color: #008000;
         font-weight: bold;
     }
+
     .attendance-section {
         margin-bottom: 30px;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: none;
     }
+
     .attendance-section h2 {
         font-size: 22px;
         color: #333;
         margin-bottom: 10px;
     }
+
     .attendance-percentage {
         font-size: 28px;
         font-weight: bold;
         color: #008000;
     }
+
+    .no-tasks-message {
+        font-size: 18px;
+        color: #888;
+        text-align: center;
+    }
+
 </style>
 
 <div class="grades-container">
-    <h1 class="grades-header text-center mb-4 card-title">Your Grades for {{ class_shell.course_name }}</h1>
+    <h1 class="grades-header text-center card-title">Your Grades for {{ class_shell.course_name }}</h1>
 
-    <!-- Attendance Section -->
-    <div class="attendance-section">
-        <h2>Attendance</h2>
-        <p>Your current attendance percentage:</p>
-        <p class="attendance-percentage">{{ attendance_percentage|floatformat:2 }}%</p>
-    </div>
+<!-- Attendance Section -->
+<div class="card p-4 shadow-sm border-0 text-center mb-4">
+    <h5 class="mb-3">Attendance</h5>    
+            <!-- Attendance Icon and Percentage -->
+            <div class="d-flex justify-content-center align-items-center gap-2">
+                {% if attendance_percentage >= 75 %}
+                    <i class="fas fa-check-circle text-success fs-3"></i>
+                {% elif attendance_percentage >= 50 %}
+                    <i class="fas fa-exclamation-circle text-warning fs-3"></i>
+                {% else %}
+                    <i class="fas fa-times-circle text-danger fs-3"></i>
+                {% endif %}
+                <span class="fw-bold fs-4">{{ attendance_percentage|floatformat:2 }}%</span>
+            </div>
+        </div>
 
     {% if not assignments and not quizzes and not exercises %}
-    <p class="no-tasks-message">
-        Take it easy for now! You're in the right spot to check your grades, but your instructor hasn't assigned any tasks yet.
-    </p>
+        <p class="no-tasks-message">
+            Take it easy for now! You're in the right spot to check your grades, but your instructor hasn't assigned any tasks yet.
+        </p>
     {% else %}
-    <!-- Display Assignment Grades -->
-    <div class="grades-section card">
-        <h3>Assignments</h3>
-        <div style="width: 100%; overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Assignment Title</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Grade</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for assignment in assignments %}
-                <tr>
-                    <td>{{ assignment.title }}</td>
-                    <td>{{ assignment.due_date }}</td>
-                    <td>
-                        {% if assignment.id in submitted_assignment_ids %}
-                            <span class="status-submitted">Submitted</span>
-                        {% else %}
-                            <span class="not-submitted">Not submitted</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if assignment.id in submitted_assignment_ids %}
-                            {% for submission_info in latest_assignments_info %}
-                                {% if submission_info.assignment_id == assignment.id %}
-                                    <p>
-                                        {% if submission_info.grade %}
-                                            {{ submission_info.grade }}/{{ submission_info.total_marks }}
-                                        {% else %}
-                                            <span class="no-grade">No grade posted yet</span>
+        <!-- Display Assignment Grades -->
+        <div class="grades-section card">
+            <h3>Assignments</h3>
+            <div style="width: 100%; overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Assignment Title</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr>
+                            <td>{{ assignment.title }}</td>
+                            <td>{{ assignment.due_date }}</td>
+                            <td>
+                                {% if assignment.id in submitted_assignment_ids %}
+                                    <span class="status-submitted">Submitted</span>
+                                {% else %}
+                                    <span class="not-submitted">Not submitted</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if assignment.id in submitted_assignment_ids %}
+                                    {% for submission_info in latest_assignments_info %}
+                                        {% if submission_info.assignment_id == assignment.id %}
+                                            <p>
+                                                {% if submission_info.grade %}
+                                                    {{ submission_info.grade }}/{{ submission_info.total_marks }}
+                                                {% else %}
+                                                    <span class="no-grade">No grade posted yet</span>
+                                                {% endif %}
+                                            </p>
                                         {% endif %}
-                                    </p>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            {% if assignment.due_date < now %}
-                            <span class="not-submitted" style="color: red;">Not submitted (Overdue)</span>
-                            {% else %}
-                                <span class="not-submitted">Not submitted</span>
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    </div>
-
-    <!-- Display Quiz Grades -->
-    <div class="grades-section card">
-        <h3>Quizzes</h3>
-        <div style="width: 100%; overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Quiz Title</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for quiz in quizzes %}
-                <tr>
-                    <td>{{ quiz.title }}</td>
-                    <td>{{ quiz.due_date }}</td>
-                    <td>
-                        {% if quiz.id in submitted_quiz_ids %}
-                            <span class="status-submitted">Submitted</span>
-                        {% else %}
-                        {% if quiz.due_date < now %}
-                        <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
-                        {% else %}
-                            <span class="not-submitted">Not attempted</span>
-                        {% endif %}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if quiz.id in submitted_quiz_ids %}
-                        {% for quiz_info in latest_quizzes %}
-                            {% if quiz_info.quiz_id == quiz.id %}
-                                <p>
-                                    {% if quiz_info.grade %}
-                                        {{ quiz_info.grade }}/{{ quiz_info.total_marks }}
+                                    {% endfor %}
+                                {% else %}
+                                    {% if assignment.due_date < now %}
+                                        <span class="not-submitted" style="color: red;">Not submitted (Overdue)</span>
                                     {% else %}
-                                        <span class="no-grade">No grade posted yet</span>
+                                        <span class="not-submitted">Not submitted</span>
                                     {% endif %}
-                                </p>
                                 {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <p class="not-submitted">Not attempted yet</p>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-
+        <!-- Display Quiz Grades -->
+        <div class="grades-section card">
+            <h3>Quizzes</h3>
+            <div style="width: 100%; overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Quiz Title</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quiz in quizzes %}
+                        <tr>
+                            <td>{{ quiz.title }}</td>
+                            <td>{{ quiz.due_date }}</td>
+                            <td>
+                                {% if quiz.id in submitted_quiz_ids %}
+                                    <span class="status-submitted">Submitted</span>
+                                {% else %}
+                                    {% if quiz.due_date < now %}
+                                        <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
+                                    {% else %}
+                                        <span class="not-submitted">Not attempted</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if quiz.id in submitted_quiz_ids %}
+                                    {% for quiz_info in latest_quizzes %}
+                                        {% if quiz_info.quiz_id == quiz.id %}
+                                            <p>
+                                                {% if quiz_info.grade %}
+                                                    {{ quiz_info.grade }}/{{ quiz_info.total_marks }}
+                                                {% else %}
+                                                    <span class="no-grade">No grade posted yet</span>
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="not-submitted">Not attempted yet</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {% endif %}
 </div>
