@@ -1,7 +1,7 @@
-<h2 class="text-center mb-4">Assignments for {{ class_shell.course_name }}</h2>
+<h2 class="text-center card-title">Assignments for {{ class_shell.course_name }}</h2>
 
 <!-- List of Assignments -->
-<ul class="list-group mt-3">
+<ul class="list-group mt-4">
     {% for assignment in assignments %}
         <li class="list-group-item p-3 card">
             <strong>{{ assignment.title }}</strong>
