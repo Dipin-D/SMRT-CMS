@@ -238,9 +238,8 @@
       
         .card {
           background: linear-gradient(145deg, #F5F5F5, #61162D);
-          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border: none; 
         }
       
         .card:hover {
@@ -258,12 +257,10 @@
           color: #61162D;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           transition: all 0.3s ease;
-          border: 1px solid rgba(97, 22, 45, 0.1);
           flex-grow: 1; 
         }
         .card-body .container .row .col:hover {
           background: rgba(255, 255, 255, 0.95);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
       
         .card-body .container .row {
@@ -449,32 +446,23 @@
   <!-- Font Awesome Script -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
   <script>
-    // Show the spinner immediately when any link is clicked
-    document.addEventListener('click', function (event) {
-      // Check if the clicked element is an anchor tag with an href attribute
-      const target = event.target.closest('a[href]');
-      if (target) {
-        // Prevent the default navigation behavior temporarily
-        event.preventDefault();
+   
+    document.addEventListener("DOMContentLoaded", function () {
+      hideSpinner();
+  });
   
-        // Show the spinner
-        const spinner = document.getElementById('loading-spinner');
-        spinner.classList.add('active');
-        console.log('Navigation started. Showing spinner...');
+  window.addEventListener("pageshow", function () {
+      hideSpinner();
+  });
   
-        // Allow the navigation to proceed after a short delay
-        setTimeout(function () {
-          window.location.href = target.href; // Navigate to the new page
-        }, 100); // Small delay to ensure the spinner is visible
-      }
-    });
+  function showSpinner() {
+      document.getElementById("loading-spinner").classList.add("active");
+  }
   
-    // Hide the spinner when the new page is fully loaded
-    window.addEventListener('load', function () {
-      const spinner = document.getElementById('loading-spinner');
-      spinner.classList.remove('active'); // Hide the spinner
-      console.log('New page fully loaded. Hiding spinner...');
-    });
+  function hideSpinner() {
+      document.getElementById("loading-spinner").classList.remove("active");
+  }
+  
   </script>
 
 </body>

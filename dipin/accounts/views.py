@@ -41,7 +41,7 @@ def front_page(request):
 
 def guest_login(request):
 
-    user = authenticate(username='dipin', password='dipin123')
+    user = authenticate(username='guest', password='dipin123')
 
     if user is not None:
         login(request, user)
