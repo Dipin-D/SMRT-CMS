@@ -11,6 +11,11 @@
     <!-- Display attempt information -->
     <div class="alert alert-secondary text-center">
         <p><strong>Attempts Left:</strong> {{ attempts_left }}</p>
+        <div class="text-center mt-4">
+            <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-outline-dark btn-sm text-maroon">
+                <i class="fas fa-arrow-left fs-6"></i> Back to exercises
+            </a>
+        </div>
     </div>
 
     {% if max_attempts_reached %}
@@ -20,9 +25,6 @@
     {% endif %}
 
     {% if already_attempted %}
-        <div class="alert alert-info text-center">
-            <h5>You have already attempted this exercise.</h5>
-        </div>
 
         <!-- Display previous attempts -->
         {% if previous_attempts %}
@@ -72,245 +74,33 @@
                         </li>
                     {% endfor %}
                 </ul>
-                <div class="text-center mt-4">
-                    <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-primary btn-sm">
-                        Go back
-                    </a>
-                </div>
+             
             </div>
         {% else %}
             <div class="text-center mt-4">
                 <form method="get">
-                    <button type="submit" name="view" value="true" class="btn btn-secondary btn-sm">
-                        View Latest Submitted Exercise
+                    <button type="submit" name="view" value="true" class="btn btn-outline-dark btn-sm text-maroon">
+                        <i class="fas fa-file-alt fs-6"></i>View Latest Submitted Exercise
                     </button>
                 </form>
-            </div>
-            <div class="text-center mt-4">
-                <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-primary btn-sm">
-                    Go back
-                </a>
             </div>
         {% endif %}
 
         <!-- Start a new attempt if attempts are left -->
         {% if attempts_left > 0 %}
             <div class="text-center mt-4">
-                <a href="?start_new_attempt=true" class="btn btn-primary btn-lg" id="newAttemptLink">
-                    Start New Attempt {{ current_attempt }}
+                <a href="?start_new_attempt=true"class="btn custom-button" id="newAttemptLink">
+                    <i class="fas fa-play-circle fs-6"></i> Start Attempt {{ current_attempt }}
                 </a>
             </div>
         {% endif %}
 
     {% else %}
-        <!-- Exercise form for new attempt -->
-        <div class="alert alert-info text-center">
-            <p>Time Remaining: <span id="timer">Loading...</span></p>
-          </div>  
-        <p class="mb-4 text-center">Please answer the following questions:</p>
-
-        <form method="POST" id="exercise_form">
-            {% csrf_token %}
-          <div class="row">
-              <div class="col-md-8 offset-md-2">
-                  <div class="list-group">
-                      {% for exercise_question in exercise_questions %}
-                          <div class="list-group-item mb-4">
-                              <h5 class="mb-3">{{ exercise_question.text }}</h5>
-                              {% if exercise_question.type == "multiple_choice" %}
-                                  <div class="mb-3">
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_1_{{ exercise_question.id }}" value="{{ exercise_question.choice_1 }}">
-                                          <label class="form-check-label" for="choice_1_{{ exercise_question.id }}">
-                                              {{ exercise_question.choice_1 }}
-                                          </label>
-                                      </div>
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_2_{{ exercise_question.id }}" value="{{ exercise_question.choice_2 }}">
-                                          <label class="form-check-label" for="choice_2_{{ exercise_question.id }}">
-                                              {{ exercise_question.choice_2 }}
-                                          </label>
-                                      </div>
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_3_{{ exercise_question.id }}" value="{{ exercise_question.choice_3 }}">
-                                          <label class="form-check-label" for="choice_3_{{ exercise_question.id }}">
-                                              {{ exercise_question.choice_3 }}
-                                          </label>
-                                      </div>
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="choice_4_{{ exercise_question.id }}" value="{{ exercise_question.choice_4 }}">
-                                          <label class="form-check-label" for="choice_4_{{ exercise_question.id }}">
-                                              {{ exercise_question.choice_4 }}
-                                          </label>
-                                      </div>
-                                  </div>                                
-                              {% elif exercise_question.type == "true_false" %}
-                                  <div class="mb-3">
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="true_{{ exercise_question.id }}" value="True">
-                                          <label class="form-check-label" for="true_{{ exercise_question.id }}">
-                                              True
-                                          </label>
-                                      </div>
-                                      <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="answer_{{ exercise_question.id }}" id="false_{{ exercise_question.id }}" value="False">
-                                          <label class="form-check-label" for="false_{{ exercise_question.id }}">
-                                              False
-                                          </label>
-                                      </div>
-                                  </div>
-                              {% elif exercise_question.type == "essay" %}
-                                  <div class="form-group mb-3">
-                                      <label for="answer_{{ exercise_question.id }}">Your Answer:</label>
-                                      <textarea name="answer_{{ exercise_question.id }}" rows="4" class="form-control" placeholder="Type your answer here..."></textarea>
-                                  </div>
-                              {% endif %}
-                          </div>
-                      {% endfor %}
-                  </div>
-                  <div class="text-center mt-4">
-                      <button type="submit" class="btn btn-primary btn-lg">Submit Exercise</button>
-                  </div>
-              </div>
-          </div>
-        </form>
+    <script>
+        window.location.href = "{% url 'student:while_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}";
+    </script>  
     {% endif %}
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var exerciseId = "{{ exercise.id }}";
-        var currentAttempt = "{{ current_attempt }}";
-        var uniqueEndTimeKey = "endTime_exercise_" + exerciseId + "_attempt_" + currentAttempt;
-        var serverEndTime = new Date(Number("{{ end_time }}") * 1000).getTime();
-    
-        // Use stored endTime if available; otherwise, use serverEndTime.
-        var storedEndTime = localStorage.getItem(uniqueEndTimeKey);
-        var endTime;
-        if (storedEndTime && parseInt(storedEndTime, 10) > 0) {
-            endTime = parseInt(storedEndTime, 10);
-        } else {
-            endTime = serverEndTime;
-            localStorage.setItem(uniqueEndTimeKey, endTime);
-        }
-    
-        function updateTimerDisplay(minutes, seconds) {
-            var timerElement = document.getElementById("timer");
-            if (timerElement) {
-                timerElement.textContent = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-            }
-        }
-    
-        function autoSubmitExercise() {
-            var form = document.getElementById("exercise_form");
-            if (form && !form.hasAttribute("data-submitted")) {
-                form.setAttribute("data-submitted", "true");
-                var input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "time_expired";
-                input.value = "true";
-                form.appendChild(input);
-                form.submit();
-            }
-        }
-    
-        function startTimer() {
-            var timerInterval = setInterval(function () {
-                var timeRemaining = endTime - new Date().getTime();
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    updateTimerDisplay(0, 0);
-                    localStorage.setItem("exercise_expired_" + exerciseId, "true");
-                    autoSubmitExercise();
-                } else {
-                    var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-                    var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-                    updateTimerDisplay(minutes, seconds);
-                }
-            }, 1000);
-        }
-    
-        // Immediately display the correct time remaining.
-        var initialTimeRemaining = endTime - new Date().getTime();
-        if (initialTimeRemaining < 0) {
-            initialTimeRemaining = 0;
-        }
-        var initialMinutes = Math.floor((initialTimeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-        var initialSeconds = Math.floor((initialTimeRemaining % (1000 * 60)) / 1000);
-        updateTimerDisplay(initialMinutes, initialSeconds);
-    
-        // Auto-submit if the window gains focus and time is expired.
-        window.addEventListener("focus", function () {
-            if (localStorage.getItem("exercise_expired_" + exerciseId) === "true") {
-                autoSubmitExercise();
-            }
-        });
-    
-        // Auto-submit on visibility change if time has run out.
-        document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === 'visible' && new Date().getTime() >= endTime) {
-                updateTimerDisplay(0, 0);
-                localStorage.setItem("exercise_expired_" + exerciseId, "true");
-                autoSubmitExercise();
-            }
-        });
-    
-        // Calculate the delay until auto-submit.
-        var autoSubmitDelay = endTime - new Date().getTime();
-        if (autoSubmitDelay < 0) autoSubmitDelay = 0;
-    
-        // Use setTimeout as before.
-        setTimeout(function() {
-            updateTimerDisplay(0, 0);
-            localStorage.setItem("exercise_expired_" + exerciseId, "true");
-            autoSubmitExercise();
-        }, autoSubmitDelay);
-    
-        // NEW: Use a Web Worker to trigger auto-submit even if the tab is inactive.
-        if (window.Worker) {
-            var workerCode = 
-                self.onmessage = function(e) {
-                    var delay = e.data;
-                    setTimeout(function(){
-                        self.postMessage('timesup');
-                    }, delay);
-                };
-            ;
-            var blob = new Blob([workerCode], { type: "application/javascript" });
-            var workerUrl = URL.createObjectURL(blob);
-            var timerWorker = new Worker(workerUrl);
-            timerWorker.postMessage(autoSubmitDelay);
-            timerWorker.onmessage = function(e) {
-                if (e.data === 'timesup') {
-                    updateTimerDisplay(0, 0);
-                    localStorage.setItem("exercise_expired_" + exerciseId, "true");
-                    autoSubmitExercise();
-                }
-            };
-        }
-    
-        // Use an attempt key that includes the current attempt number.
-        var attemptKey = "attempt_in_progress_" + exerciseId + "_attempt_" + currentAttempt;
-        if (localStorage.getItem(attemptKey) === "true") {
-            var attemptLink = document.getElementById("newAttemptLink");
-            if (attemptLink) {
-                attemptLink.textContent = "Continue Attempt";
-            }
-        }
-    
-        // Mark this attempt as in progress when the user clicks to start it.
-        document.getElementById("newAttemptLink")?.addEventListener("click", function () {
-            localStorage.setItem(attemptKey, "true");
-        });
-    
-        if (new Date().getTime() >= endTime) {
-            updateTimerDisplay(0, 0);
-            localStorage.setItem("exercise_expired_" + exerciseId, "true");
-            autoSubmitExercise();
-        } else {
-            startTimer();
-        }
-    });
-    </script>
   {% endblock %}
   

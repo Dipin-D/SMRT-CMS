@@ -1,0 +1,136 @@
+{% extends "home.html" %}
+
+{% block title %}
+Exercise: {{ exercise.title }}
+{% endblock %}
+
+{% block content %}
+ <!-- exercise form for new attempt -->
+ <div class="alert alert-info text-center">
+    <p>Time Remaining: <span id="timer">Loading...</span></p>
+  </div>  
+  <p class="mb-4 text-center">Please answer the following questions:</p>
+
+  <form id="exercise_form" method="POST" action="{% url 'student:attempt_exercise' class_shell_id=class_shell_id exercise_id=exercise_id %}">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="list-group">
+                {% for question in exercise_questions %}
+                    <div class="list-group-item mb-4">
+                        <h5 class="mb-3">{{ question.text }}</h5>
+                        {% if question.type == "multiple_choice" %}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="choice_1_{{ question.id }}" value="{{ question.choice_1 }}">
+                                <label class="form-check-label" for="choice_1_{{ question.id }}">
+                                    {{ question.choice_1 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="choice_2_{{ question.id }}" value="{{ question.choice_2 }}">
+                                <label class="form-check-label" for="choice_2_{{ question.id }}">
+                                    {{ question.choice_2 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="choice_3_{{ question.id }}" value="{{ question.choice_3 }}">
+                                <label class="form-check-label" for="choice_3_{{ question.id }}">
+                                    {{ question.choice_3 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="choice_4_{{ question.id }}" value="{{ question.choice_4 }}">
+                                <label class="form-check-label" for="choice_4_{{ question.id }}">
+                                    {{ question.choice_4 }}
+                                </label>
+                            </div>
+                        </div>                                  
+                        {% elif question.type == "true_false" %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="true_{{ question.id }}" value="True">
+                                    <label class="form-check-label" for="true_{{ question.id }}">
+                                        True
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answer_{{ question.id }}" id="false_{{ question.id }}" value="False">
+                                    <label class="form-check-label" for="false_{{ question.id }}">
+                                        False
+                                    </label>
+                                </div>
+                            </div>
+                        {% elif question.type == "essay" %}
+                            <div class="form-group mb-3">
+                                <label for="answer_{{ question.id }}">Your Answer:</label>
+                                <textarea name="answer_{{ question.id }}" class="form-control" rows="5"></textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit button -->
+    <div class="text-center mt-4">
+        <button type="submit" class="btn custom-button">
+            <i class="fas fa-paper-plane fs-6"></i> Submit Exercise
+        </button>
+    </div>
+    
+
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var quizId = "{{ exercise_id }}";
+        var remainingTime = {{ remaining_time }}; 
+        
+        function updateTimerDisplay(minutes, seconds) {
+            var timerElement = document.getElementById("timer");
+            if (timerElement) {
+                timerElement.textContent = `${minutes}m ${seconds}s`;
+            }
+        }
+    
+        function autoSubmitExercise() {
+            var form = document.getElementById("exercise_form");
+            if (form && !form.hasAttribute("data-submitted")) {
+                form.setAttribute("data-submitted", "true");
+                var input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "time_expired";
+                input.value = "true";
+                form.appendChild(input);
+                form.submit();
+            }
+        }
+    
+        function startTimer() {
+            var timerInterval = setInterval(function () {
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    updateTimerDisplay(0, 0);
+                    autoSubmitExercise();  
+                } else {
+                    remainingTime -= 1;
+                    var minutes = Math.floor(remainingTime / 60);
+                    var seconds = remainingTime % 60;
+                    updateTimerDisplay(minutes, seconds);  // Update the timer display
+                }
+            }, 1000);
+        }
+    
+        var initialMinutes = Math.floor(remainingTime / 60);
+        var initialSeconds = remainingTime % 60;
+        updateTimerDisplay(initialMinutes, initialSeconds);
+    
+        startTimer();
+    });
+</script>
+
+  
+{% endblock %}

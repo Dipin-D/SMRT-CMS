@@ -7,116 +7,71 @@
 {% block content %}
 
 <style>
-    @media (max-width: 1200px) {
-    .custom-button {
-        font-size: 0.9rem;
-        padding: 8px;
+    .button-container {
+        display: flex;
+        justify-content: center; 
+        margin: 10px 0;
+        padding: 0;  
+        flex-wrap: wrap;  
+        background-color: #f8f9fa;
     }
-    .custom-button i {
-        font-size: 0.9rem;
-    }
-}
 
-@media (max-width: 992px) {
-    .custom-button {
-        font-size: 0.8rem;
-        padding: 6px;
+    .custombutton {
+        background-color: #61162D;
+        border: none;
+        padding: 10px 20px;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+        margin: 5px;
     }
-    .custom-button i {
-        font-size: 0.8rem;
-    }
-}
 
-@media (max-width: 768px) {
-    .col-2 {
-        min-width: 150px !important;
+    .custombutton:hover {
+        background-color: rgb(124, 49, 64);
+        color: #fff;
     }
-    .custom-button {
-        font-size: 0.7rem;
-        padding: 5px;
-    }
-    .custom-button i {
-        font-size: 0.7rem;
-    }
-}
 
-@media (max-width: 576px) {
-    .col-2 {
-        min-width: 120px !important;
-    }
-    .custom-button {
-        font-size: 0.6rem;
-        padding: 4px;
-    }
-    .custom-button i {
-        font-size: 0.6rem;
-    }
-    @media (max-width: 1200px) {
-        .col {
-            font-size: 0.9rem;
-            padding: 8px;
-        }
-    }
-    
-    @media (max-width: 992px) {
-        .col {
-            font-size: 0.8rem;
-            padding: 6px;
-        }
-    }
-    
     @media (max-width: 768px) {
-        .col {
-            font-size: 0.7rem;
-            padding: 5px;
+        .button-container {
+            justify-content: center;
         }
     }
-    
-    @media (max-width: 576px) {
-        .col {
-            font-size: 0.6rem;
-            padding: 4px;
-        }
-    }
-    
-}
-
 </style>
-<div class="container-fluid">
-    <div class="row" style="min-height: 100vh;">
-        <!-- Sidebar on the left -->
-        <div class="col-2 bg-light d-flex flex-column p-2" 
-             style="min-height: 100vh; overflow-y: auto; min-width: 200px;">
-            <div class="d-grid gap-4">
-                <button class="custom-button" onclick="loadContent('lecture', event)">
-                    <i class="fas fa-chalkboard-teacher fs-5"></i> <span>Lectures</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('exercise', event)">
-                    <i class="fas fa-tasks fs-5"></i> <span>Exercises</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('quiz', event)">
-                    <i class="fas fa-clipboard-list fs-5"></i> <span>Quizzes</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('assignment', event)">
-                    <i class="fas fa-file-alt fs-5"></i> <span>Assignments</span>
-                </button>
-                <button class="custom-button " onclick="loadContent('other', event)">
-                    <i class="fas fa-users fs-5"></i> <span>Student List</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('attendance', event)">
-                    <i class="fas fa-calendar-check fs-5"></i> <span>Attendance</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('student_submissions', event)">
-                    <i class="fas fa-upload fs-5"></i> <span>Submissions</span>
-                </button>
-                <button class="custom-button" onclick="loadContent('analytics', event)">
-                    <i class="fas fa-chart-bar fs-5"></i> <span>Analytics</span>
-                </button>
-            </div>
-        </div>
-        
 
-        <!-- Right content area -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Button container for horizontal layout -->
+        <div class="button-container">
+            <button class="custombutton btn btn-sm" onclick="loadContent('lecture', event)">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Lectures</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('exercise', event)">
+                <i class="fas fa-tasks"></i> <span>Exercises</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('quiz', event)">
+                <i class="fas fa-clipboard-list"></i> <span>Quizzes</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('assignment', event)">
+                <i class="fas fa-file-alt"></i> <span>Assignments</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('other', event)">
+                <i class="fas fa-users"></i> <span>Student List</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('attendance', event)">
+                <i class="fas fa-calendar-check"></i> <span>Attendance</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('student_submissions', event)">
+                <i class="fas fa-upload"></i> <span>Submissions</span>
+            </button>
+            <button class="custombutton btn btn-sm" onclick="loadContent('analytics', event)">
+                <i class="fas fa-chart-bar"></i> <span>Analytics</span>
+            </button>
+        </div>
+
+        <!-- Content area -->
         <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
             <div id="lecture-content" class="content-section">
                 {% include 'lecture.html' %}
@@ -124,59 +79,57 @@
             <div id="exercise-content" class="content-section">
                 {% include 'exercise.html' %}
             </div>
-            <div id="quiz-content" class="content-section" >
+            <div id="quiz-content" class="content-section">
                 {% include 'quiz.html' %}
             </div>
             <div id="assignment-content" class="content-section">
                 {% include 'assignment.html' %}
             </div>
-            <div id="other-content" class="content-section" >
+            <div id="other-content" class="content-section">
                 {% include 'student_list.html' %}
             </div>
-            <div id="attendance-content" class="content-section" >
+            <div id="attendance-content" class="content-section">
                 {% include 'attendance.html' %}
             </div>
-            <div id="analytics-content" class="content-section" >
+            <div id="analytics-content" class="content-section">
                 {% include 'analytics.html' %}
             </div>
             <div id="student_submissions-content" class="content-section">
                 {% include 'student_submissions.html' %}
             </div>
         </div>
-        </div>
     </div>
+</div>
 
-    <script>
-        function loadContent(contentType, event) {
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-    
-            document.getElementById(`${contentType}-content`).style.display = 'block';
-            localStorage.setItem('activeTab', contentType);
-    
-            document.querySelectorAll('.custom-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-        }
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            let activeTab = localStorage.getItem('activeTab') || 'lecture';
-            localStorage.setItem('activeTab', activeTab);
-
-            document.querySelectorAll('.custom-button').forEach(button => {
-                button.classList.add('general-button');
-            });
-    
-            const button = document.querySelector(`.custom-button:nth-child(${getTabIndex(activeTab)})`);
-            loadContent(activeTab, { currentTarget: button });
+<script>
+    function loadContent(contentType, event) {
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
         });
-    
-        function getTabIndex(contentType) {
-            const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'other', 'attendance','student_submissions', 'analytics'];
-            return tabOrder.indexOf(contentType) + 1;
+
+        document.getElementById(`${contentType}-content`).style.display = 'block';
+        localStorage.setItem('activeTab', contentType);
+
+        document.querySelectorAll('.custombutton').forEach(button => {
+            button.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        let activeTab = localStorage.getItem('activeTab') || 'lecture';
+        localStorage.setItem('activeTab', activeTab);
+
+        const button = document.querySelector(`.custombutton:nth-child(${getTabIndex(activeTab)})`);
+        if (button) {
+            loadContent(activeTab, { currentTarget: button });
         }
-    </script>
-    
-    {% endblock %}
+    });
+
+    function getTabIndex(contentType) {
+        const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'other', 'attendance', 'student_submissions', 'analytics'];
+        return tabOrder.indexOf(contentType) + 1;
+    }
+</script>
+
+{% endblock %}
