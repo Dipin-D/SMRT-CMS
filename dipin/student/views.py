@@ -488,3 +488,29 @@ def attempt_exercise(request, class_shell_id, exercise_id):
 
         }
         return render(request, 'attempt_exercise.html', context)
+
+def while_exercise(request, class_shell_id, exercise_id):
+    class_shell = get_object_or_404(ClassShell, id=class_shell_id)
+    exercise = get_object_or_404(Exercise, id=exercise_id, class_shell=class_shell)
+    exercise_questions = ExerciseQuestion.objects.filter(exercise=exercise)
+
+    attempts = ExerciseAttempt.objects.filter(student=request.user, exercise=exercise).order_by('attempt_number')
+    current_attempt = attempts.count() + 1
+
+    if 'exercise_attempt_number' not in request.session or request.session['exercise_attempt_number'] != current_attempt:
+        end_time = timezone.now() + timedelta(minutes=exercise.timer)
+        request.session['exercise_end_time'] = end_time.isoformat()  
+        request.session['exercise_attempt_number'] = current_attempt  
+    else:
+        end_time = timezone.datetime.fromisoformat(request.session['exercise_end_time'])
+
+    current_time = timezone.now()
+    remaining_time = max(0, int((end_time - current_time).total_seconds()))
+
+    return render(request, 'while_exercise.html', {
+        'class_shell_id': class_shell_id,
+        'exercise_id': exercise_id,
+        'exercise_questions': exercise_questions,
+        'remaining_time': remaining_time,
+        'current_attempt': current_attempt,
+    })

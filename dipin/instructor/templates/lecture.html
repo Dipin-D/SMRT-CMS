@@ -1,7 +1,7 @@
 <h2 class="text-center mb-4 card-title">Manage Lecture for {{ class_shell.course_name }}</h2>
 
 <!-- Button to Show the New Lecture Form -->
-<div class="mt-3 mb-3" style="display: inline-block;">
+<div class="mt-3 mb-3">
     <button class="custom-button" id="add-content">Add Content</button>
 </div>
 
@@ -62,11 +62,11 @@
             </form>
 
             <!-- Edit and Delete Buttons -->
-            <button class="btn btn-warning btn-sm edit-btn" data-lecture-id="{{ lecture.id }}">Edit</button>
+            <button class="edit-button btn btn-sm" data-lecture-id="{{ lecture.id }}">Edit</button>
             <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this lecture?');">
                 {% csrf_token %}
                 <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
-                <button type="submit" name="delete_lecture" class="btn btn-danger btn-sm">Delete</button>
+                <button type="submit" name="delete_lecture" class="delete-button btn btn-sm">Delete</button>
             </form>
         </li>
     {% empty %}

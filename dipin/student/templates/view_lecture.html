@@ -5,14 +5,61 @@
     {% for lecture in lectures %}
         <li class="list-group-item mt-4 p-3 border rounded card">
             <h5><strong>{{ lecture.title }}</strong></h5>
-            <p>{{ lecture.text }}</p>
+
+            <!-- Lecture Text with Toggle -->
+            <div class="lecture-text-container">
+                {% if lecture.text|length > 100 %}
+                    <button class="btn btn-sm btn-outline-primary toggle-lecture" 
+                            data-target="#lecture-text-{{ lecture.id }}">
+                        View Lecture Text
+                    </button>
+                    <div id="lecture-text-{{ lecture.id }}" class="lecture-text-content mt-2" style="display: none;">
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-sm btn-close toggle-lecture" 
+                                    data-target="#lecture-text-{{ lecture.id }}"></button>
+                        </div>
+                        <p>{{ lecture.text }}</p>
+                    </div>
+                {% else %}
+                    <p>{{ lecture.text }}</p>
+                {% endif %}
+            </div>
 
             <!-- Display Files for this Lecture -->
             <ul class="list-group mt-3">
                 {% for file in files %}
                     {% if file.course.id == lecture.id %}
                         <li class="list-group-item list-group-item-action">
-                            <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ file.file.url }}" target="_blank" style="font-weight: 500; font-size: 16px; color: black;">{{ file.file.name }}</a>
+                                
+                                <button class="btn btn-sm btn-outline-secondary toggle-preview"
+                                        data-target="#file-preview-{{ file.id }}">
+                                    Preview
+                                </button>
+                            </div>
+                            
+                            <!-- File Preview (Handles different file types) -->
+                            <div id="file-preview-{{ file.id }}" class="file-preview mt-2" style="display: none;">
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-sm btn-close toggle-preview"
+                                            data-target="#file-preview-{{ file.id }}"></button>
+                                </div>
+                                {% if ".jpg" in file.file.url or ".jpeg" in file.file.url or ".png" in file.file.url %}
+                                    <img src="{{ file.file.url }}" class="img-fluid mt-2" />
+                                {% elif ".pdf" in file.file.url %}
+                                    <iframe src="{{ file.file.url }}#view=fitH" class="w-100" style="height: 500px;"></iframe>
+                                {% elif ".mp4" in file.file.url %}
+                                    <video controls width="100%" class="mt-2">
+                                        <source src="{{ file.file.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% elif ".txt" in file.file.url or ".py" in file.file.url or ".cpp" in file.file.url or ".java" in file.file.url %}
+                                    <pre class="p-2 bg-light mt-2"><code>Download to view full content</code></pre>
+                                {% else %}
+                                    <p class="mt-2">Preview not available - please download the file</p>
+                                {% endif %}
+                            </div>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -22,3 +69,29 @@
         <li class="list-group-item text-center">No lecture content available.</li>
     {% endfor %}
 </ul>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle lecture text
+    document.querySelectorAll('.toggle-lecture').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            const element = document.querySelector(target);
+            if (element) {
+                element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+
+    // Toggle file preview
+    document.querySelectorAll('.toggle-preview').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            const element = document.querySelector(target);
+            if (element) {
+                element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+});
+</script>

@@ -6,56 +6,69 @@
 
 {% block content %}
 <style>
-    .sidebar {
+    .button-container {
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 100vh;
-        padding: 10px;
+        justify-content: center; 
+        margin: 10px 0;
+        padding: 0;  
+        flex-wrap: wrap;  
+        background-color: #f8f9fa;
+
     }
+
+    .custombutton {
+        background-color: #61162D;
+        border: none;
+        padding: 10px 20px;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+        margin: 5px;
+    }
+
+    .custombutton:hover {
+        background-color:rgb(124, 49, 64);
+        color: #fff;}
 
     @media (max-width: 768px) {
-        .sidebar {
-            min-width: 150px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .sidebar {
-            min-width: 120px;
+        .button-container {
+            justify-content: center;  /* Center buttons on smaller screens */
         }
     }
 </style>
 
+
 <div class="container-fluid">
-    <div class="row" style="min-height: 100vh;">
-        <!-- Sidebar on the left -->
-        <div class="col-2 sidebar">
-            <button class="custom-button btn btn-sm" onclick="loadContent('lecture', event)">
+    <div class="row">
+        <!-- Button container for horizontal layout -->
+        <div class="button-container">
+            <button class="custombutton btn btn-sm" onclick="loadContent('lecture', event)">
                 <i class="fas fa-chalkboard-teacher"></i> <span>Lectures</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('exercise', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('exercise', event)">
                 <i class="fas fa-tasks"></i> <span>Exercises</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('quiz', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('quiz', event)">
                 <i class="fas fa-clipboard-list"></i> <span>Quizzes</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('assignment', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('assignment', event)">
                 <i class="fas fa-file-alt"></i> <span>Assignments</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('grade', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('grade', event)">
                 <i class="fas fa-graduation-cap"></i> <span>Grades</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('analytics', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('analytics', event)">
                 <i class="fas fa-chart-bar"></i> <span>Analytics</span>
             </button>
-            <button class="custom-button btn btn-sm" onclick="loadContent('ide', event)">
+            <button class="custombutton btn btn-sm" onclick="loadContent('ide', event)">
                 <i class="fas fa-laptop-code"></i> <span>IDE</span>
             </button>
-            
         </div>
 
-        <!-- Content area on the right -->
+        <!-- Content area -->
         <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
             <div id="lecture-content" class="content-section">
                 {% include 'view_lecture.html' %}
@@ -82,7 +95,6 @@
     </div>
 </div>
 
-
 <script>
     function loadContent(contentType, event) {
         document.querySelectorAll('.content-section').forEach(section => {
@@ -92,7 +104,7 @@
         document.getElementById(`${contentType}-content`).style.display = 'block';
         localStorage.setItem('activeTab', contentType);
 
-        document.querySelectorAll('.custom-button').forEach(button => {
+        document.querySelectorAll('.custombutton').forEach(button => {
             button.classList.remove('active');
         });
         event.currentTarget.classList.add('active');
@@ -102,12 +114,7 @@
         let activeTab = localStorage.getItem('activeTab') || 'lecture';
         localStorage.setItem('activeTab', activeTab);
 
-        // Apply general-button class to all custom buttons
-        document.querySelectorAll('.custom-button').forEach(button => {
-            button.classList.add('general-button');
-        });
-
-        const button = document.querySelector(`.custom-button:nth-child(${getTabIndex(activeTab)})`);
+        const button = document.querySelector(`.custombutton:nth-child(${getTabIndex(activeTab)})`);
         if (button) {
             loadContent(activeTab, { currentTarget: button });
         }
@@ -118,6 +125,5 @@
         return tabOrder.indexOf(contentType) + 1;
     }
 </script>
-
 
 {% endblock %}
