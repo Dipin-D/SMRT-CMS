@@ -37,25 +37,25 @@
                     <input type="file" name="file" id="file_upload_{{ lecture.id }}" class="form-control">
                 </div>
 
-                <!-- Display existing file with option to remove -->
-                <div class="form-group">
-                    <label>Existing File:</label>
-                    {% if lecture.coursefile_set.all %}
-                        <ul>
-                            {% for file in lecture.coursefile_set.all %}
-                                <li>
-                                    <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
-                                    <br>
-                                    <label>
-                                        <input type="checkbox" name="remove_file" value="{{ file.id }}"> Remove this file
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No existing files for this lecture.</p>
-                    {% endif %}
-                </div>
+                    <!-- Display existing files with remove option (Hidden by default) -->
+                    <div class="form-group">
+                        <label>Existing Files:</label>
+                        {% if lecture.coursefile_set.all %}
+                            <ul>
+                                {% for file in lecture.coursefile_set.all %}
+                                    <li>
+                                        <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
+                                        <label class="file-remove-option" style="display: none;">
+                                            <input type="checkbox" name="remove_file" value="{{ file.id }}"> Remove this file
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No existing files for this lecture.</p>
+                        {% endif %}
+                    </div>
+
                 
                 <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
                 <button type="submit" name="edit_lecture" class="custom-button mt-2 mb-2">Save Changes</button>
@@ -110,11 +110,18 @@
     });
 
     // Add event listeners to all edit buttons
-    document.querySelectorAll('.edit-btn').forEach(button => {
+    document.querySelectorAll('.edit-button').forEach(button => {
         button.addEventListener('click', function() {
             const lectureId = this.getAttribute('data-lecture-id');
             const editForm = document.getElementById(`edit-lecture-${lectureId}`);
             editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    
+            // Show file removal options when the form is displayed
+            if (editForm.style.display === 'block') {
+                const fileRemovalSection = editForm.querySelectorAll('.file-remove-option');
+                fileRemovalSection.forEach(option => option.style.display = 'block');
+            }
         });
     });
+    
 </script>

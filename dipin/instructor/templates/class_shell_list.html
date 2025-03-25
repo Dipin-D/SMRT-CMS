@@ -31,8 +31,15 @@
                             </div>
                             <div class="text-center mt-3">
                                 <a href="{% url 'instructor:go_to_course' class_shell.id %}" class="btn btn-secondary custom-button">Go to Course</a>
-                                <button type="button" class="btn btn-warning edit-button" onclick="showEditForm({{ class_shell.id }}, '{{ class_shell.course_name }}')">Edit</button>
-                                <form method="POST" action="{% url 'instructor:class_shell_list' %}" style="display:inline-block;">
+                                <button type="button" class="btn btn-warning edit-button" 
+                                onclick="showEditForm({{ class_shell.id }}, 
+                                                       '{{ class_shell.course_name }}', 
+                                                       '{{ class_shell.section_number }}', 
+                                                       '{{ class_shell.semester }}', 
+                                                       '{{ class_shell.year }}')">
+                                Edit
+                            </button>
+                                                            <form method="POST" action="{% url 'instructor:class_shell_list' %}" style="display:inline-block;">
                                     {% csrf_token %}
                                     <input type="hidden" name="class_shell_id" value="{{ class_shell.id }}">
                                     <button type="submit" name="delete" class="btn btn-danger delete-button">Delete</button>
@@ -75,17 +82,26 @@
         formContainer.classList.add('show');
         formTitle.textContent = 'Create Class Shell';
         formSubmitButton.textContent = 'Create';
-        classShellIdInput.value = '';
+        classShellIdInput.value = ''; 
     });
+    
 
     // Show Edit Form
-    function showEditForm(classShellId, classShellName) {
+    function showEditForm(classShellId, courseName, sectionNumber, semester, year) {
         formContainer.style.display = 'block';
         formContainer.classList.add('show');
-        formTitle.textContent = 'Edit Class Shell: ' + classShellName;
+        formTitle.textContent = 'Edit Class Shell: ' + courseName;
         formSubmitButton.textContent = 'Update';
         classShellIdInput.value = classShellId;
+    
+        // Fill the form fields
+        document.getElementById('id_course_name').value = courseName;
+        document.getElementById('id_section_number').value = sectionNumber;
+        document.getElementById('id_semester').value = semester;
+        document.getElementById('id_year').value = year;
     }
+    
+    
 
     // Cancel Form
     document.getElementById('cancel-form').addEventListener('click', function() {

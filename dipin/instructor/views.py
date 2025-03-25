@@ -10,38 +10,29 @@ import plotly.express as px
 import pandas as pd
 from datetime import datetime
 
-
 def class_shell_list(request):
     edit_class_shell = None
     form = ClassShellForm(request.POST or None)
 
     if request.method == 'POST':
         class_shell_id = request.POST.get('class_shell_id')
-        
-        if class_shell_id:  # Editing or deleting
+
+        if class_shell_id:  
             class_shell = get_object_or_404(ClassShell, pk=class_shell_id, user=request.user)
-            
-            if 'edit' in request.POST:
-                form = ClassShellForm(instance=class_shell)
-                edit_class_shell = class_shell  # Set the class shell being edited
-
-            elif 'update' in request.POST:
-                form = ClassShellForm(request.POST, instance=class_shell)
-                if form.is_valid():
-                    form.save()
-                    return redirect('instructor:class_shell_list')
-
-            elif 'delete' in request.POST:
-                class_shell.delete()
-                return redirect('instructor:class_shell_list')
-        
-        else:  # Creating a new class shell
+            form = ClassShellForm(request.POST, instance=class_shell)
+        else:  
             form = ClassShellForm(request.POST)
-            if form.is_valid():
-                class_shell = form.save(commit=False)
-                class_shell.user = request.user
-                class_shell.save()
-                return redirect('instructor:class_shell_list')
+            class_shell = form.save(commit=False)
+            class_shell.user = request.user
+
+        if form.is_valid():
+            form.save()
+            return redirect('instructor:class_shell_list')
+
+        elif 'delete' in request.POST:
+            class_shell = get_object_or_404(ClassShell, pk=request.POST.get('class_shell_id'), user=request.user)
+            class_shell.delete()
+            return redirect('instructor:class_shell_list')
 
     class_shells = ClassShell.objects.filter(user=request.user)
     return render(request, 'class_shell_list.html', {
