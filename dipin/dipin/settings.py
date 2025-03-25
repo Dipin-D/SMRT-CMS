@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-mkn8+vu&c$$xpsr+3pi@j5atfjf%pphjsxfj%(=_ebaj%nz=4a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['smrt-cms.onrender.com', 'localhost', '127.0.0.1', '3.148.147.27']
+ALLOWED_HOSTS = ['www.aamusmartcms.com', 'localhost', '127.0.0.1', '3.148.147.27']
 
 # Application definition
 INSTALLED_APPS = [
