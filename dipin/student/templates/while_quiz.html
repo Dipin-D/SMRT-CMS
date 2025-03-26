@@ -1,8 +1,10 @@
 {% extends "home.html" %}
 
+
 {% block title %}
   Quiz: {{ quiz.title }}
 {% endblock %}
+
 
 {% block content %}
  <!-- Quiz form for new attempt -->
@@ -11,15 +13,16 @@
   </div>  
   <p class="mb-4 text-center">Please answer the following questions:</p>
 
+
   <form id="quiz_form" method="POST" action="{% url 'student:attempt_quiz' class_shell_id=class_shell_id quiz_id=quiz_id %}">
     {% csrf_token %}
-    
+   
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="list-group">
                 {% for question in questions %}
                     <div class="list-group-item mb-4">
-                        <h5 class="mb-3">{{ question.text }}</h5>
+                        <pre><code>{{ question.text|linebreaksbr }}</code></pre>
                         {% if question.type == "multiple_choice" %}
                         <div class="mb-3">
                             <div class="form-check">
@@ -74,28 +77,69 @@
         </div>
     </div>
 
+
     <!-- Submit button -->
     <div class="text-center mt-4">
         <button type="submit" class="btn custom-button">
             <i class="fas fa-paper-plane fs-6"></i> Submit Quiz
         </button>
     </div>
-    
+   
+
 
 </form>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var quizId = "{{ quiz_id }}";
-        var remainingTime = {{ remaining_time }}; 
-        
+        var remainingTime = {{ remaining_time }};
+        var storageKey = "quiz_answers_" + quizId; // Unique key for each quiz
+   
+        function saveAnswers() {
+            var answers = {};
+            document.querySelectorAll("input[type=radio]:checked, textarea").forEach(function (input) {
+                answers[input.name] = input.value;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(answers)); // Save in localStorage
+        }
+   
+        function loadAnswers() {
+            var savedAnswers = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            Object.keys(savedAnswers).forEach(function (name) {
+                var input = document.querySelector(`[name="${name}"][value="${savedAnswers[name]}"]`);
+                if (input) {
+                    input.checked = true;
+                } else {
+                    var textarea = document.querySelector(`[name="${name}"]`);
+                    if (textarea) {
+                        textarea.value = savedAnswers[name];
+                    }
+                }
+            });
+        }
+   
+        function clearSavedAnswers() {
+            localStorage.removeItem(storageKey); // Clear answers when quiz is submitted
+        }
+   
+        document.querySelectorAll("input[type=radio], textarea").forEach(function (input) {
+            input.addEventListener("change", saveAnswers);
+        });
+
+
+        document.getElementById("quiz_form").addEventListener("submit", clearSavedAnswers);
+   
+        loadAnswers();
+   
+        // Timer functions
         function updateTimerDisplay(minutes, seconds) {
             var timerElement = document.getElementById("timer");
             if (timerElement) {
                 timerElement.textContent = `${minutes}m ${seconds}s`;
             }
         }
-    
+   
         function autoSubmitQuiz() {
             var form = document.getElementById("quiz_form");
             if (form && !form.hasAttribute("data-submitted")) {
@@ -105,32 +149,34 @@
                 input.name = "time_expired";
                 input.value = "true";
                 form.appendChild(input);
+                clearSavedAnswers();
                 form.submit();
             }
         }
-    
+   
         function startTimer() {
             var timerInterval = setInterval(function () {
                 if (remainingTime <= 0) {
                     clearInterval(timerInterval);
                     updateTimerDisplay(0, 0);
-                    autoSubmitQuiz();  // Auto-submit the quiz when time is up
+                    autoSubmitQuiz();
                 } else {
                     remainingTime -= 1;
                     var minutes = Math.floor(remainingTime / 60);
                     var seconds = remainingTime % 60;
-                    updateTimerDisplay(minutes, seconds);  // Update the timer display
+                    updateTimerDisplay(minutes, seconds);
                 }
             }, 1000);
         }
-    
+   
         var initialMinutes = Math.floor(remainingTime / 60);
         var initialSeconds = remainingTime % 60;
         updateTimerDisplay(initialMinutes, initialSeconds);
-    
+   
         startTimer();
     });
 </script>
 
-  
+
+ 
 {% endblock %}

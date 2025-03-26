@@ -480,15 +480,15 @@ class QuizDetailView(View):
 
         elif 'delete_question' in request.POST:
             question_id = request.POST.get('question_id')
-            self.handle_delete_question(question_id)
+            if question_id:
+                self.handle_delete_question(question_id)
+            return redirect('instructor:go_to_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
 
         return redirect('instructor:go_to_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
 
     def handle_delete_question(self, question_id):
         question = get_object_or_404(Question, id=question_id)
         question.delete()
-
-
 
 
 class ExerciseDetailView(View):
@@ -507,40 +507,52 @@ class ExerciseDetailView(View):
     def post(self, request, class_shell_id, exercise_id):
         exercise = get_object_or_404(Exercise, id=exercise_id)
         question_form = ExerciseQuestionForm(request.POST)
+
+        if 'delete_question' in request.POST:
+            exercise_question_id = request.POST.get('exerciseQuestion_id')
+            if exercise_question_id:  # Ensure ID exists
+                self.handle_delete_question(exercise_question_id)
+            return redirect('instructor:go_to_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
+
         if 'add_question' in request.POST and question_form.is_valid():
             exercise_question_instance = question_form.save(commit=False)
             exercise_question_instance.exercise = exercise
-        if exercise_question_instance.type == 'multiple_choice':
-            exercise_question_instance.choice_1 = question_form.cleaned_data['choice_1']
-            exercise_question_instance.choice_2 = question_form.cleaned_data['choice_2']
-            exercise_question_instance.choice_3 = question_form.cleaned_data['choice_3']
-            exercise_question_instance.choice_4 = question_form.cleaned_data['choice_4']
-            mcq_answer = question_form.cleaned_data['mcq_answer'].strip()            
-            if mcq_answer == 'Choice 1':
-                exercise_question_instance.mcq_answer = exercise_question_instance.choice_1
-            elif mcq_answer == 'Choice 2':
-                exercise_question_instance.mcq_answer = exercise_question_instance.choice_2
-            elif mcq_answer == 'Choice 3':
-                exercise_question_instance.mcq_answer = exercise_question_instance.choice_3
-            elif mcq_answer == 'Choice 4':
-                exercise_question_instance.mcq_answer = exercise_question_instance.choice_4
-            exercise_question_instance.tf_answer = None  
-            exercise_question_instance.save()
 
-        elif exercise_question_instance.type == 'true_false':
+            if exercise_question_instance.type == 'multiple_choice':
+                exercise_question_instance.choice_1 = question_form.cleaned_data['choice_1']
+                exercise_question_instance.choice_2 = question_form.cleaned_data['choice_2']
+                exercise_question_instance.choice_3 = question_form.cleaned_data['choice_3']
+                exercise_question_instance.choice_4 = question_form.cleaned_data['choice_4']
+
+                mcq_answer = question_form.cleaned_data['mcq_answer'].strip()            
+                if mcq_answer == 'Choice 1':
+                    exercise_question_instance.mcq_answer = exercise_question_instance.choice_1
+                elif mcq_answer == 'Choice 2':
+                    exercise_question_instance.mcq_answer = exercise_question_instance.choice_2
+                elif mcq_answer == 'Choice 3':
+                    exercise_question_instance.mcq_answer = exercise_question_instance.choice_3
+                elif mcq_answer == 'Choice 4':
+                    exercise_question_instance.mcq_answer = exercise_question_instance.choice_4
+
+                exercise_question_instance.tf_answer = None  
+                exercise_question_instance.save()
+
+            elif exercise_question_instance.type == 'true_false':
                 exercise_question_instance.mcq_answer = None  
                 exercise_question_instance.save()
-        elif 'delete_question' in request.POST:
-            exercise_question_id = request.POST.get('exerciseQuestion_id')
-            self.handle_delete_question(exercise_question_id)
+
         else:
             print("Form Errors:", question_form.errors)
 
         return redirect('instructor:go_to_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
 
-    def handle_delete_question(self, exercise_question_id):
-        exercise_question = get_object_or_404(ExerciseQuestion, id=exercise_question_id)  
-        exercise_question.delete()
+    def handle_delete_question(self, question_id):
+        try:
+            exercise_question = get_object_or_404(ExerciseQuestion, id=question_id)
+            exercise_question.delete()
+        except Exception as e:
+            print(f"Error deleting question: {e}")
+
 
 class QuizGradeView(View):
     def get(self, request, submission_id):
