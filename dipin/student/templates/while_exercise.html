@@ -19,7 +19,7 @@ Exercise: {{ exercise.title }}
             <div class="list-group">
                 {% for question in exercise_questions %}
                     <div class="list-group-item mb-4">
-                        <h5 class="mb-3">{{ question.text }}</h5>
+                        <pre><code>{{ question.text|linebreaksbr }}</code></pre>
                         {% if question.type == "multiple_choice" %}
                         <div class="mb-3">
                             <div class="form-check">
@@ -84,10 +84,47 @@ Exercise: {{ exercise.title }}
 
 </form>
 
-<script>
+<script> 
     document.addEventListener("DOMContentLoaded", function () {
         var quizId = "{{ exercise_id }}";
-        var remainingTime = {{ remaining_time }}; 
+        var remainingTime = {{ remaining_time }};
+        var storageKey = "exercise_answers_" + quizId; // Unique key for each quiz
+   
+        function saveAnswers() {
+            var answers = {};
+            document.querySelectorAll("input[type=radio]:checked, textarea").forEach(function (input) {
+                answers[input.name] = input.value;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(answers)); // Save in localStorage
+        }
+   
+        function loadAnswers() {
+            var savedAnswers = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            Object.keys(savedAnswers).forEach(function (name) {
+                var input = document.querySelector(`[name="${name}"][value="${savedAnswers[name]}"]`);
+                if (input) {
+                    input.checked = true;
+                } else {
+                    var textarea = document.querySelector(`[name="${name}"]`);
+                    if (textarea) {
+                        textarea.value = savedAnswers[name];
+                    }
+                }
+            });
+        }
+   
+        function clearSavedAnswers() {
+            localStorage.removeItem(storageKey); 
+        }
+   
+        document.querySelectorAll("input[type=radio], textarea").forEach(function (input) {
+            input.addEventListener("change", saveAnswers);
+        });
+
+
+        document.getElementById("exercise_form").addEventListener("submit", clearSavedAnswers);
+   
+        loadAnswers(); 
         
         function updateTimerDisplay(minutes, seconds) {
             var timerElement = document.getElementById("timer");
@@ -105,6 +142,7 @@ Exercise: {{ exercise.title }}
                 input.name = "time_expired";
                 input.value = "true";
                 form.appendChild(input);
+                clearSavedAnswers();
                 form.submit();
             }
         }

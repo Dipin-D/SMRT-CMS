@@ -42,6 +42,7 @@ class ExerciseForm(forms.ModelForm):  # Corrected spelling here
 
 # Base Question Form
 class BaseQuestionForm(forms.ModelForm):
+    text = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}))
     class Meta:
         model = BaseQuestion
         fields = ['text', 'type', 'choice_1', 'choice_2', 'choice_3', 'choice_4','mark','mcq_answer','tf_answer']

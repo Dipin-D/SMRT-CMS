@@ -64,7 +64,7 @@ class AssignmentFile(BaseFile):
         return self.assignment_file.name
 
 class BaseQuestion(models.Model):
-    text= models.CharField(max_length=255,null=True)
+    text = models.TextField(null=True)
     type = models.CharField(max_length=255)
     answer = models.CharField(max_length=255)
     mark = models.IntegerField(default=5)

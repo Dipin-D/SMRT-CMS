@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h4 class="mb-4 text-center">Quiz: {{ quiz.title }}</h4>      
+    <h4 class="mb-4 text-center card-title">Quiz: {{ quiz.title }}</h4>      
 
 <!-- Display attempt information in a compact style -->
 <div class="alert alert-secondary text-center p-1 mb-2">
@@ -20,7 +20,7 @@
 
 {% if max_attempts_reached %}
     <div class="alert alert-danger text-center p-1 mb-2">
-        <small>🚨 Maximum Attempts Reached!</small>
+        <small><i class="fas fa-exclamation-circle text-warning fs-5"></i> Maximum Attempts Reached!</small>
     </div>
 {% endif %}
 
@@ -49,13 +49,13 @@
                 <ul class="list-group">
                     {% for attempt in question_attempts %}
                         <li class="list-group-item mb-3">
-                            <p><strong>Question:</strong> {{ attempt.question.text }}</p>
+                            <pre><code><p><strong>Question:</strong> {{ attempt.question.text|linebreaksbr }}</p></code></pre>
                             <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
                             <p class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
                                 {% if attempt.is_correct %}
-                                    ✅ Correct
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Correct
                                 {% else %}
-                                    ❌ Incorrect
+                                    <i class="fas fa-times-circle text-danger fs-5"></i> Incorrect
                                 {% endif %}
                             </p>
                         </li>
