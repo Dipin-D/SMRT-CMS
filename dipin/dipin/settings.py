@@ -6,14 +6,14 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mkn8+vu&c$$xpsr+3pi@j5atfjf%pphjsxfj%(=_ebaj%nz=4a'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ['www.aamusmartcms.com', 'localhost', '127.0.0.1', '3.148.147.27', 'aamusmartcms.com']
 CSRF_TRUSTED_ORIGINS = [
     "https://aamusmartcms.com",
-    "https://www.aamusmartcms.com",
+    "https://www.aamusmartcms.com", 
 ]
 
 
