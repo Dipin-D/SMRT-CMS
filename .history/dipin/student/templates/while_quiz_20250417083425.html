@@ -1,0 +1,211 @@
+{% extends "home.html" %}
+
+{% block title %}
+  Quiz: {{ quiz.title }}
+{% endblock %}
+
+{% block content %}
+ <!-- Quiz form for new attempt -->
+ <div class="alert alert-info text-center">
+    <p>Time Remaining: <span id="timer">Loading...</span></p>
+  </div>  
+  <p class="mb-4 text-center">Please answer the following questions:</p>
+
+<form id="quiz_form" method="POST" action="{% url 'student:while_quiz' class_shell_id=class_shell_id quiz_id=quiz_id %}">
+    {% csrf_token %}
+<div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="list-group">
+                {% for question in questions %}
+                    <div class="list-group-item mb-4">
+                        <pre><code>{{ question.text|linebreaksbr }}</code></pre>
+                        {% if question.type == "multiple_choice" %}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                       id="choice_1_{{ question.id }}" value="{{ question.choice_1 }}"
+                                       {% if question.saved_answer == question.choice_1 %}checked{% endif %}>
+                                <label class="form-check-label" for="choice_1_{{ question.id }}">
+                                    {{ question.choice_1 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                       id="choice_2_{{ question.id }}" value="{{ question.choice_2 }}"
+                                       {% if question.saved_answer == question.choice_2 %}checked{% endif %}>
+                                <label class="form-check-label" for="choice_2_{{ question.id }}">
+                                    {{ question.choice_2 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                       id="choice_3_{{ question.id }}" value="{{ question.choice_3 }}"
+                                       {% if question.saved_answer == question.choice_3 %}checked{% endif %}>
+                                <label class="form-check-label" for="choice_3_{{ question.id }}">
+                                    {{ question.choice_3 }}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                       id="choice_4_{{ question.id }}" value="{{ question.choice_4 }}"
+                                       {% if question.saved_answer == question.choice_4 %}checked{% endif %}>
+                                <label class="form-check-label" for="choice_4_{{ question.id }}">
+                                    {{ question.choice_4 }}
+                                </label>
+                            </div>
+                        </div>                                  
+                        {% elif question.type == "true_false" %}
+                            <div class="mb-3">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+       id="true_{{ question.id }}" value="True"
+       {% if question.saved_answer == "True" %}checked{% endif %}>
+                                <label class="form-check-label" for="true_{{ question.id }}">
+                                    True
+                                </label>
+
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                    id="false_{{ question.id }}" value="False"
+                                    {% if question.saved_answer == "False" %}checked{% endif %}>
+                                <label class="form-check-label" for="false_{{ question.id }}">
+                                    False
+                                </label>
+
+                            </div>
+                        {% elif question.type == "essay" %}
+                            <div class="form-group mb-3">
+                                <label for="answer_{{ question.id }}">Your Answer:</label>
+                                <textarea name="answer_{{ question.id }}" class="form-control" rows="5"></textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div> 
+
+  <!-- Submit button -->
+    <div class="text-center mt-4">
+        <button type="submit" class="btn custom-button">
+            <i class="fas fa-paper-plane fs-6"></i> Submit Quiz
+        </button>
+    </div> 
+
+</form> 
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+        var quizId = "{{ quiz_id }}";
+        var remainingTime = {{ remaining_time }};
+        var storageKey = "quiz_answers_" + quizId; // Unique key for each quiz
+   
+        // Save answers to local storage
+        function saveAnswers() {
+            var answers = {};
+            document.querySelectorAll("input[type=radio]:checked, textarea").forEach(function (input) {
+                answers[input.name] = input.value;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(answers)); // Save in localStorage
+        }
+
+        // Load saved answers from local storage
+        function loadAnswers() {
+            var savedAnswers = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            Object.keys(savedAnswers).forEach(function (name) {
+                var input = document.querySelector(`[name="${name}"][value="${savedAnswers[name]}"]`);
+                if (input) {
+                    input.checked = true;
+                } else {
+                    var textarea = document.querySelector(`[name="${name}"]`);
+                    if (textarea) {
+                        textarea.value = savedAnswers[name];
+                    }
+                }
+            });
+        }
+
+          
+
+        // Clear saved answers when quiz is submitted
+        function clearSavedAnswers() {
+            localStorage.removeItem(storageKey); // Clear answers when quiz is submitted
+        }
+   
+        document.querySelectorAll("input[type=radio], textarea").forEach(function (input) {
+            input.addEventListener("change", saveAnswers); // Save on answer change
+        });
+
+        // When the quiz form is submitted, clear saved answers
+        document.getElementById("quiz_form").addEventListener("submit", clearSavedAnswers);
+   
+        loadAnswers(); // Load saved answers if any
+        
+        // Timer functions
+        function updateTimerDisplay(minutes, seconds) {
+            var timerElement = document.getElementById("timer");
+            if (timerElement) {
+                timerElement.textContent = `${minutes}m ${seconds}s`;
+            }
+        }
+   
+        function autoSubmitQuiz() {
+            var form = document.getElementById("quiz_form");
+            if (form && !form.hasAttribute("data-submitted")) {
+                form.setAttribute("data-submitted", "true");
+                var input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "time_expired";
+                input.value = "true";
+                form.appendChild(input);
+                clearSavedAnswers();
+                form.submit();
+            }
+        }
+   
+        function startTimer() {
+            var timerInterval = setInterval(function () {
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    updateTimerDisplay(0, 0);
+                    autoSubmitQuiz();
+                } else {
+                    remainingTime -= 1;
+                    var minutes = Math.floor(remainingTime / 60);
+                    var seconds = remainingTime % 60;
+                    updateTimerDisplay(minutes, seconds);
+                }
+            }, 1000);
+        }
+   
+        var initialMinutes = Math.floor(remainingTime / 60);
+        var initialSeconds = remainingTime % 60;
+        updateTimerDisplay(initialMinutes, initialSeconds);
+   
+        startTimer();
+    });
+
+        function autoSave(questionId, answer, attemptId) {
+            fetch("{% url 'student:autosave_answer' %}", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `question_id=${questionId}&answer=${answer}&quiz_attempt_id=${attemptId}`
+            }).then(res => res.json()).then(data => {
+                console.log('Auto-saved:', data);
+            });
+        }
+        
+        document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(input => {
+            input.addEventListener('change', function () {
+                const questionId = this.name.split('_')[1];
+                const answer = this.value;
+                const attemptId = "{{ quiz_attempt.id }}";
+                autoSave(questionId, answer, attemptId);
+            });
+        });
+        
+</script>
+
+{% endblock %}

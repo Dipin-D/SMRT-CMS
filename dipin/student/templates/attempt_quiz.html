@@ -1,92 +1,90 @@
 {% extends "home.html" %}
 
-{% block title %}
-  Quiz: {{ quiz.title }}
-{% endblock %}
+{% block title %} Quiz: {{ quiz.title }} {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h4 class="mb-4 text-center card-title">Quiz: {{ quiz.title }}</h4>      
+    <h4 class="mb-4 text-center card-title">Quiz: {{ quiz.title }}</h4>
 
-<!-- Display attempt information in a compact style -->
-<div class="alert alert-secondary text-center p-1 mb-2">
-    <small><strong>Attempts Left:</strong> {{ attempts_left }}</small>
-    <div class="text-center mt-4">
-        <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-outline-dark btn-sm text-maroon">
-            <i class="fas fa-arrow-left fs-6"></i> Back to Quizzes
-        </a>
-    </div>    
-</div>
-
-{% if max_attempts_reached %}
-    <div class="alert alert-danger text-center p-1 mb-2">
-        <small><i class="fas fa-exclamation-circle text-warning fs-5"></i> Maximum Attempts Reached!</small>
-    </div>
-{% endif %}
-
-{% if already_attempted %}
-        <!-- Display previous attempts -->
-        {% if previous_attempts %}
-            <div class="mt-4">
-                <h5 class="text-center">Previous Attempts</h5>
-                <ul class="list-group">
-                    {% for attempt in previous_attempts %}
-                        <li class="list-group-item mb-3">
-                            <p><strong>Attempt Number:</strong> {{ forloop.counter }}</p>
-                            <p><strong>Score:</strong> {{ attempt.score }} / {{ total_marks }}</p>
-                            {% load tz %}
-                            <p><strong>Submitted On:</strong> {% timezone 'America/Chicago' %}{{ attempt.attempted_on }}{% endtimezone %}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <!-- View submitted quiz -->
-        {% if view_submitted %}
-            <div class="mt-4">
-                <h5 class="text-center">Submitted Quiz Review</h5>
-                <ul class="list-group">
-                    {% for attempt in question_attempts %}
-                        <li class="list-group-item mb-3">
-                            <pre><code><p><strong>Question:</strong> {{ attempt.question.text|linebreaksbr }}</p></code></pre>
-                            <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
-                            <p class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
-                                {% if attempt.is_correct %}
-                                    <i class="fas fa-check-circle text-success fs-5"></i> Correct
-                                {% else %}
-                                    <i class="fas fa-times-circle text-danger fs-5"></i> Incorrect
-                                {% endif %}
-                            </p>
-                        </li>
-                    {% endfor %}
-                </ul>
-        {% else %}
-        <div class="d-flex justify-content-center mt-3">
-            <form method="get">
-                <button type="submit" name="view" value="true" class="btn btn-outline-dark btn-sm text-maroon">
-                    <i class="fas fa-file-alt fs-6"></i> View Submitted Quiz
-                </button>
-            </form>
-        </div>        
-        
-        {% endif %}
-
-        <!-- Start a new attempt if attempts are left -->
-        {% if attempts_left > 0 %}
+    <div class="alert alert-secondary text-center p-1 mb-2">
+        <small><strong>Attempts Left:</strong> {{ attempts_left }}</small>
         <div class="text-center mt-4">
-            <a href="?start_new_attempt=true" class="btn custom-button" id="newAttemptLink">
-                <i class="fas fa-play-circle fs-6"></i> Start Attempt {{ current_attempt }}
+            <a href="{% url 'student:go_to_course' class_shell_id=class_shell.id %}" class="btn btn-outline-dark btn-sm text-maroon">
+                <i class="fas fa-arrow-left fs-6"></i> Back to Quizzes
             </a>
         </div>
-        
-        {% endif %}
+    </div>
 
+    {% if ongoing_attempt %}
+    <div class="text-center mt-4">
+        <a href="?start_new_attempt=true" class="btn custom-button" id="newAttemptLink">
+            <i class="fas fa-play-circle fs-6"></i>Continue Attempt {{ current_attempt}}
+
+        </a>
+    </div>
     {% else %}
-    <script>
-        window.location.href = "{% url 'student:while_quiz' class_shell_id=class_shell.id quiz_id=quiz.id %}";
-    </script>     
-    {% endif %}
-</div>
+                {% if max_attempts_reached %}
+                <div class="alert alert-danger text-center p-1 mb-2">
+                    <small><i class="fas fa-exclamation-circle text-warning fs-5"></i> Maximum Attempts Reached!</small>
+                </div>
+                {% endif %}
 
-  {% endblock %}
+                {% if already_attempted %}
+                            {% if previous_attempts %}
+                            <div class="mt-4">
+                                <h5 class="text-center">Previous Attempts</h5>
+                                <ul class="list-group">
+                                    {% for attempt in previous_attempts %}
+                                    <li class="list-group-item mb-3">
+                                        <p><strong>Attempt Number:</strong> {{ forloop.counter }}</p>
+                                        <p><strong>Score:</strong> {{ attempt.score }} / {{ total_marks }}</p>
+                                        {% load tz %}
+                                        <p><strong>Submitted On:</strong> {% timezone 'America/Chicago' %}{{ attempt.attempted_on }}{% endtimezone %}</p>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            {% if view_submitted %}
+                            <div class="mt-4">
+                                <h5 class="text-center">Submitted Quiz Review</h5>
+                                <ul class="list-group">
+                                    {% for attempt in question_attempts %}
+                                    <li class="list-group-item mb-3">
+                                        <p><strong>Question:</strong> {{ attempt.question.text|linebreaksbr }}</p>
+                                        <p><strong>Your Answer:</strong> {{ attempt.student_answer }}</p>
+                                        <p class="{% if attempt.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                            {% if attempt.is_correct %}
+                                                <i class="fas fa-check-circle text-success fs-5"></i> Correct
+                                            {% else %}
+                                                <i class="fas fa-times-circle text-danger fs-5"></i> Incorrect
+                                            {% endif %}
+                                        </p>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% else %}
+                            <div class="d-flex justify-content-center mt-3">
+                                <form method="get">
+                                    <button type="submit" name="view" value="true" class="btn btn-outline-dark btn-sm text-maroon">
+                                        <i class="fas fa-file-alt fs-6"></i> View Submitted Quiz
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+
+                            {% if attempts_left > 0 %}
+                            <div class="text-center mt-4">
+                                <a href="?start_new_attempt=true" class="btn custom-button" id="newAttemptLink">
+                                    <i class="fas fa-play-circle fs-6"></i> Start Attempt {{ current_attempt|add:"1" }}
+
+                                </a>
+                            </div>
+                            {% endif %}
+                {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}
