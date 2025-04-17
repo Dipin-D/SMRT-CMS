@@ -10,6 +10,7 @@ from django.contrib import messages
 from datetime import datetime
 from datetime import timedelta
 from django.utils import timezone
+from django.http import JsonResponse
 import plotly.graph_objects as go
 import plotly.offline as opy
 import pytz
@@ -191,8 +192,9 @@ class go_to_course_student(View):
             assignment_submission.save()
             return redirect('student:go_to_course', class_shell_id=class_shell_id)
 
-def attempt_quiz(request, class_shell_id, quiz_id):
 
+
+def attempt_quiz(request, class_shell_id, quiz_id):
     class_shell = get_object_or_404(ClassShell, id=class_shell_id)
     quiz = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
     questions = Question.objects.filter(quiz=quiz)
@@ -200,317 +202,390 @@ def attempt_quiz(request, class_shell_id, quiz_id):
 
     # Retrieve previous attempts for this student and quiz.
     attempts = QuizAttempt.objects.filter(student=request.user, quiz=quiz).order_by('attempt_number')
-    current_attempt = attempts.count() + 1
     attempts_left = quiz.max_attempts - attempts.count()
+    current_attempt = attempts.count()
+    ongoing_attempt = QuizAttempt.objects.filter(
+            student=request.user, quiz=quiz, attempt_number=current_attempt, end_time__gt=timezone.now(), submitted=False 
+        ).first()
+    
     max_attempts_reached = (attempts_left <= 0)
+    
+    if not attempts.exists():
+            current_attempt+=1  
+            end_time = timezone.now() + timedelta(minutes=quiz.timer)
+            quiz_attempt = QuizAttempt.objects.create(
+                student=request.user,
+                quiz=quiz,
+                class_shell=class_shell,
+                total_marks=total_marks,
+                attempt_number=current_attempt,
+                end_time=end_time
+            )
+            print('first attempt created:',quiz_attempt)
+
+            return redirect('student:while_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
+    # NEW ATTEMPT: when a student clicks "start new attempt"
+    if "start_new_attempt" in request.GET and not max_attempts_reached:       
+
+        # If no ongoing attempt exists or the current attempt has expired, create a new one
+        if not ongoing_attempt:
+            current_attempt += 1
+            end_time = timezone.now() + timedelta(minutes=quiz.timer)
+            quiz_attempt = QuizAttempt.objects.create(
+                student=request.user,
+                quiz=quiz,
+                class_shell=class_shell,
+                total_marks=total_marks,
+                attempt_number=current_attempt,
+                end_time=end_time
+            )
+            quiz_attempt.save()
+            print('New attempt created:', quiz_attempt.attempt_number)
+
+        return redirect('student:while_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
 
 
-    # NEW ATTEMPT: when a student clicks a "start new attempt" link.
-    if "start_new_attempt" in request.GET:
-        if attempts_left <= 0:
-            return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
-        # Calculate a new end time.
-        context = {
+    # Viewing a previously submitted attempt
+    if "view" in request.GET:
+        attempt_to_view = attempts.last()
+        question_attempts = QuestionAttempt.objects.filter(quiz_attempt=attempt_to_view)
+        print('latest attempt',question_attempts)
+
+        return render(request, 'attempt_quiz.html', {
             'quiz': quiz,
-            'questions': questions,
-            'score': None,
+            'already_attempted': True,
+            'view_submitted': True,
             'total_marks': total_marks,
+            'question_attempts': question_attempts,
             'class_shell': class_shell,
-            'quiz_id': quiz_id,
-            'already_attempted': False,
             'previous_attempts': attempts,
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-        }
-        return render(request, 'attempt_quiz.html', context)
+            'ongoing_attempt': ongoing_attempt,
+        })
 
-    # Viewing a previously submitted attempt (e.g., for review).
-    if "view" in request.GET:
-        if attempts.exists():
-            # Compute highest score among all attempts.
-            highest_score = max(attempt.score for attempt in attempts)
-            attempt_to_view = attempts.last()
-            question_attempts = QuestionAttempt.objects.filter(quiz_attempt=attempt_to_view)
-            context = {
-                'quiz': quiz,
-                'already_attempted': True,
-                'view_submitted': True,
-                'total_marks': total_marks,
-                'score': highest_score,  # Only highest score counts.
-                'question_attempts': question_attempts,
-                'class_shell': class_shell,
-                'previous_attempts': attempts,
-                'current_attempt': current_attempt,
-                'attempts_left': attempts_left,
-                'max_attempts_reached': max_attempts_reached,
-            }
-            return render(request, 'attempt_quiz.html', context)
-
-    if request.method == "POST":
-        if attempts_left <= 0:
-            return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
-        score = 0
-        quiz_attempt = QuizAttempt.objects.create(
-            student=request.user,
-            quiz=quiz,
-            class_shell=class_shell,
-            total_marks=total_marks,
-            attempt_number=current_attempt
-        )
-
-        # Process each question.
-        for question in questions:
-            user_answer = request.POST.get(f'answer_{question.id}', 'n/a')
-            is_correct = False
-            if user_answer != 'n/a':
-                if question.type == "multiple_choice":
-                    print('quiz ans', question.mcq_answer )
-                    is_correct = (user_answer == question.mcq_answer)
-                elif question.type == "true_false":
-                    is_correct = (str(user_answer) == str(question.tf_answer))
-
-            QuestionAttempt.objects.create(
-                quiz_attempt=quiz_attempt,
-                question=question,
-                student_answer=user_answer,
-                is_correct=is_correct,
-            )
-            if is_correct:
-                score += question.mark
-
-        quiz_attempt.score = score
-        quiz_attempt.save()
-        return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
-
-    # Default GET: Show either the summary or the quiz form.
+    # Default GET: Show attempt history or quiz options.
     if attempts.exists():
-        # Compute the highest score among all attempts.
+        print('attempt',attempts)
         highest_score = max(attempt.score for attempt in attempts)
-        context = {
+        return render(request, 'attempt_quiz.html', {
             'quiz': quiz,
             'already_attempted': True,
             'view_submitted': False,
-            'score': highest_score,  # Highest score is used.
+            'score': highest_score,
             'total_marks': total_marks,
             'class_shell': class_shell,
             'previous_attempts': attempts,
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-        }
-        return render(request, 'attempt_quiz.html', context)
-    else:
-        # First GET request to start the quiz.
-        context = {
-            'quiz': quiz,
-            'questions': questions,
-            'score': None,
-            'total_marks': total_marks,
-            'class_shell': class_shell,
-            'quiz_id': quiz_id,
-            'already_attempted': False,
-            'previous_attempts': attempts,
-            'current_attempt': current_attempt,
-            'attempts_left': attempts_left,
-            'max_attempts_reached': max_attempts_reached,
-        }
-        return render(request, 'attempt_quiz.html', context)
-
-
+            'ongoing_attempt': ongoing_attempt,
+        })
 
 def while_quiz(request, class_shell_id, quiz_id):
     class_shell = get_object_or_404(ClassShell, id=class_shell_id)
     quiz = get_object_or_404(Quiz, id=quiz_id, class_shell=class_shell)
     questions = Question.objects.filter(quiz=quiz)
 
-    attempts = QuizAttempt.objects.filter(student=request.user, quiz=quiz).order_by('attempt_number')
-    current_attempt = attempts.count() + 1 
-
-    if 'quiz_attempt_number' not in request.session or request.session['quiz_attempt_number'] != current_attempt:
-        end_time = timezone.now() + timedelta(minutes=quiz.timer)
-        request.session['quiz_end_time'] = end_time.isoformat()  
-        request.session['quiz_attempt_number'] = current_attempt  
-    else:
-        end_time = timezone.datetime.fromisoformat(request.session['quiz_end_time'])
-
+    # Get latest attempt
+    quiz_attempt = QuizAttempt.objects.filter(student=request.user, quiz=quiz).order_by('-attempt_number').first()
+    quiz_attempt_id = quiz_attempt.id
     current_time = timezone.now()
-    remaining_time = max(0, int((end_time - current_time).total_seconds()))
+    remaining_time = int((quiz_attempt.end_time - current_time).total_seconds())
+
+    # Get the saved answers from the database
+    saved_answers = {
+        qa.question.id: qa.student_answer
+        for qa in QuestionAttempt.objects.filter(quiz_attempt=quiz_attempt)
+    }
+
+    # Pass saved answers to the template
+    for question in questions:
+        question.saved_answer = saved_answers.get(question.id)
+    for question in questions:
+        QuestionAttempt.objects.get_or_create(
+            quiz_attempt=quiz_attempt,
+            question=question,
+            defaults={
+                'student_answer': 'n/a',
+                'is_correct': False
+            }
+        )
+    if request.method == 'POST':
+        # Handle form submission
+        score = 0
+        for question in questions:
+            user_answer = request.POST.get(f'answer_{question.id}', 'n/a')
+            is_correct = False
+            if user_answer != 'n/a':
+                if question.type == "multiple_choice":
+                    is_correct = (user_answer == question.mcq_answer)
+                elif question.type == "true_false":
+                    is_correct = (str(user_answer) == str(question.tf_answer))
+
+            QuestionAttempt.objects.update_or_create(
+                quiz_attempt=quiz_attempt,
+                question=question,
+                defaults={
+                    'student_answer': user_answer,
+                    'is_correct': is_correct
+                }
+            )
+
+            if is_correct:
+                score += question.mark
+
+        quiz_attempt.score = score
+        quiz_attempt.submitted = True
+        quiz_attempt.save()
+        return redirect('student:attempt_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
 
     return render(request, 'while_quiz.html', {
         'class_shell_id': class_shell_id,
         'quiz_id': quiz_id,
         'questions': questions,
         'remaining_time': remaining_time,
-        'current_attempt': current_attempt,
+        'quiz_attempt_id': quiz_attempt_id,
     })
 
 
+def autosave_answer(request):
+    question_id = request.POST.get('question_id')
+    selected_answer = request.POST.get('selected_answer')
+    quiz_attempt_id = request.POST.get('quiz_attempt_id')
+
+    if not all([question_id, selected_answer, quiz_attempt_id]):
+        return JsonResponse({
+            'error': 'Missing parameters',
+            'received': dict(request.POST)
+        }, status=400)
+
+    try:
+        quiz_attempt = QuizAttempt.objects.get(id=quiz_attempt_id, student=request.user)
+        question = Question.objects.get(id=question_id)
+
+        # Check if selected answer is correct
+        if question.type == "multiple_choice":
+            is_correct = (selected_answer == question.mcq_answer)
+        elif question.type == "true_false":
+            is_correct = (selected_answer == str(question.tf_answer))
+
+        # Save or update the answer attempt
+        QuestionAttempt.objects.update_or_create(
+            quiz_attempt=quiz_attempt,
+            question=question,
+            defaults={
+                'student_answer': selected_answer,
+                'is_correct': is_correct
+            }
+        )
+
+        # Recalculate score based on all current attempts
+        total_score = 0
+        attempts = QuestionAttempt.objects.filter(quiz_attempt=quiz_attempt)
+        for attempt in attempts:
+            if attempt.is_correct:
+                total_score += attempt.question.mark
+
+        # Update score in quiz attempt
+        quiz_attempt.score = total_score
+        quiz_attempt.save()
+
+        return JsonResponse({'success': True, 'updated_score': total_score})
+
+    except QuizAttempt.DoesNotExist:
+        return JsonResponse({'error': 'Quiz attempt not found'}, status=404)
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
-def attempt_exercise(request, class_shell_id, exercise_id): 
-    from django.shortcuts import render, get_object_or_404, redirect
 
+def attempt_exercise(request, class_shell_id, exercise_id):
     class_shell = get_object_or_404(ClassShell, id=class_shell_id)
     exercise = get_object_or_404(Exercise, id=exercise_id, class_shell=class_shell)
-    exercise_questions = ExerciseQuestion.objects.filter(exercise=exercise)
-    total_marks = sum(question.mark for question in exercise_questions)
-    
-    # Retrieve all previous attempts by the student for this exercise.
+    questions = ExerciseQuestion.objects.filter(exercise=exercise)
+    total_marks = sum(question.mark for question in questions)
+
     attempts = ExerciseAttempt.objects.filter(student=request.user, exercise=exercise).order_by('attempt_number')
-    current_attempt = attempts.count() + 1
     attempts_left = exercise.max_attempts - attempts.count()
-    max_attempts_reached = attempts_left <= 0
-    end_time = timezone.now() + timedelta(minutes=exercise.timer)
+    current_attempt = attempts.count()
+    ongoing_attempt = ExerciseAttempt.objects.filter(
+        student=request.user, exercise=exercise, attempt_number=current_attempt, end_time__gt=timezone.now(), submitted=False
+    ).first()
+    max_attempts_reached = (attempts_left <= 0)
 
-
-    # If the student requested to view a submitted exercise, display the latest attempt’s review.
-    if "view" in request.GET:
-        if attempts.exists():
-            attempt_to_view = attempts.last()
-            question_attempts = ExerciseQuestionAttempt.objects.filter(exercise_attempt=attempt_to_view)
-            context = {
-                'exercise': exercise,
-                'already_attempted': True,
-                'view_submitted': True,
-                'total_marks': total_marks,
-                'score': attempt_to_view.score,
-                'question_attempts': question_attempts,
-                'class_shell': class_shell,
-                'previous_attempts': attempts,
-                'current_attempt': current_attempt,
-                'attempts_left': attempts_left,
-                'max_attempts_reached': max_attempts_reached,
-                'end_time': end_time.timestamp(),  # Passed as seconds.
-
-            }
-            return render(request, 'attempt_exercise.html', context)
-    
-    # Process a new attempt submission.
-    if request.method == "POST":
-        # Check if the student is allowed to attempt again.
-        if attempts_left <= 0:
-            # Optionally add a message notifying the student.
-            return redirect('student:attempt_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
-
-        score = 0
-        # Create a new ExerciseAttempt with the current attempt number.
+    if not attempts.exists():
+        current_attempt += 1
+        end_time = timezone.now() + timedelta(minutes=exercise.timer)
         exercise_attempt = ExerciseAttempt.objects.create(
             student=request.user,
             exercise=exercise,
             class_shell=class_shell,
             total_marks=total_marks,
-            attempt_number=current_attempt
+            attempt_number=current_attempt,
+            end_time=end_time
         )
+        return redirect('student:while_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
 
-        for exercise_question in exercise_questions:
-            user_answer = request.POST.get(f'answer_{exercise_question.id}')
-            is_correct = False
-            if not user_answer:  
-                    user_answer = 'N/A'
-            if exercise_question.type == "multiple_choice":
-                if user_answer:
-                    print(exercise_question.mcq_answer)
-                    is_correct = user_answer == str(exercise_question.mcq_answer)
-            elif exercise_question.type == "true_false":
-                if user_answer is not None:  
-                    is_correct = (str(user_answer).strip().lower() == str(exercise_question.tf_answer).strip().lower())
-            # For essay questions, you may want to add manual grading later.
-
-            ExerciseQuestionAttempt.objects.create(
-                exercise_attempt=exercise_attempt,
-                exercise_question=exercise_question,
-                student_answer=user_answer,
-                is_correct=is_correct,
+    if "start_new_attempt" in request.GET and not max_attempts_reached:
+        if not ongoing_attempt:
+            current_attempt += 1
+            end_time = timezone.now() + timedelta(minutes=exercise.timer)
+            exercise_attempt = ExerciseAttempt.objects.create(
+                student=request.user,
+                exercise=exercise,
+                class_shell=class_shell,
+                total_marks=total_marks,
+                attempt_number=current_attempt,
+                end_time=end_time
             )
+        return redirect('student:while_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
 
-            if is_correct:
-                score += exercise_question.mark
-
-        exercise_attempt.score = score
-        exercise_attempt.save()
-        return redirect('student:attempt_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
-
-    # Handle GET requests:
-    # If the student clicked "start new attempt" (and if attempts remain), show the exercise form.
-    if "start_new_attempt" in request.GET:
-        if attempts_left <= 0:
-            return redirect('student:attempt_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
-        context = {
+    if "view" in request.GET:
+        attempt_to_view = attempts.last()
+        question_attempts = ExerciseQuestionAttempt.objects.filter(exercise_attempt=attempt_to_view)
+        return render(request, 'attempt_exercise.html', {
             'exercise': exercise,
-            'exercise_questions': exercise_questions,
-            'score': None,
+            'already_attempted': True,
+            'view_submitted': True,
             'total_marks': total_marks,
+            'question_attempts': question_attempts,
             'class_shell': class_shell,
-            'exercise_id': exercise_id,
-            'already_attempted': False,  # New attempt in progress
             'previous_attempts': attempts,
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-            'end_time': end_time.timestamp(),  # Passed as seconds.
+            'ongoing_attempt': ongoing_attempt,
+        })
 
-        }
-        return render(request, 'attempt_exercise.html', context)
-
-    # Default GET:
-    # If there are any previous attempts, show the latest attempt's details along with attempt information.
     if attempts.exists():
-        last_attempt = attempts.last()
-        context = {
+        highest_score = max(attempt.score for attempt in attempts)
+        return render(request, 'attempt_exercise.html', {
             'exercise': exercise,
             'already_attempted': True,
             'view_submitted': False,
-            'score': last_attempt.score,
+            'score': highest_score,
             'total_marks': total_marks,
             'class_shell': class_shell,
             'previous_attempts': attempts,
             'current_attempt': current_attempt,
             'attempts_left': attempts_left,
             'max_attempts_reached': max_attempts_reached,
-        }
-        return render(request, 'attempt_exercise.html', context)
-    else:
-        # No attempts yet: show the exercise form.
-        context = {
-            'exercise': exercise,
-            'exercise_questions': exercise_questions,
-            'score': None,
-            'total_marks': total_marks,
-            'class_shell': class_shell,
-            'exercise_id': exercise_id,
-            'already_attempted': False,
-            'previous_attempts': attempts,
-            'current_attempt': current_attempt,
-            'attempts_left': attempts_left,
-            'max_attempts_reached': max_attempts_reached,
-            'end_time': end_time.timestamp(),  # Passed as seconds.
-
-        }
-        return render(request, 'attempt_exercise.html', context)
-
+            'ongoing_attempt': ongoing_attempt,
+        })
 def while_exercise(request, class_shell_id, exercise_id):
     class_shell = get_object_or_404(ClassShell, id=class_shell_id)
     exercise = get_object_or_404(Exercise, id=exercise_id, class_shell=class_shell)
-    exercise_questions = ExerciseQuestion.objects.filter(exercise=exercise)
+    questions = ExerciseQuestion.objects.filter(exercise=exercise)
 
-    attempts = ExerciseAttempt.objects.filter(student=request.user, exercise=exercise).order_by('attempt_number')
-    current_attempt = attempts.count() + 1
-
-    if 'exercise_attempt_number' not in request.session or request.session['exercise_attempt_number'] != current_attempt:
-        end_time = timezone.now() + timedelta(minutes=exercise.timer)
-        request.session['exercise_end_time'] = end_time.isoformat()  
-        request.session['exercise_attempt_number'] = current_attempt  
-    else:
-        end_time = timezone.datetime.fromisoformat(request.session['exercise_end_time'])
-
+    exercise_attempt = ExerciseAttempt.objects.filter(student=request.user, exercise=exercise).order_by('-attempt_number').first()
+    exercise_attempt_id = exercise_attempt.id
     current_time = timezone.now()
-    remaining_time = max(0, int((end_time - current_time).total_seconds()))
+    remaining_time = int((exercise_attempt.end_time - current_time).total_seconds())
+
+    saved_answers = {
+        eaq.exercise_question.id: eaq.student_answer
+        for eaq in ExerciseQuestionAttempt.objects.filter(exercise_attempt=exercise_attempt)
+    }
+
+    for question in questions:
+        question.saved_answer = saved_answers.get(question.id)
+        ExerciseQuestionAttempt.objects.get_or_create(
+            exercise_attempt=exercise_attempt,
+            exercise_question=question,
+            defaults={
+                'student_answer': 'n/a',
+                'is_correct': False
+            }
+        )
+
+    if request.method == 'POST':
+        score = 0
+        for question in questions:
+            user_answer = request.POST.get(f'answer_{question.id}', 'n/a')
+            is_correct = False
+            if user_answer != 'n/a':
+                if question.type == "multiple_choice":
+                    is_correct = (user_answer == question.mcq_answer)
+                elif question.type == "true_false":
+                    is_correct = (str(user_answer) == str(question.tf_answer))
+
+            ExerciseQuestionAttempt.objects.update_or_create(
+                exercise_attempt=exercise_attempt,
+                question=question,
+                defaults={
+                    'student_answer': user_answer,
+                    'is_correct': is_correct
+                }
+            )
+
+            if is_correct:
+                score += question.mark
+
+        exercise_attempt.score = score
+        exercise_attempt.submitted = True
+        exercise_attempt.save()
+        return redirect('student:attempt_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
 
     return render(request, 'while_exercise.html', {
         'class_shell_id': class_shell_id,
         'exercise_id': exercise_id,
-        'exercise_questions': exercise_questions,
+        'questions': questions,
         'remaining_time': remaining_time,
-        'current_attempt': current_attempt,
+        'exercise_attempt_id': exercise_attempt_id,
     })
+def autosave_answer_exercise(request):
+    exercise_question_id = request.POST.get('question_id')
+    selected_answer = request.POST.get('selected_answer')
+    exercise_attempt_id = request.POST.get('exercise_attempt_id')
+    if not all([exercise_question_id, selected_answer, exercise_attempt_id]):
+        return JsonResponse({
+            'error': 'Missing parameters',
+            'received': dict(request.POST)
+        }, status=400)
+
+    try:
+        print('here')
+
+        exercise_attempt = ExerciseAttempt.objects.get(id=exercise_attempt_id, student=request.user)
+        exercise_question = ExerciseQuestion.objects.get(id=exercise_question_id)
+
+        # Check if the selected answer is correct
+        is_correct = False
+        if exercise_question.type == "multiple_choice":
+            is_correct = (selected_answer == str(exercise_question.mcq_answer))
+        elif exercise_question.type == "true_false":
+            is_correct = (selected_answer == str(exercise_question.tf_answer))
+
+        # Save or update the answer attempt
+        ExerciseQuestionAttempt.objects.update_or_create(
+            exercise_attempt=exercise_attempt,
+            exercise_question=exercise_question,
+            defaults={
+                'student_answer': selected_answer,
+                'is_correct': is_correct
+            }
+        )
+
+        # Recalculate score based on all current attempts
+        total_score = 0
+        attempts = ExerciseQuestionAttempt.objects.filter(exercise_attempt=exercise_attempt)
+        for attempt in attempts:
+            if attempt.is_correct:
+                total_score += attempt.exercise_question.mark
+
+        # Update score in exercise attempt
+        exercise_attempt.score = total_score
+        exercise_attempt.save()
+
+        return JsonResponse({'success': True, 'updated_score': total_score})
+
+    except ExerciseAttempt.DoesNotExist:
+        return JsonResponse({'error': 'Exercise attempt not found'}, status=404)
+    except ExerciseQuestion.DoesNotExist:
+        return JsonResponse({'error': 'Exercise question not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

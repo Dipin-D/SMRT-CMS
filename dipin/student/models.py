@@ -20,11 +20,13 @@ class QuizAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
     class_shell = models.ForeignKey(ClassShell, on_delete=models.CASCADE, related_name="quiz_attempts")
     score = models.FloatField(default=0)
-    total_marks = models.FloatField()
+    total_marks = models.FloatField(null=True, blank=True)
     attempted_on = models.DateTimeField(auto_now_add=True)
     graded = models.BooleanField(default=False)
     grade = models.FloatField(null=True, blank=True)
     attempt_number = models.IntegerField(default=1)
+    end_time = models.DateTimeField(null=True, blank=True)
+    submitted = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student} - {self.quiz} - {self.score}/{self.total_marks}"
@@ -44,11 +46,13 @@ class ExerciseAttempt(models.Model):
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name="attempts")
     class_shell = models.ForeignKey(ClassShell, on_delete=models.CASCADE, related_name="exercise_attempts")
     score = models.FloatField(default=0)
-    total_marks = models.FloatField()
+    total_marks = models.FloatField(null=True, blank=True)
     attempted_on = models.DateTimeField(auto_now_add=True)
     graded = models.BooleanField(default=False)
     grade = models.FloatField(null=True, blank=True)
     attempt_number = models.IntegerField(default=1)
+    end_time = models.DateTimeField(null=True, blank=True)
+    submitted = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student} - {self.exercise} - {self.score}/{self.total_marks}"

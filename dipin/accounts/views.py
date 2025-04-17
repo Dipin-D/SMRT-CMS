@@ -4,7 +4,6 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from accounts.models import CustomUser  
 
 
 
@@ -42,13 +41,12 @@ def front_page(request):
     return render(request, 'registration/login.html', {'form': form})
 
 def guest_login(request):
-    # Get or create a guest user
-    user, created = CustomUser.objects.get_or_create(username='guest', defaults={'is_active': False})
 
-    # Log in the guest user
-    login(request, user)
+    user = authenticate(username='guest', password='dipin123')
 
-    return redirect('student:course_list')
+    if user is not None:
+        login(request, user)
+        return redirect('student:course_list')
     
 
 def redirect_based_on_role(user):
