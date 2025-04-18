@@ -11,7 +11,7 @@ Exercise: {{ exercise.title }}
   </div>  
   <p class="mb-4 text-center">Please answer the following questions:</p>
 
-<form id="exercise_form" method="POST" action="{% url 'student:attempt_exercise' class_shell_id=class_shell_id exercise_id=exercise_id %}">
+<form id="exercise_form" method="POST" action="{% url 'student:while_exercise' class_shell_id=class_shell_id exercise_id=exercise_id %}">
     {% csrf_token %}
 <div class="row">
         <div class="col-md-8 offset-md-2">
