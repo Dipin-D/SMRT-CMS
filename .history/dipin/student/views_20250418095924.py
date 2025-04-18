@@ -225,7 +225,7 @@ def attempt_quiz(request, class_shell_id, quiz_id):
 
             return redirect('student:while_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
     # NEW ATTEMPT: when a student clicks "start new attempt"
-    if "start_new_attempt" in request.GET:       
+    if "start_new_attempt" in request.GET and not max_attempts_reached:       
 
         # If no ongoing attempt exists or the current attempt has expired, create a new one
         if not ongoing_attempt:
@@ -430,7 +430,7 @@ def attempt_exercise(request, class_shell_id, exercise_id):
         )
         return redirect('student:while_exercise', class_shell_id=class_shell_id, exercise_id=exercise_id)
 
-    if "start_new_attempt" in request.GET:
+    if "start_new_attempt" in request.GET and not max_attempts_reached:
         if not ongoing_attempt:
             current_attempt += 1
             end_time = timezone.now() + timedelta(minutes=exercise.timer)
@@ -503,8 +503,6 @@ def while_exercise(request, class_shell_id, exercise_id):
         )
 
     if request.method == 'POST':
-        print('post vayo')
-
         score = 0
         for question in questions:
             user_answer = request.POST.get(f'answer_{question.id}', 'n/a')
@@ -517,7 +515,7 @@ def while_exercise(request, class_shell_id, exercise_id):
 
             ExerciseQuestionAttempt.objects.update_or_create(
                 exercise_attempt=exercise_attempt,
-                exercise_question=question,
+                question=question,
                 defaults={
                     'student_answer': user_answer,
                     'is_correct': is_correct

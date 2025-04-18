@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    {% if ongoing_attempt %}
+    {% if ongoing_attempt and not max_attempts_reached %}
     <div class="text-center mt-4">
         <a href="?start_new_attempt=true" class="btn custom-button" id="newAttemptLink">
             <i class="fas fa-play-circle fs-6"></i>Continue Attempt {{ current_attempt }}

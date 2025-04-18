@@ -71,29 +71,29 @@ class GoToCourseView(View):
         ungraded_submissions = {
             'assignments': AssignmentSubmission.objects.filter(graded=False, assignment__class_shell=class_shell)
                             .order_by('assignment', '-submitted_on')
-                            ,
+                            .distinct('assignment'),
 
             'quizzes': QuizAttempt.objects.filter(graded=False, quiz__class_shell=class_shell, submitted=True)
                         .order_by('quiz', '-attempted_on')
-                        ,
+                        .distinct('quiz'),
 
             'exercises': ExerciseAttempt.objects.filter(graded=False, exercise__class_shell=class_shell)
                         .order_by('exercise', '-attempted_on')
-                        ,
+                        .distinct('exercise'),
         }
 
         graded_submissions = {
             'assignments': AssignmentSubmission.objects.filter(graded=True, assignment__class_shell=class_shell)
                             .order_by('assignment', '-submitted_on')
-                            ,
+                            .distinct('assignment'),
 
             'quizzes': QuizAttempt.objects.filter(graded=True, quiz__class_shell=class_shell)
                         .order_by('quiz', '-attempted_on')
-                        ,
+                        .distinct('quiz'),
 
             'exercises': ExerciseAttempt.objects.filter(graded=True, exercise__class_shell=class_shell)
                         .order_by('exercise', '-attempted_on')
-                        ,
+                        .distinct('exercise'),
         }
 
 

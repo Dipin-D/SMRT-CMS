@@ -79,7 +79,7 @@ class GoToCourseView(View):
 
             'exercises': ExerciseAttempt.objects.filter(graded=False, exercise__class_shell=class_shell)
                         .order_by('exercise', '-attempted_on')
-                        ,
+                        .distinct('exercise'),
         }
 
         graded_submissions = {
@@ -93,7 +93,7 @@ class GoToCourseView(View):
 
             'exercises': ExerciseAttempt.objects.filter(graded=True, exercise__class_shell=class_shell)
                         .order_by('exercise', '-attempted_on')
-                        ,
+                        .distinct('exercise'),
         }
 
 

@@ -225,7 +225,7 @@ def attempt_quiz(request, class_shell_id, quiz_id):
 
             return redirect('student:while_quiz', class_shell_id=class_shell_id, quiz_id=quiz_id)
     # NEW ATTEMPT: when a student clicks "start new attempt"
-    if "start_new_attempt" in request.GET:       
+    if "start_new_attempt" in request.GET and not max_attempts_reached:       
 
         # If no ongoing attempt exists or the current attempt has expired, create a new one
         if not ongoing_attempt:
