@@ -59,7 +59,7 @@ class GoToCourseView(View):
         #attendance
         attendance_records = Attendance.objects.filter(class_shell=class_shell).order_by('-date')
         attendance_grouped = {}
-        studentwithacceswithname = class_shell.students_with_access.values_list('username', flat=True)
+        studentwithacceswithname = class_shell.students_with_access.all()
 
         for record in attendance_records:
             if record.date not in attendance_grouped:

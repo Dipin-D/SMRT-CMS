@@ -23,28 +23,32 @@ Exercise: {{ exercise.title }}
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                       id="choice_1_{{ question.id }}" value="{{ question.choice_1 }}">
+                                       id="choice_1_{{ question.id }}" value="{{ question.choice_1 }}"
+                                       {% if question.saved_answer_exercise == question.choice_1 %}checked{% endif %}>
                                 <label class="form-check-label" for="choice_1_{{ question.id }}">
                                     {{ question.choice_1 }}
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                       id="choice_2_{{ question.id }}" value="{{ question.choice_2 }}">
+                                       id="choice_2_{{ question.id }}" value="{{ question.choice_2 }}"
+                                       {% if question.saved_answer_exercise == question.choice_2 %}checked{% endif %}>
                                 <label class="form-check-label" for="choice_2_{{ question.id }}">
                                     {{ question.choice_2 }}
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                       id="choice_3_{{ question.id }}" value="{{ question.choice_3 }}">
+                                       id="choice_3_{{ question.id }}" value="{{ question.choice_3 }}"
+                                       {% if question.saved_answer_exercise == question.choice_3 %}checked{% endif %}>
                                 <label class="form-check-label" for="choice_3_{{ question.id }}">
                                     {{ question.choice_3 }}
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                       id="choice_4_{{ question.id }}" value="{{ question.choice_4 }}">
+                                       id="choice_4_{{ question.id }}" value="{{ question.choice_4 }}"
+                                       {% if question.saved_answer_exercise == question.choice_4 %}checked{% endif %}>
                                 <label class="form-check-label" for="choice_4_{{ question.id }}">
                                     {{ question.choice_4 }}
                                 </label>
@@ -52,20 +56,20 @@ Exercise: {{ exercise.title }}
                         </div>                                  
                         {% elif question.type == "true_false" %}
                             <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                           id="true_{{ question.id }}" value="True">
-                                    <label class="form-check-label" for="true_{{ question.id }}">
-                                        True
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
-                                           id="false_{{ question.id }}" value="False">
-                                    <label class="form-check-label" for="false_{{ question.id }}">
-                                        False
-                                    </label>
-                                </div>
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+       id="true_{{ question.id }}" value="True"
+       {% if question.saved_answer_exercise == "True" %}checked{% endif %}>
+                                <label class="form-check-label" for="true_{{ question.id }}">
+                                    True
+                                </label>
+
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                    id="false_{{ question.id }}" value="False"
+                                    {% if question.saved_answer_exercise == "False" %}checked{% endif %}>
+                                <label class="form-check-label" for="false_{{ question.id }}">
+                                    False
+                                </label>
+
                             </div>
                         {% elif question.type == "essay" %}
                             <div class="form-group mb-3">
@@ -87,7 +91,7 @@ Exercise: {{ exercise.title }}
     </div> 
 
 </form> 
-
+ 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var remainingTime = {{ remaining_time }};
