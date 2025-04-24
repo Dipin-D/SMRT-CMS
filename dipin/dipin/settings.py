@@ -2,19 +2,24 @@ from pathlib import Path
 import os
 from decouple import config
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['www.aamusmartcms.com', 'localhost', '127.0.0.1', '3.148.147.27', 'aamusmartcms.com']
 CSRF_TRUSTED_ORIGINS = [
     "https://aamusmartcms.com",
-    "https://www.aamusmartcms.com", 
+    "https://www.aamusmartcms.com",
 ]
+
+
 
 
 # Application definition
@@ -27,9 +32,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'storages',  
     'accounts',
-    'instructor', 
+    'instructor',
     'student',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -42,7 +48,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'dipin.urls'
+
 
 TEMPLATES = [
     {
@@ -60,15 +68,20 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'dipin.wsgi.application'
+
 
 # Email Backend for real email sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+
 # Gmail SMTP server configuration
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('email')
+EMAIL_HOST_PASSWORD = config('email_password')
 
 
 # Database configuration (PostgreSQL - AWS RDS)
@@ -82,6 +95,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -99,15 +113,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# settings.py
 
-# settings.py
+
 
 # AWS S3 Configuration
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
@@ -122,12 +136,16 @@ AWS_MEDIA_LOCATION = 'media'
 AWS_STATIC_LOCATION = 'static'  
 
 
+
+
 # Static and Media Files Configuration
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
 
 # Storage Backends Configuration
 STORAGES = {
@@ -157,5 +175,9 @@ STORAGES = {
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 LOGIN_URL = '/accounts/login'
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+
+
