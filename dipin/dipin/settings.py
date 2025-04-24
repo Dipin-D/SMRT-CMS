@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['www.aamusmartcms.com', 'localhost', '127.0.0.1', '3.148.147.27', 'aamusmartcms.com']
 CSRF_TRUSTED_ORIGINS = [
     "https://aamusmartcms.com",
@@ -61,6 +61,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dipin.wsgi.application'
+
+# Email Backend for real email sending
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Gmail SMTP server configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 
 # Database configuration (PostgreSQL - AWS RDS)
 DATABASES = {

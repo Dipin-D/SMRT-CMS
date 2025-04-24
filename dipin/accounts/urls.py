@@ -14,5 +14,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),    
     path("guest-login/", views.guest_login, name="guest_login"),
 
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
