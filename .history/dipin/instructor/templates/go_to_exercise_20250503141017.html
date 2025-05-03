@@ -1,0 +1,216 @@
+{% extends "home.html" %}
+
+{% block title %}Exercise: {{ exercise.title }}{% endblock %}
+
+{% block content %}
+<style>
+@media (max-width: 576px) {
+  .btn {
+      width: 100%;
+      margin-bottom: 5px;
+  }
+}
+.btn:active { filter: brightness(0.65); }
+.btn:hover { opacity: 0.8; }
+.btn-clicked {
+  filter: brightness(0.65);
+  opacity: 0.4;
+}
+</style>
+
+<h4>Manage Questions for {{ exercise.title }}</h4>
+<div class="container mt-4">
+
+<form method="POST" id="question-form">
+  {% csrf_token %}
+
+  <div class="mb-3">{{ question_form.text.label }} {{ question_form.text }}</div>
+
+  <div class="mb-3">
+    {{ question_form.type.label }}
+    <select name="type" id="question_type" class="form-select" onchange="updateFields()">
+      <option value="multiple_choice" {% if question_form.type.value == "multiple_choice" %}selected{% endif %}>Multiple Choice</option>
+      <option value="true_false" {% if question_form.type.value == "true_false" %}selected{% endif %}>True/False</option>
+      <option value="essay" {% if question_form.type.value == "essay" %}selected{% endif %}>Essay</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="id_mark">Marks</label>
+    <input type="number" name="mark" id="id_mark" class="form-control" value="{% if question_form.mark.value %}{{ question_form.mark.value }}{% else %}5{% endif %}">
+  </div>
+
+  <!-- Multiple Choice -->
+  <div id="multiple_choice_fields" style="display: {% if question_form.type.value == 'multiple_choice' %}block{% else %}none{% endif %};">
+    <div class="mb-3">
+      {{ question_form.choices.label }}
+      {{ question_form.choices }}
+      <small class="form-text text-muted">Enter one choice per line.</small>
+    </div>
+    <div class="mb-3">
+      <label>Correct Answers (check all that apply):</label>
+      <div id="mcq-answer-options"></div>
+    </div>
+  </div>
+
+  <!-- True/False -->
+  <div id="true_false_fields" style="display: {% if question_form.type.value == 'true_false' %}block{% else %}none{% endif %};">
+    <div class="mb-3">
+      {{ question_form.tf_answer.label }}
+      <select name="tf_answer" id="id_tf_answer" class="form-select">
+        <option value="True">True</option>
+        <option value="False">False</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Essay -->
+  <div id="essay_fields" style="display: {% if question_form.type.value == 'essay' %}block{% else %}none{% endif %};">
+    <div class="mb-3">{{ question_form.essay_answer.label }} {{ question_form.essay_answer }}</div>
+  </div>
+
+  <input type="hidden" name="exerciseQuestion_id" id="edit-question-id" value="">
+  <div class="d-grid gap-2 d-sm-flex">
+    <button type="submit" name="add_question" class="btn btn-primary shadow-sm">Add Question</button>
+    <button type="submit" name="edit_question" class="btn btn-warning shadow-sm">Update Question</button>
+  </div>
+</form>
+
+<h5 class="mt-4">Existing Questions</h5>
+<div class="list-group">
+  {% for question in exercise_questions %}
+    <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
+      <span>{{ question.text }}</span>
+      <div>
+        <button class="btn btn-warning shadow-sm edit-button" 
+                data-id="{{ question.id }}" 
+                data-text="{{ question.text }}" 
+                data-type="{{ question.type }}"
+                data-mark="{{ question.mark }}"
+                {% if question.type == 'multiple_choice' %}
+                  data-choices="{{ question.mcq_choices|join:'\\n' }}" 
+                  data-correct='{{ question.mcq_answers_json|escapejs }}'
+                {% elif question.type == 'true_false' %}
+                  data-answer="{{ question.tf_answer }}"
+                {% elif question.type == 'essay' %}
+                  data-answer="{{ question.essay_answer }}"
+                {% endif %}>Edit</button>
+
+        <form method="POST" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="exerciseQuestion_id" value="{{ question.id }}">
+          <button type="submit" name="delete_question" class="btn btn-danger shadow-sm">Delete</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <div class="list-group-item">No questions available.</div>
+  {% endfor %}
+</div>
+
+<div class="mt-3">
+  <a href="{% url 'instructor:exercises' class_shell_id=class_shell_id %}" class="btn btn-secondary mb-3">Go Back to Exercise List</a>
+</div>
+
+<script>
+function updateFields() {
+  const type = document.getElementById('question_type').value;
+  document.getElementById('multiple_choice_fields').style.display = 'none';
+  document.getElementById('true_false_fields').style.display = 'none';
+  document.getElementById('essay_fields').style.display = 'none';
+  document.getElementById('id_tf_answer').required = false;
+
+  if (type === 'multiple_choice') {
+    document.getElementById('multiple_choice_fields').style.display = 'block';
+  } else if (type === 'true_false') {
+    document.getElementById('true_false_fields').style.display = 'block';
+    document.getElementById('id_tf_answer').required = true;
+  } else if (type === 'essay') {
+    document.getElementById('essay_fields').style.display = 'block';
+  }
+}
+
+function renderCheckboxesFromChoices(selectedAnswers = []) {
+  const container = document.getElementById('mcq-answer-options');
+  const choices = document.getElementById('id_choices').value.split('\n').map(c => c.trim()).filter(Boolean);
+  container.innerHTML = '';
+
+  choices.forEach((choice, i) => {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = 'mcq_answers';
+    checkbox.value = choice;
+    checkbox.id = `mcq_choice_${i}`;
+    if (selectedAnswers.includes(choice)) checkbox.checked = true;
+
+    const label = document.createElement('label');
+    label.htmlFor = checkbox.id;
+    label.textContent = ` ${choice}`;
+
+    const div = document.createElement('div');
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
+}
+
+if (document.getElementById('id_choices')) {
+  document.getElementById('id_choices').addEventListener('input', () => {
+    const checked = Array.from(document.querySelectorAll('input[name="mcq_answers"]:checked')).map(cb => cb.value);
+    renderCheckboxesFromChoices(checked);
+  });
+}
+
+document.querySelectorAll('.edit-button').forEach(button => {
+  button.addEventListener('click', () => {
+    document.getElementById('edit-question-id').value = button.dataset.id;
+    document.getElementById('id_text').value = button.dataset.text;
+    document.getElementById('question_type').value = button.dataset.type;
+    document.getElementById('id_mark').value = button.dataset.mark || "5";
+
+    document.getElementById('id_choices').value = "";
+    document.getElementById('id_tf_answer').value = "";
+    document.getElementById('id_essay_answer').value = "";
+    document.getElementById('mcq-answer-options').innerHTML = "";
+
+    if (button.dataset.type === "multiple_choice") {
+      const choices = button.dataset.choices.split("\\n");
+      const correct = JSON.parse(button.dataset.correct || '[]');
+      document.getElementById('id_choices').value = choices.join("\n");
+      renderCheckboxesFromChoices(correct);
+    } else if (button.dataset.type === "true_false") {
+      document.getElementById('id_tf_answer').value = button.dataset.answer;
+    } else if (button.dataset.type === "essay") {
+      document.getElementById('id_essay_answer').value = button.dataset.answer;
+    }
+
+    updateFields();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateFields();
+});
+function resetForm() {
+  document.getElementById('question-form').reset();
+  document.getElementById('edit-question-id').value = '';
+  document.querySelector('button[name="add_question"]').style.display = 'inline-block';
+  document.querySelector('button[name="edit_question"]').style.display = 'none';
+
+  if (currentEditButton) {
+    currentEditButton.classList.remove("btn-clicked");
+    currentEditButton = null;
+  }
+
+  isEditMode = false;
+  document.getElementById('mcq-answer-options').innerHTML = '';
+}
+
+// Initial setup
+document.addEventListener('DOMContentLoaded', () => {
+  updateFields();
+  document.querySelector('button[name="edit_question"]').style.display = 'none';  // 👈 Hide Update on load
+});
+
+</script>
+{% endblock %}

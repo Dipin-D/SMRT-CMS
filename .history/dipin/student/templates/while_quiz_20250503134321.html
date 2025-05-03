@@ -1,0 +1,135 @@
+{% extends "home.html" %}
+
+{% block title %}
+  Quiz: {{ quiz.title }}
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-info text-center">
+    <p>Time Remaining: <span id="timer">Loading...</span></p>
+</div>  
+<p class="mb-4 text-center">Please answer the following questions:</p>
+
+<form id="quiz_form" method="POST" action="{% url 'student:while_quiz' class_shell_id=class_shell_id quiz_id=quiz_id %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="list-group">
+                {% for question in questions %}
+                    <div class="list-group-item mb-4">
+                        <pre><code>{{ question.text|linebreaksbr }}</code></pre>
+                        {% if question.type == "multiple_choice" %}
+                            <div class="mb-3">
+                                {% with saved_answers=question.saved_answer|default:"" %}
+                                    {% for choice in question.mcq_choices %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                name="answer_{{ question.id }}" 
+                                                id="choice_{{ forloop.counter }}_{{ question.id }}" 
+                                                value="{{ choice }}"
+                                                {% if choice in saved_answers %}checked{% endif %}>
+                                            <label class="form-check-label" for="choice_{{ forloop.counter }}_{{ question.id }}">
+                                                {{ choice }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            {% endif %}
+                                
+                        {% elif question.type == "true_false" %}
+                            <div class="mb-3">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                    id="true_{{ question.id }}" value="True"
+                                    {% if question.saved_answer == "True" %}checked{% endif %}>
+                                <label class="form-check-label" for="true_{{ question.id }}">
+                                    True
+                                </label>
+
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                    id="false_{{ question.id }}" value="False"
+                                    {% if question.saved_answer == "False" %}checked{% endif %}>
+                                <label class="form-check-label" for="false_{{ question.id }}">
+                                    False
+                                </label>
+                            </div>
+                        {% elif question.type == "essay" %}
+                            <div class="form-group mb-3">
+                                <label for="answer_{{ question.id }}">Your Answer:</label>
+                                <textarea name="answer_{{ question.id }}" class="form-control" rows="5">{% if question.saved_answer %}{{ question.saved_answer }}{% endif %}</textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div> 
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn custom-button">
+            <i class="fas fa-paper-plane fs-6"></i> Submit Quiz
+        </button>
+    </div> 
+</form> 
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var remainingTime = {{ remaining_time }};
+        
+        function updateTimerDisplay(minutes, seconds) {
+            document.getElementById("timer").textContent = `${minutes}m ${seconds}s`;
+        }
+    
+        function startTimer() {
+            var timerInterval = setInterval(function () {
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    updateTimerDisplay(0, 0);
+                    autoSubmitQuiz();
+                } else {
+                    remainingTime -= 1;
+                    updateTimerDisplay(Math.floor(remainingTime / 60), remainingTime % 60);
+                }
+            }, 1000);
+        }
+    
+        updateTimerDisplay(Math.floor(remainingTime / 60), remainingTime % 60);
+        startTimer();
+    
+        // Auto-save answers
+        document.querySelectorAll('input[type=radio], input[type=checkbox], textarea').forEach(input => {
+            input.addEventListener('change', function () {
+                const name = this.name;
+                const questionId = name.split('_')[1];
+                
+                let answer;
+                if (this.type === 'checkbox') {
+                    const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+                    answer = Array.from(checkboxes).map(cb => cb.value).join(',');
+                } else {
+                    answer = this.value || "N/A";
+                }
+                
+                autoSave(questionId, answer, "{{ quiz_attempt_id }}");
+            });
+        });
+    
+        function autoSave(questionId, answer, attemptId) {
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('selected_answer', answer);
+            formData.append('quiz_attempt_id', attemptId);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            fetch("{% url 'student:autosave_answer' %}", {
+                method: "POST",
+                body: formData
+            }).then(res => res.json()).catch(error => console.error('Error:', error));
+        }
+    });
+
+    function autoSubmitQuiz() {
+        document.getElementById('quiz_form').submit();
+    }
+</script>
+{% endblock %}

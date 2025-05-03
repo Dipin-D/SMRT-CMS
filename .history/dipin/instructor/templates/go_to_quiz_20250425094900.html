@@ -1,0 +1,224 @@
+{% extends "home.html" %}
+
+{% block title %}
+  Quiz: {{ quiz.title }}
+{% endblock %}
+
+{% block content %}
+<style>
+  @media (max-width: 576px) {
+    .btn {
+        width: 100%; /* Full width on small screens */
+        margin-bottom: 5px; /* Space between buttons */
+    }
+  }
+  .btn:active {
+    filter: brightness(0.65); /* Darker effect on click */
+  }
+  .btn:hover {
+    opacity: 0.8; /* Slight dimming on hover */
+  }
+  .btn-clicked {
+    filter: brightness(0.65);
+    opacity: 0.4; /*  dimming  */
+  }
+  </style> 
+<h4>Manage Questions for {{ quiz.title }}</h4>
+<div class="container mt-4">
+
+  <!-- Add/Edit Question Form -->
+  <form method="POST" id="question-form">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      {{ question_form.text.label }} {{ question_form.text }}
+    </div>
+    
+    <div class="mb-3">
+      {{ question_form.type.label }} 
+      <select name="type" id="question_type" class="form-select" onchange="updateFields()">
+        <option value="multiple_choice" {% if question_form.type.value == "multiple_choice" %}selected{% endif %}>Multiple Choice</option>
+        <option value="true_false" {% if question_form.type.value == "true_false" %}selected{% endif %}>True/False</option>
+        <option value="essay" {% if question_form.type.value == "essay" %}selected{% endif %}>Essay</option>
+      </select>
+    </div>
+    
+    <!-- Field for Marks -->
+    <div class="mb-3">
+      <label for="id_mark">Marks</label>
+      <input type="number" name="mark" id="id_mark" class="form-control" value="{% if question_form.mark.value %}{{ question_form.mark.value }}{% else %}5{% endif %}">
+    </div>
+
+    <!-- Fields for Multiple Choice Questions -->
+    <div id="multiple_choice_fields" style="display: {% if question_form.type.value == 'multiple_choice' %}block{% else %}none{% endif %};">
+      <div class="mb-2">
+        {{ question_form.choice_1.label }} {{ question_form.choice_1 }} required
+      </div>
+      <div class="mb-2">
+        {{ question_form.choice_2.label }} {{ question_form.choice_2 }} required
+      </div>
+      <div class="mb-2">
+        {{ question_form.choice_3.label }} {{ question_form.choice_3 }} required
+      </div>
+      <div class="mb-2">
+        {{ question_form.choice_4.label }} {{ question_form.choice_4 }} required
+      </div>
+      <div class="mb-3">
+        {{ question_form.answer.label }}
+        <select name="mcq_answer" id="id_mcq_answer" class="form-select" required>
+          <option value="" disabled>Select an answer</option>
+          <option value="Choice 1">Choice 1</option>
+          <option value="Choice 2">Choice 2</option>
+          <option value="Choice 3">Choice 3</option>
+          <option value="Choice 4">Choice 4</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fields for True/False Questions -->
+    <div id="true_false_fields" style="display: {% if question_form.type.value == 'true_false' %}block{% else %}none{% endif %};">
+      <div class="mb-3">
+        {{ question_form.true_false_answer.label }}
+        <select name="tf_answer" id="id_tf_answer" class="form-select" required>
+          <option value="True">True</option>
+          <option value="False">False</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fields for Essay Questions -->
+    <div id="essay_fields" style="display: {% if question_form.type.value == 'essay' %}block{% else %}none{% endif %};">
+      <div class="mb-3">
+        {{ question_form.essay_answer.label }} {{ question_form.essay_answer }} required
+      </div>
+    </div>
+
+    <input type="hidden" name="question_id" id="edit-question-id" value=""> <!-- Hidden input for editing question -->
+    
+    <div class="mt-3">
+      <button type="submit" name="add_question" class="btn btn-primary  shadow-sm">Add Question</button>
+      <button type="submit" name="edit_question" class="btn btn-warning  shadow-sm">Update Question</button>
+    </div>
+  </form>
+
+  <h5 class="mt-4">Existing Questions</h5>
+  <div class="list-group">
+    {% for question in questions %}
+      <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
+        <span>{{ question.text }}</span>
+        <div>
+          <!-- Edit Question Button -->
+          <button class="btn btn-warning  shadow-sm edit-button" 
+                  data-id="{{ question.id }}" 
+                  data-text="{{ question.text }}" 
+                  data-type="{{ question.type }}"
+                  {% if question.type == 'multiple_choice' %} 
+                    data-answer1="{{ question.choice_1 }}" 
+                    data-answer2="{{ question.choice_2 }}" 
+                    data-answer3="{{ question.choice_3 }}" 
+                    data-answer4="{{ question.choice_4 }}" 
+                    data-correct="{{ question.mcq_answer }}"
+                  {% elif question.type == 'true_false' %} 
+                    data-answer="{{ question.tf_answer }}"
+                  {% elif question.type == 'essay' %}
+                    data-answer="{{ question.essay_answer }}"
+                  {% endif %}>
+            Edit
+          </button>
+
+          <!-- Delete Question Form -->
+          <form method="POST" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <button type="submit" name="delete_question" class="btn btn-danger shadow-sm">Delete</button>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <div class="list-group-item">No questions available.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="mt-3">
+  <a href="{% url 'instructor:quizlist' class_shell_id=class_shell_id %}" class="btn btn-secondary mb-3">Go Back to Quiz</a>
+</div>
+
+<!-- JavaScript to Handle Edit Button Functionality -->
+<script>
+  function updateFields() {
+    const questionType = document.getElementById('question_type').value;
+
+    // Hide all question type fields initially
+    document.getElementById('multiple_choice_fields').style.display = 'none';
+    document.getElementById('true_false_fields').style.display = 'none';
+    document.getElementById('essay_fields').style.display = 'none';
+
+    // Show fields based on the selected question type
+    if (questionType === 'multiple_choice') {
+      document.getElementById('multiple_choice_fields').style.display = 'block';
+    } else if (questionType === 'true_false') {
+      document.getElementById('true_false_fields').style.display = 'block';
+    } else if (questionType === 'essay') {
+      document.getElementById('essay_fields').style.display = 'block';
+    }
+  }
+
+  document.querySelectorAll('.edit-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const questionId = this.getAttribute('data-id');
+        const questionText = this.getAttribute('data-text');
+        const questionType = this.getAttribute('data-type');
+        
+        // Populate the edit form with the current question details
+        document.getElementById('edit-question-id').value = questionId;
+        document.getElementById('id_text').value = questionText;
+        
+        // Set mark to a specific value if one exists, else default
+        const markField = document.getElementById('id_mark');
+        markField.value = this.getAttribute('data-mark') || "5";
+
+        // Show the correct fields based on the question type
+        updateFields();
+
+        // Populate question fields based on type
+        if (questionType === 'multiple_choice') {
+            document.getElementById('id_choice_1').value = this.getAttribute('data-answer1');
+            document.getElementById('id_choice_2').value = this.getAttribute('data-answer2');
+            document.getElementById('id_choice_3').value = this.getAttribute('data-answer3');
+            document.getElementById('id_choice_4').value = this.getAttribute('data-answer4');
+            document.getElementById('id_mcq_answer').value = this.getAttribute('data-correct') || "";
+            document.getElementById('question_type').value = 'multiple_choice';
+        } else if (questionType === 'true_false') {
+            document.getElementById('id_tf_answer').value = this.getAttribute('data-answer');
+            document.getElementById('question_type').value = 'true_false';
+        } else if (questionType === 'essay') {
+            document.getElementById('id_essay_answer').value = this.getAttribute('data-answer');
+            document.getElementById('question_type').value = 'essay';
+        }
+        
+        updateFields(); // Call again to show correct fields based on type
+    });
+  });
+
+  // Call updateFields on page load to set the initial state
+  document.addEventListener('DOMContentLoaded', () => {
+    updateFields();
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let buttons = document.querySelectorAll(".btn");
+
+    buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            // Remove active class from all buttons
+            buttons.forEach(btn => btn.classList.remove("btn-clicked"));
+
+            // Add active class to the clicked button
+            this.classList.add("btn-clicked");
+        });
+    });
+});
+</script>
+
+{% endblock %}

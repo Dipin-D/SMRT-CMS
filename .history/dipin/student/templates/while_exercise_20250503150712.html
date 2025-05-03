@@ -1,0 +1,154 @@
+{% extends "home.html" %}
+
+{% block title %}
+Exercise: {{ exercise.title }}
+{% endblock %}
+
+{% block content %}
+ <!-- Exercise form for new attempt -->
+ <div class="alert alert-info text-center">
+    <p>Time Remaining: <span id="timer">Loading...</span></p>
+  </div>  
+  <p class="mb-4 text-center">Please answer the following questions:</p>
+
+<form id="exercise_form" method="POST" action="{% url 'student:while_exercise' class_shell_id=class_shell_id exercise_id=exercise_id %}">
+    {% csrf_token %}
+<div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="list-group">
+                {% for question in questions %}
+                    <div class="list-group-item mb-4">
+                        <pre><code>{{ question.text|linebreaksbr }}</code></pre>
+                        {% if question.type == "multiple_choice" %}
+                            <div class="mb-3">
+                                {% with saved_answers=question.saved_answer_exercise|default:"" %}
+                                    {% for choice in question.mcq_choices %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                name="answer_{{ question.id }}" 
+                                                id="choice_{{ forloop.counter }}_{{ question.id }}" 
+                                                value="{{ choice }}"
+                                                {% if choice in saved_answers %}checked{% endif %}>
+                                            <label class="form-check-label" for="choice_{{ forloop.counter }}_{{ question.id }}">
+                                                {{ choice }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                          
+                        {% elif question.type == "true_false" %}
+                            <div class="mb-3">
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                id="true_{{ question.id }}" value="True"
+                                {% if "True" in question.saved_answer_exercise %}checked{% endif %}
+                                <label class="form-check-label" for="true_{{ question.id }}">
+                                    True
+                                </label>
+
+                                <input class="form-check-input" type="radio" name="answer_{{ question.id }}"
+                                    id="false_{{ question.id }}" value="False"
+                                    {% if "True" in question.saved_answer_exercise %}checked{% endif %}
+                                    <label class="form-check-label" for="false_{{ question.id }}">
+                                    False
+                                </label>
+
+                            </div>
+                        {% elif question.type == "essay" %}
+                            <div class="form-group mb-3">
+                                <label for="answer_{{ question.id }}">Your Answer:</label>
+                                <textarea name="answer_{{ question.id }}" class="form-control" rows="5">{% if question.saved_answer_exercise %}{{ question.saved_answer_exercise }}{% endif %}</textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div> 
+
+  <!-- Submit button -->
+    <div class="text-center mt-4">
+        <button type="submit" class="btn custom-button">
+            <i class="fas fa-paper-plane fs-6"></i> Submit Exercise
+        </button>
+    </div> 
+
+</form> 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var remainingTime = {{ remaining_time }};
+        
+        function updateTimerDisplay(minutes, seconds) {
+            const timerElement = document.getElementById("timer");
+            if (timerElement) {
+                timerElement.textContent = `${minutes}m ${seconds}s`;
+            }
+        }
+
+        function startTimer() {
+            const timerInterval = setInterval(function () {
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    updateTimerDisplay(0, 0);
+                    autoSubmitExercise();
+                } else {
+                    remainingTime -= 1;
+                    updateTimerDisplay(Math.floor(remainingTime / 60), remainingTime % 60);
+                }
+            }, 1000);
+        }
+
+        updateTimerDisplay(Math.floor(remainingTime / 60), remainingTime % 60);
+        startTimer();
+
+        // Auto-save answers when user changes input
+        document.querySelectorAll('input[type=radio], input[type=checkbox], textarea').forEach(input => {
+            input.addEventListener('change', function () {
+                const name = this.name;
+                const questionId = name.split('_')[1];
+                const attemptId = "{{ exercise_attempt_id }}";
+
+                let answer;
+
+                if (this.type === 'checkbox') {
+                    const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+                    answer = Array.from(checkboxes).map(cb => cb.value);
+                } else {
+                    answer = this.value || "N/A";
+                }
+
+                autoSave(questionId, answer, attemptId);
+            });
+        });
+
+        function autoSave(questionId, answer, attemptId) {
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+
+            if (Array.isArray(answer)) {
+                formData.append('selected_answer', JSON.stringify(answer));  // Only stringify arrays
+            } else {
+                formData.append('selected_answer', answer);  // Send strings as-is
+            }
+
+            formData.append('exercise_attempt_id', attemptId);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch("{% url 'student:autosave_answer_exercise' %}", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("🧪 AUTOSAVE DEBUG:", data);
+            })
+            .catch(error => {
+                console.error("Auto-save error:", error);
+            });
+    });
+
+    function autoSubmitExercise() {
+        document.getElementById('exercise_form').submit();
+    }
+</script>
+{% endblock %}

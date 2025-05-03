@@ -1,0 +1,160 @@
+{% extends "home.html" %}
+
+{% block title %}Quiz: {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<style>
+  @media (max-width: 576px) {
+    .btn { width: 100%; margin-bottom: 5px; }
+  }
+  .btn:active { filter: brightness(0.65); }
+  .btn:hover { opacity: 0.8; }
+  .btn-clicked { filter: brightness(0.65); opacity: 0.4; }
+</style>
+
+<h4>Manage Questions for {{ quiz.title }}</h4>
+<div class="container mt-4">
+  <form method="POST" id="question-form">
+    {% csrf_token %}
+    {{ question_form.non_field_errors }}
+    <div class="mb-3">{{ question_form.text.label_tag }} {{ question_form.text }}</div>
+    <div class="mb-3">{{ question_form.type.label_tag }} {{ question_form.type }}</div>
+    <div class="mb-3">
+      <label for="id_mark">Marks</label>
+      <input type="number" name="mark" id="id_mark" class="form-control" value="{{ question_form.mark.value|default:5 }}">
+    </div>
+
+    <!-- Multiple Choice -->
+    <div id="multiple_choice_fields" style="display:none;">
+      <div class="mb-3">
+        {{ question_form.choices.label_tag }} {{ question_form.choices }}
+        <small>One choice per line</small>
+      </div>
+      <div class="mb-3">
+        <label>Correct Answers:</label>
+        <div id="mcq-answer-options"></div>
+      </div>
+    </div>
+
+    <!-- True/False -->
+    <div id="true_false_fields" style="display:none;">
+      <div class="mb-3">{{ question_form.true_false_answer.label_tag }} {{ question_form.true_false_answer }}</div>
+    </div>
+
+    <!-- Essay -->
+    <div id="essay_fields" style="display:none;">
+      <div class="mb-3">{{ question_form.essay_answer.label_tag }} {{ question_form.essay_answer }}</div>
+    </div>
+
+    <input type="hidden" name="question_id" id="edit-question-id" value="">
+    <button type="submit" name="add_question" class="btn btn-primary">Add Question</button>
+    <button type="submit" name="edit_question" class="btn btn-warning">Update Question</button>
+  </form>
+
+  <h5 class="mt-4">Existing Questions</h5>
+  <div class="list-group">
+    {% for question in questions %}
+      <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
+        <span>{{ question.text }}</span>
+        <div>
+          <!-- Edit Button -->
+          <button class="btn btn-warning edit-button"
+            data-id="{{ question.id }}"
+            data-text="{{ question.text }}"
+            data-type="{{ question.type }}"
+            data-mark="{{ question.mark }}"
+            {% if question.type == 'multiple_choice' %}
+              data-choices="{{ question.mcq_choices|join:'\\n'|escapejs }}"
+              data-correct="{{ question.mcq_answers|safe }}"
+            {% elif question.type == 'true_false' %}
+              data-answer="{{ question.tf_answer }}"
+            {% elif question.type == 'essay' %}
+              data-answer="{{ question.essay_answer }}"
+            {% endif %}>
+            Edit
+          </button>
+
+          <!-- Delete Form -->
+          <form method="POST" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <button type="submit" name="delete_question" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <div class="list-group-item">No questions yet.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+function updateFields() {
+  const type = document.getElementById('question_type').value;
+  document.getElementById('multiple_choice_fields').style.display = (type === 'multiple_choice') ? 'block' : 'none';
+  document.getElementById('true_false_fields').style.display = (type === 'true_false') ? 'block' : 'none';
+  document.getElementById('essay_fields').style.display = (type === 'essay') ? 'block' : 'none';
+}
+
+function renderCheckboxesFromChoices() {
+  const container = document.getElementById('mcq-answer-options');
+  const choices = document.getElementById('id_choices').value.split('\\n').map(c => c.trim()).filter(Boolean);
+  container.innerHTML = '';
+  choices.forEach((choice, idx) => {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = 'mcq_answers';
+    checkbox.value = choice;
+    checkbox.id = 'mcq_' + idx;
+
+    const label = document.createElement('label');
+    label.htmlFor = checkbox.id;
+    label.innerText = ' ' + choice;
+
+    const div = document.createElement('div');
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    container.appendChild(div);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateFields();
+  document.getElementById('id_choices').addEventListener('input', renderCheckboxesFromChoices);
+  document.querySelector('button[name="edit_question"]').style.display = 'none';
+
+  document.querySelectorAll('.edit-button').forEach(button => {
+    button.addEventListener('click', function () {
+      document.getElementById('edit-question-id').value = this.dataset.id;
+      document.getElementById('id_text').value = this.dataset.text;
+      document.getElementById('id_mark').value = this.dataset.mark;
+      document.getElementById('question_type').value = this.dataset.type;
+      updateFields();
+
+      if (this.dataset.type === 'multiple_choice') {
+        const choices = (this.dataset.choices || '').split("\\n").map(c => c.trim());
+        document.getElementById('id_choices').value = choices.join("\\n");
+        renderCheckboxesFromChoices();
+        const correct = JSON.parse(this.dataset.correct || '[]');
+        setTimeout(() => {
+          document.querySelectorAll('input[name="mcq_answers"]').forEach(cb => {
+            cb.checked = correct.includes(cb.value);
+          });
+        }, 100);
+      }
+
+      if (this.dataset.type === 'true_false') {
+        document.getElementById('id_tf_answer').value = this.dataset.answer;
+      }
+
+      if (this.dataset.type === 'essay') {
+        document.getElementById('id_essay_answer').value = this.dataset.answer;
+      }
+
+      document.querySelector('button[name="add_question"]').style.display = 'none';
+      document.querySelector('button[name="edit_question"]').style.display = 'inline-block';
+    });
+  });
+});
+</script>
+{% endblock %}
