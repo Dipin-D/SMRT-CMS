@@ -10,7 +10,7 @@
 
     <!-- Instructor can view student submission and grade -->
     <div class="mt-4">
-      <h5 class="text-center">Submitted Quiz Review for {{ submission.student.username }}</h5>
+      <h5 class="text-center">Submitted Quiz Review for{{ QuizAttempt.student }}</h5>
       <ul class="list-group">
         {% for attempt in question_attempts %}
           <li class="list-group-item mb-3">
