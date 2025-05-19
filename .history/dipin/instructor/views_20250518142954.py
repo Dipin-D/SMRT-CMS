@@ -118,9 +118,9 @@ class GoToCourseView(View):
         max_quiz = quiz_subs_graded.aggregate(max=Max('grade'))['max'] or 0
         std_quiz = quiz_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
 
-        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('score'))['avg'] or 0
-        max_exercise = exercise_subs_graded.aggregate(max=Max('score'))['max'] or 0
-        std_exercise = exercise_subs_graded.aggregate(std=StdDev('score'))['std'] or 0
+        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        max_exercise = exercise_subs_graded.aggregate(max=Max('grade'))['max'] or 0
+        std_exercise = exercise_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
 
         # Prepare data for bar chart
         data_bar = {
@@ -141,24 +141,22 @@ class GoToCourseView(View):
         )
 
         chart_bar = fig_bar.to_html(full_html=False)
-        # Prepare data for dot plot (standard deviation as point height)
+        # Prepare data for standard deviation comparison
         data_bar2 = {
             'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
-            'Standard Deviation': [std_assignment, std_quiz, std_exercise]
+            'Grade StdDev': [std_assignment, std_quiz, std_exercise]
         }
         df_bar2 = pd.DataFrame(data_bar2)
 
-        fig_bar2 = px.scatter(
+        fig_bar2 = px.bar(
             df_bar2,
             x='Assessment Type',
-            y='Standard Deviation',
-            size=[10, 10, 10],  # Optional: consistent dot size
-            title='Grade Variability (Std. Dev.) Across Assessment Types',
-            labels={'Standard Deviation': 'Grade StdDev'},
+            y='Grade StdDev',
+            title='Grade Variability Across Assessment Types',
+            labels={'Grade StdDev': 'Standard Deviation'}
         )
 
         chart_bar2 = fig_bar2.to_html(full_html=False)
-
 
 
 

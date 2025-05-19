@@ -33,7 +33,7 @@ class go_to_course_student(View):
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
-        latest_assignments = AssignmentSubmission.objects.filter(student=request.user,assignment__class_shell=class_shell)\
+        latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
             .order_by('assignment_id', '-submitted_on')\
             .distinct('assignment_id')
         latest_assignments_info = [
@@ -52,7 +52,7 @@ class go_to_course_student(View):
             .distinct('quiz_id')
 
         # --- Assignments ---
-        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user, assignment__class_shell=class_shell).values_list(
+        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
             'assignment', 'submission_text', 'submission_file', 'grade'
         )
         submitted_assignments_info = [
@@ -100,22 +100,17 @@ class go_to_course_student(View):
         else:
             attendance_percentage = 100  # Default to 100% if no attendance records exist
 
-        # --- Achieved Score (based on actual graded submissions only)
+        # Calculate overall marks and scores based on submitted items only
+        submitted_assignment_marks = sum(a.total_marks for a in assignments if a.id in submitted_assignment_ids)
         submitted_assignment_score = sum(sub['grade'] for sub in submitted_assignments_info if sub['grade'] is not None)
+
+        # --- Quizzes ---
+        submitted_quiz_marks = sum(sum(q.mark for q in Question.objects.filter(quiz=quiz)) for quiz in quizzes if quiz.id in submitted_quiz_ids)
         submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
 
-        # --- Total Possible Marks (based on all assignments and quizzes, submitted or not)
-        submitted_assignment_marks = sum(a.total_marks or 0 for a in assignments)
-
-        submitted_quiz_marks = sum(
-            sum(q.mark for q in Question.objects.filter(quiz=quiz))
-            for quiz in quizzes
-        )
-
-        # Final totals
+        # Calculate overall marks and scores without exercises
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
-
 
         # Avoid division by zero
         overall_percentage = (overall_score / overall_total_marks) * 100 if overall_total_marks > 0 else 0
@@ -125,31 +120,51 @@ class go_to_course_student(View):
         categories = ["Assignments", "Quizzes", "Overall"]
         scores = [submitted_assignment_score, submitted_quiz_score, overall_score]
         max_marks = [submitted_assignment_marks, submitted_quiz_marks, overall_total_marks]
-        fig = go.Figure()
+        # Calculate totals
+        assignment_earned = submitted_assignment_score
+        assignment_possible = submitted_assignment_marks
+        assignment_missed = assignment_possible - assignment_earned
 
-        fig.add_trace(go.Bar(
-            x=categories,
-            y=scores,
-            name="Grade Achieved",
-            marker_color="#800000",  
-            textposition='outside'
-        ))
+        quiz_earned = submitted_quiz_score
+        quiz_possible = submitted_quiz_marks
+        quiz_missed = quiz_possible - quiz_earned
 
-        fig.add_trace(go.Bar(
-            x=categories,
-            y=max_marks,
-            name="Total Marks",
-            marker_color="#f5f5f5",  
-            textposition='outside'
-        ))
+        overall_possible = assignment_possible + quiz_possible
+        overall_earned = assignment_earned + quiz_earned
+        overall_missed = overall_possible - overall_earned
 
-        fig.update_layout(
-            title="Grade Breakdown",
-            title_x=0.5,  
-            barmode='group',
-            template="plotly_white"
-        )
-        interactive_overall_chart = opy.plot(fig, output_type='div', include_plotlyjs=False)
+        # Avoid zero division
+        missed_percent = round((overall_missed / overall_possible * 100), 2) if overall_possible else 0
+        missed_summary = f"You’ve missed {missed_percent}% of all available marks."
+
+        # Donut for Assignments
+        labels_a = ['Earned', 'Missed'] if assignment_possible else ['No Data']
+        values_a = [assignment_earned, assignment_missed] if assignment_possible else [1]
+        fig_a = go.Figure(data=[go.Pie(
+            labels=labels_a,
+            values=values_a,
+            hole=0.5,
+            marker=dict(colors=['#4CAF50', '#F44336']),
+            textinfo="label+percent",
+        )])
+        fig_a.update_layout(title="Assignments Progress", template="plotly_white", title_x=0.5)
+
+        # Donut for Quizzes
+        labels_q = ['Earned', 'Missed'] if quiz_possible else ['No Data']
+        values_q = [quiz_earned, quiz_missed] if quiz_possible else [1]
+        fig_q = go.Figure(data=[go.Pie(
+            labels=labels_q,
+            values=values_q,
+            hole=0.5,
+            marker=dict(colors=['#2196F3', '#FF5722']),
+            textinfo="label+percent",
+        )])
+        fig_q.update_layout(title="Quizzes Progress", template="plotly_white", title_x=0.5)
+
+        # Convert to HTML
+        interactive_assignment_chart = opy.plot(fig_a, output_type='div', include_plotlyjs=False)
+        interactive_quiz_chart = opy.plot(fig_q, output_type='div', include_plotlyjs=False)
+
 
         return render(request, 'go_to_course_student.html', {
             'class_shell': class_shell,
@@ -173,7 +188,8 @@ class go_to_course_student(View):
             'overall_score': overall_score,
             'overall_percentage': overall_percentage,
             'grade': grade,
-            'interactive_overall_chart': interactive_overall_chart,
+            'interactive_assignment_chart': interactive_assignment_chart,
+            'interactive_quiz_chart': interactive_quiz_chart,
             'attendance_percentage': attendance_percentage,
         })
 

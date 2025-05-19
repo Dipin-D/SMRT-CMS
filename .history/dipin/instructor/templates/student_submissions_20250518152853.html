@@ -90,7 +90,6 @@
 </style>
 
 <body>
-
 <div class="container ">
     <h3 class="text-center mb-4 card-title">Ungraded Submissions</h3>
 
@@ -167,41 +166,44 @@
 <!-- Collapsible for Quizzes -->
 <button class="collapsible custom-button mt-3 mb-3 ml-3">Quizzes</button>
 <div class="collapsible-content table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Student Name</th>
-                <th>Auto Grade Score</th>
-                <th>Manual Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for quiz in ungraded_submissions.quizzes %}
-            <tr>
-                <td>{{ quiz.quiz.title }}</td>
-                <td>{{ quiz.student.username }}</td>
-                <td>{{ quiz.score }}</td>
-                <td>
-                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button btn-sm">View Details to Grade</a>
-                </td>
-            </tr>
-            {% endfor %}
-
-            {% for quiz in graded_submissions.quizzes %}
-            <tr>
-                <td>{{ quiz.quiz.title }}</td>
-                <td>{{ quiz.student.username }}</td>
-                <td>Previous Auto Grade - {{ quiz.score }}</td>
-                <td>
+    {% with '' as current_title %}
+    {% for quiz in ungraded_submissions.quizzes|add:graded_submissions.quizzes %}
+        {% if quiz.quiz.title != current_title %}
+            {% if not forloop.first %}</tbody></table></div>{% endif %}
+            <button class="collapsible">{{ quiz.quiz.title }}</button>
+            <div class="collapsible-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Student Name</th>
+                        <th>Auto Grade</th>
+                        <th>Manual Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% endif %}
+        <tr>
+            <td>{{ quiz.quiz.title }}</td>
+            <td>{{ quiz.student.username }}</td>
+            <td>
+                {% if quiz.score %}{{ quiz.score }}{% endif %}
+            </td>
+            <td>
+                {% if quiz.grade %}
                     <span class="badge bg-success">{{ quiz.grade }}</span>
                     <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button">Regrade / View Details</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                {% else %}
+                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button btn-sm">View Details to Grade</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% with quiz.quiz.title as current_title %}{% endwith %}
+        {% if forloop.last %}</tbody></table></div>{% endif %}
+    {% endfor %}
+    {% endwith %}
 </div>
+
 
 <!-- 
 <button class="collapsible">Exercises</button>

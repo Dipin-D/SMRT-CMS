@@ -33,7 +33,7 @@ class go_to_course_student(View):
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
-        latest_assignments = AssignmentSubmission.objects.filter(student=request.user,assignment__class_shell=class_shell)\
+        latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
             .order_by('assignment_id', '-submitted_on')\
             .distinct('assignment_id')
         latest_assignments_info = [
@@ -52,7 +52,7 @@ class go_to_course_student(View):
             .distinct('quiz_id')
 
         # --- Assignments ---
-        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user, assignment__class_shell=class_shell).values_list(
+        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
             'assignment', 'submission_text', 'submission_file', 'grade'
         )
         submitted_assignments_info = [
@@ -100,22 +100,17 @@ class go_to_course_student(View):
         else:
             attendance_percentage = 100  # Default to 100% if no attendance records exist
 
-        # --- Achieved Score (based on actual graded submissions only)
+        # Calculate overall marks and scores based on submitted items only
+        submitted_assignment_marks = sum(a.total_marks for a in assignments if a.id in submitted_assignment_ids)
         submitted_assignment_score = sum(sub['grade'] for sub in submitted_assignments_info if sub['grade'] is not None)
+
+        # --- Quizzes ---
+        submitted_quiz_marks = sum(sum(q.mark for q in Question.objects.filter(quiz=quiz)) for quiz in quizzes if quiz.id in submitted_quiz_ids)
         submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
 
-        # --- Total Possible Marks (based on all assignments and quizzes, submitted or not)
-        submitted_assignment_marks = sum(a.total_marks or 0 for a in assignments)
-
-        submitted_quiz_marks = sum(
-            sum(q.mark for q in Question.objects.filter(quiz=quiz))
-            for quiz in quizzes
-        )
-
-        # Final totals
+        # Calculate overall marks and scores without exercises
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
-
 
         # Avoid division by zero
         overall_percentage = (overall_score / overall_total_marks) * 100 if overall_total_marks > 0 else 0

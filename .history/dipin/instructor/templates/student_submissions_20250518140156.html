@@ -90,7 +90,6 @@
 </style>
 
 <body>
-
 <div class="container ">
     <h3 class="text-center mb-4 card-title">Ungraded Submissions</h3>
 
@@ -120,12 +119,16 @@
                     {% endif %}
                 </td>
                 <td>
-                    <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="submission_id" value="{{ assignment.id }}">
-                        <input type="text" name="grade" placeholder="Enter Grade">
-                        <button type="submit" name="grade_submission" class="custom-button">Save</button>
-                    </form>
+                    {% if assignment.grade %}
+                        <p>{{ assignment.grade }} ✔️</p> 
+                    {% else %}
+                        <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="submission_id" value="{{ assignment.id }}">
+                            <input type="text" name="grade" placeholder="Enter Grade">
+                            <button type="submit" name="grade_submission" class="custom-button">Save</button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -135,25 +138,18 @@
                 <td>{{ assignment.student.username }}</td>
                 <td>
                     {% if assignment.submission_text %}
-                        <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
+                        <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View </button>
                     {% endif %}
                     {% if assignment.submission_file %}
                         <a href="{{ assignment.submission_file.url }}" target="_blank">View File</a>
                     {% endif %}
                 </td>
                 <td>
-                    <!-- Display current grade and edit button -->
-                    <div id="display-grade-{{ assignment.id }}">
-                        <span>✔️ Graded</span>
-                        <button type="button" class="custom-button" onclick="toggleEdit({{ assignment.id }})">Edit Grade</button>
-                    </div>
-
-                    <!-- Hidden edit form -->
-                    <form method="POST" id="edit-form-{{ assignment.id }}" style="display: none;" action="{% url 'instructor:go_to_course' class_shell.id %}">
+                    <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="submission_id" value="{{ assignment.id }}">
                         <input type="text" name="grade" value="{{ assignment.grade }}" placeholder="Enter Grade">
-                        <button type="submit" name="grade_submission" class="custom-button">Save</button>
+                        <button type="submit" name="grade_submission" class="custom-button">✔️ Edit Grade</button>
                     </form>
                 </td>
             </tr>
@@ -161,7 +157,6 @@
         </tbody>
     </table>
 </div>
-
 
 
 <!-- Collapsible for Quizzes -->
@@ -256,12 +251,6 @@
 </div>
 
 <script>
-    <!-- Inline Script for toggle -->
-  function toggleEdit(id) {
-    document.getElementById('display-grade-' + id).style.display = 'none';
-    document.getElementById('edit-form-' + id).style.display = 'block';
-  }
-  
     document.querySelectorAll(".collapsible").forEach(button => {
         button.addEventListener("click", function () {
             this.classList.toggle("active");

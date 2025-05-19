@@ -5,7 +5,7 @@ from student.models import AssignmentSubmission, QuizAttempt, ExerciseAttempt
 from django.views import View
 from accounts.models import CustomUser
 from django.contrib import messages
-from django.db.models import Avg, Sum, Max, StdDev
+from django.db.models import Avg, Sum
 import plotly.express as px
 import pandas as pd
 from datetime import datetime
@@ -103,62 +103,36 @@ class GoToCourseView(View):
         exercise_form = ExerciseForm()  
         assignment_form = AssignmentForm()
 
-   # analytics section
+        #analytics section
         # Graded submissions for each assessment type
         assignment_subs_graded = AssignmentSubmission.objects.filter(assignment__class_shell=class_shell, graded=True)
         quiz_subs_graded = QuizAttempt.objects.filter(quiz__class_shell=class_shell, graded=True)
-        exercise_subs_graded = ExerciseAttempt.objects.filter(exercise__class_shell=class_shell, submitted=True)
+        exercise_subs_graded = ExerciseAttempt.objects.filter(exercise__class_shell=class_shell, graded=True)
 
-        # Calculate average, max, and std deviation (default to 0 if none)
+        # Calculate average and total grades (defaulting to 0 if no submissions exist)
         avg_assignment = assignment_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
-        max_assignment = assignment_subs_graded.aggregate(max=Max('grade'))['max'] or 0
-        std_assignment = assignment_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
+        total_assignment = assignment_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
 
         avg_quiz = quiz_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
-        max_quiz = quiz_subs_graded.aggregate(max=Max('grade'))['max'] or 0
-        std_quiz = quiz_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
+        total_quiz = quiz_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
 
-        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('score'))['avg'] or 0
-        max_exercise = exercise_subs_graded.aggregate(max=Max('score'))['max'] or 0
-        std_exercise = exercise_subs_graded.aggregate(std=StdDev('score'))['std'] or 0
+        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        total_exercise = exercise_subs_graded.aggregate(total=Sum('grade'))['total'] or 0
 
-        # Prepare data for bar chart
+        # Prepare data for bar chart: Only Average Grades per Assessment Type
         data_bar = {
             'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
-            'Average Grade': [avg_assignment, avg_quiz, avg_exercise],
-            'Max Grade': [max_assignment, max_quiz, max_exercise],
-            'Standard Deviation': [std_assignment, std_quiz, std_exercise]
+            'Average Grade': [avg_assignment, avg_quiz, avg_exercise]
         }
         df_bar = pd.DataFrame(data_bar)
 
         fig_bar = px.bar(
             df_bar,
             x='Assessment Type',
-            y=['Average Grade', 'Max Grade'],
-            barmode='group',
-            title='Average vs Max Grades per Assessment Type',
-            labels={'value': 'Grade', 'variable': 'Metric'}
-        )
-
-        chart_bar = fig_bar.to_html(full_html=False)
-        # Prepare data for dot plot (standard deviation as point height)
-        data_bar2 = {
-            'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
-            'Standard Deviation': [std_assignment, std_quiz, std_exercise]
-        }
-        df_bar2 = pd.DataFrame(data_bar2)
-
-        fig_bar2 = px.scatter(
-            df_bar2,
-            x='Assessment Type',
-            y='Standard Deviation',
-            size=[10, 10, 10],  # Optional: consistent dot size
-            title='Grade Variability (Std. Dev.) Across Assessment Types',
-            labels={'Standard Deviation': 'Grade StdDev'},
-        )
-
-        chart_bar2 = fig_bar2.to_html(full_html=False)
-
+            y='Average Grade',
+            title='Average Grades per Assessment Type',
+            range_y=[0, 100]  # Assuming grades are out of 100
+)
 
 
 
@@ -180,7 +154,6 @@ class GoToCourseView(View):
             'ungraded_submissions': ungraded_submissions,
             'graded_submissions': graded_submissions,
             'chart_bar': chart_bar,
-            'chart_bar2': chart_bar2,
             'attendance_grouped': attendance_grouped,
             'studentwithacceswithname':studentwithacceswithname,
        })

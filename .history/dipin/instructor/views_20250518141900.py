@@ -107,7 +107,7 @@ class GoToCourseView(View):
         # Graded submissions for each assessment type
         assignment_subs_graded = AssignmentSubmission.objects.filter(assignment__class_shell=class_shell, graded=True)
         quiz_subs_graded = QuizAttempt.objects.filter(quiz__class_shell=class_shell, graded=True)
-        exercise_subs_graded = ExerciseAttempt.objects.filter(exercise__class_shell=class_shell, submitted=True)
+        exercise_subs_graded = ExerciseAttempt.objects.filter(exercise__class_shell=class_shell, graded=True)
 
         # Calculate average, max, and std deviation (default to 0 if none)
         avg_assignment = assignment_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
@@ -118,9 +118,9 @@ class GoToCourseView(View):
         max_quiz = quiz_subs_graded.aggregate(max=Max('grade'))['max'] or 0
         std_quiz = quiz_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
 
-        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('score'))['avg'] or 0
-        max_exercise = exercise_subs_graded.aggregate(max=Max('score'))['max'] or 0
-        std_exercise = exercise_subs_graded.aggregate(std=StdDev('score'))['std'] or 0
+        avg_exercise = exercise_subs_graded.aggregate(avg=Avg('grade'))['avg'] or 0
+        max_exercise = exercise_subs_graded.aggregate(max=Max('grade'))['max'] or 0
+        std_exercise = exercise_subs_graded.aggregate(std=StdDev('grade'))['std'] or 0
 
         # Prepare data for bar chart
         data_bar = {
@@ -141,24 +141,6 @@ class GoToCourseView(View):
         )
 
         chart_bar = fig_bar.to_html(full_html=False)
-        # Prepare data for dot plot (standard deviation as point height)
-        data_bar2 = {
-            'Assessment Type': ['Assignments', 'Quizzes', 'Exercises'],
-            'Standard Deviation': [std_assignment, std_quiz, std_exercise]
-        }
-        df_bar2 = pd.DataFrame(data_bar2)
-
-        fig_bar2 = px.scatter(
-            df_bar2,
-            x='Assessment Type',
-            y='Standard Deviation',
-            size=[10, 10, 10],  # Optional: consistent dot size
-            title='Grade Variability (Std. Dev.) Across Assessment Types',
-            labels={'Standard Deviation': 'Grade StdDev'},
-        )
-
-        chart_bar2 = fig_bar2.to_html(full_html=False)
-
 
 
 
@@ -180,7 +162,6 @@ class GoToCourseView(View):
             'ungraded_submissions': ungraded_submissions,
             'graded_submissions': graded_submissions,
             'chart_bar': chart_bar,
-            'chart_bar2': chart_bar2,
             'attendance_grouped': attendance_grouped,
             'studentwithacceswithname':studentwithacceswithname,
        })

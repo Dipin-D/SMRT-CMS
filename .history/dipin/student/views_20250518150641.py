@@ -115,6 +115,11 @@ class go_to_course_student(View):
         # Final totals
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
+        print("Assignment Grades:", [sub['grade'] for sub in submitted_assignments_info])
+        print("Quiz Grades:", [sub['grade'] for sub in submitted_quizzes_info])
+        print("submitted_assignment_score:", submitted_assignment_score)
+        print("submitted_quiz_score:", submitted_quiz_score)
+        print("overall_score:", overall_score)
 
 
         # Avoid division by zero

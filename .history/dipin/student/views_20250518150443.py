@@ -33,7 +33,7 @@ class go_to_course_student(View):
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
-        latest_assignments = AssignmentSubmission.objects.filter(student=request.user,assignment__class_shell=class_shell)\
+        latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
             .order_by('assignment_id', '-submitted_on')\
             .distinct('assignment_id')
         latest_assignments_info = [
@@ -115,6 +115,11 @@ class go_to_course_student(View):
         # Final totals
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
+        print("Assignment Grades:", [sub['grade'] for sub in submitted_assignments_info])
+        print("Quiz Grades:", [sub['grade'] for sub in submitted_quizzes_info])
+        print("submitted_assignment_score:", submitted_assignment_score)
+        print("submitted_quiz_score:", submitted_quiz_score)
+        print("overall_score:", overall_score)
 
 
         # Avoid division by zero

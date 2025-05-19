@@ -1,0 +1,33 @@
+<!-- Plotly JS library -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<div class="container text-center mt-4" style="max-width: 700px;">
+    <h2 class="mb-4 card-title">Analytics for {{ class_shell.course_name }}</h2>
+
+    {% if not assignments and not quizzes and not exercises %}
+        <p class="text-muted fw-semibold">
+            Take it easy for now! Your instructor hasn’t assigned any tasks yet.
+        </p>
+    {% else %}
+        <!-- Grade Details Card (Same Width as Chart) -->
+        <div class="card p-3 shadow-sm mx-auto w-100">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <span class="badge text-dark p-2 bg-light border">Grade: <strong>{{ grade }}</strong></span>
+                <span class="badge text-dark p-2 bg-light border">Total Marks: <strong>{{ overall_total_marks }}</strong></span>
+                <span class="badge text-dark p-2 bg-light border">Achieved: <strong>{{ overall_score }}</strong></span>
+                <span class="badge text-dark p-2 bg-light border">Percentage: <strong>{{ overall_percentage|floatformat:1 }}%</strong></span>
+            </div>
+        </div>
+
+        <!-- Interactive Chart (Same Width as Card) -->
+        <div class="container mt-4 text-center">
+            <h2 class="mb-4">Your Performance Breakdown</h2>
+            <div class="d-flex justify-content-center flex-wrap">
+              <div class="m-3" style="flex: 1; min-width: 350px;">{{ interactive_overall_chart|safe }}</div>
+              <div class="m-3" style="flex: 1; min-width: 350px;">{{ interactive_quiz_chart|safe }}</div>
+            </div>
+            <p class="mt-4 text-muted">{{ missed_summary }}</p>
+          </div>
+          
+    {% endif %}
+</div>

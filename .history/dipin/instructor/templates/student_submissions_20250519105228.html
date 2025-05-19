@@ -90,6 +90,26 @@
 </style>
 
 <body>
+    <h4>Debug Ungraded Quiz Fields:</h4>
+<pre>
+{% for quiz in ungraded_submissions.quizzes %}
+Title: {{ quiz.quiz.title }}
+Student: {{ quiz.student.username }}
+Score: {{ quiz.score }}
+---
+{% endfor %}
+</pre>
+
+<h4>Debug Graded Quiz Fields:</h4>
+<pre>
+{% for quiz in graded_submissions.quizzes %}
+Title: {{ quiz.quiz.title }}
+Student: {{ quiz.student.username }}
+Score: {{ quiz.score }}
+Grade: {{ quiz.grade }}
+---
+{% endfor %}
+</pre>
 
 <div class="container ">
     <h3 class="text-center mb-4 card-title">Ungraded Submissions</h3>

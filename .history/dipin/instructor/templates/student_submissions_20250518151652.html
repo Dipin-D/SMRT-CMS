@@ -90,7 +90,6 @@
 </style>
 
 <body>
-
 <div class="container ">
     <h3 class="text-center mb-4 card-title">Ungraded Submissions</h3>
 
@@ -108,27 +107,33 @@
         </thead>
         <tbody>
             {% for assignment in ungraded_submissions.assignments %}
-            <tr>
-                <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}</td>
-                <td>
-                    {% if assignment.submission_text %}
-                        <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
-                    {% endif %}
-                    {% if assignment.submission_file %}
-                        <a href="{{ assignment.submission_file.url }}" target="_blank">View File</a>
-                    {% endif %}
-                </td>
-                <td>
-                    <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="submission_id" value="{{ assignment.id }}">
-                        <input type="text" name="grade" placeholder="Enter Grade">
-                        <button type="submit" name="grade_submission" class="custom-button">Save</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
+<tr>
+    <td colspan="4">
+        <button class="collapsible w-100">
+            📄 {{ assignment.assignment.title }} — {{ assignment.student.username }}
+        </button>
+        <div class="collapsible-content">
+            <div class="p-3">
+                <strong>Submission:</strong><br>
+                {% if assignment.submission_text %}
+                    <button class="view-submission-btn custom-button mt-2 mb-2" data-text="{{ assignment.submission_text }}">View Text</button><br>
+                {% endif %}
+                {% if assignment.submission_file %}
+                    <a href="{{ assignment.submission_file.url }}" class="d-block mb-2" target="_blank">📎 View Attached File</a>
+                {% endif %}
+
+                <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="submission_id" value="{{ assignment.id }}">
+                    <input type="text" name="grade" placeholder="Enter Grade">
+                    <button type="submit" name="grade_submission" class="custom-button">Save</button>
+                </form>
+            </div>
+        </div>
+    </td>
+</tr>
+{% endfor %}
+
             {% for assignment in graded_submissions.assignments %}
             <tr>
                 <td>{{ assignment.assignment.title }}</td>

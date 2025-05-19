@@ -33,7 +33,7 @@ class go_to_course_student(View):
         assignments = Assignment.objects.filter(class_shell=class_shell)
         utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
         now = utc_now - timedelta(hours=6)
-        latest_assignments = AssignmentSubmission.objects.filter(student=request.user,assignment__class_shell=class_shell)\
+        latest_assignments = AssignmentSubmission.objects.filter(student=request.user)\
             .order_by('assignment_id', '-submitted_on')\
             .distinct('assignment_id')
         latest_assignments_info = [
@@ -52,7 +52,7 @@ class go_to_course_student(View):
             .distinct('quiz_id')
 
         # --- Assignments ---
-        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user, assignment__class_shell=class_shell).values_list(
+        submitted_assignments = AssignmentSubmission.objects.filter(student=request.user).values_list(
             'assignment', 'submission_text', 'submission_file', 'grade'
         )
         submitted_assignments_info = [
@@ -115,7 +115,6 @@ class go_to_course_student(View):
         # Final totals
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
-
 
         # Avoid division by zero
         overall_percentage = (overall_score / overall_total_marks) * 100 if overall_total_marks > 0 else 0
