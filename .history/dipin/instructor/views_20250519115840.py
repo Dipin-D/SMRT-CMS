@@ -9,8 +9,7 @@ from django.db.models import Avg, Sum, Max, StdDev
 import plotly.express as px
 import pandas as pd
 from datetime import datetime
-import csv
-from django.contrib.auth import get_user_model
+from collections import defaultdict
 
 
 def class_shell_list(request):
@@ -98,9 +97,35 @@ class GoToCourseView(View):
                         .order_by('exercise', '-attempted_on')
                         ,
         }
-        print("==== Graded Assignment Submissions ====")
+
+        # Group ungraded submissions by title
+        grouped_ungraded_assignments = defaultdict(list)
+        for submission in ungraded_submissions['assignments']:
+            grouped_ungraded_assignments[submission.assignment.title].append(submission)
+
+        grouped_ungraded_quizzes = defaultdict(list)
+        for attempt in ungraded_submissions['quizzes']:
+            grouped_ungraded_quizzes[attempt.quiz.title].append(attempt)
+
+        # Group graded submissions by title
+        grouped_graded_assignments = defaultdict(list)
         for submission in graded_submissions['assignments']:
-            print(f"Assignment: {submission.assignment.title}, Student: {submission.student.username}, Attempt #: {submission.attempt_number}")
+            grouped_graded_assignments[submission.assignment.title].append(submission)
+
+        grouped_graded_quizzes = defaultdict(list)
+        for attempt in graded_submissions['quizzes']:
+            grouped_graded_quizzes[attempt.quiz.title].append(attempt)
+        grouped_data = {
+            'assignments': {
+                'ungraded': grouped_ungraded_assignments,
+                'graded': grouped_graded_assignments,
+            },
+            'quizzes': {
+                'ungraded': grouped_ungraded_quizzes,
+                'graded': grouped_graded_quizzes,
+            }
+        }
+
 
 
         lecture_form = CourseForm()
@@ -189,6 +214,7 @@ class GoToCourseView(View):
             'chart_bar2': chart_bar2,
             'attendance_grouped': attendance_grouped,
             'studentwithacceswithname':studentwithacceswithname,
+            'grouped_data': grouped_data
        })
 
     def post(self, request, class_shell_id):
@@ -213,47 +239,6 @@ class GoToCourseView(View):
                 selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
 
             class_shell.students_with_access.set(selected_students) 
-            # === Create Single Student Account ===
-        User = get_user_model()
-        if 'create_single' in request.POST:
-            first = request.POST.get('first_name', '').strip().lower()
-            last = request.POST.get('last_name', '').strip().lower()
-            email = request.POST.get('email', '').strip().lower()
-            username = first + last
-            password = last + first
-
-            if not User.objects.filter(username=username).exists():
-                new_user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    is_student=True
-                )
-                class_shell.students_with_access.add(new_user)
-
-        # === Bulk Upload Students from CSV ===
-        if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
-            try:
-                csv_file = request.FILES['student_csv'].read().decode('utf-8').splitlines()
-                reader = csv.DictReader(csv_file)
-                for row in reader:
-                    first = row['first_name'].strip().lower()
-                    last = row['last_name'].strip().lower()
-                    email = row['email'].strip().lower()
-                    username = first + last
-                    password = last + first
-
-                    if not User.objects.filter(username=username).exists():
-                        new_user = User.objects.create_user(
-                            username=username,
-                            email=email,
-                            password=password,
-                            is_student=True
-                        )
-                        class_shell.students_with_access.add(new_user)
-            except Exception as e:
-                messages.error(request, f"CSV upload failed: {str(e)}")
-
 
         if 'take_attendance' in request.POST:
             try:

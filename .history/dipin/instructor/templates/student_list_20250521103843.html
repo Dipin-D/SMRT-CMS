@@ -5,18 +5,8 @@
         display: block;
     }
 </style>
-<h4 class="text-center mb-4 card-title">Enroll and Create New Students Accounts</h4>
+<h4 class="text-center mb-4 card-title">Enroll and create New Students Accounts</h4>
 
-<!-- CSV Upload -->
-<form method="POST" enctype="multipart/form-data" action="{% url 'instructor:go_to_course' class_shell.id %}" class="mt-4">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label>Upload CSV (first_name, last_name, email)</label>
-        <input type="file" name="student_csv" accept=".csv" class="form-control" required>
-    </div>
-    <input type="hidden" name="upload_csv" value="1">
-    <button type="submit" class="custom-button">Upload CSV</button>
-</form>
 <!-- Manual Entry -->
 <form method="POST" enctype="multipart/form-data" action="{% url 'instructor:go_to_course' class_shell.id %}">
     {% csrf_token %}
@@ -33,9 +23,19 @@
         <input type="email" name="email" class="form-control" required>
     </div>
     <input type="hidden" name="create_single" value="1">
-    <button type="submit" class="custom-button">Manually Create and Enroll Student</button>
+    <button type="submit" class="custom-button">Create Student</button>
 </form>
 
+<!-- CSV Upload -->
+<form method="POST" enctype="multipart/form-data" action="{% url 'instructor:go_to_course' class_shell.id %}" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label>Upload CSV (first_name, last_name, email)</label>
+        <input type="file" name="student_csv" accept=".csv" class="form-control" required>
+    </div>
+    <input type="hidden" name="upload_csv" value="1">
+    <button type="submit" class="custom-button">Upload CSV</button>
+</form>
 
 <h3 class="text-center mb-4 card-title">Manage Student Access</h3>
 <div class="text-center mb-3">
@@ -54,39 +54,36 @@
         </label>
     </div>
 
-    <!-- Scrollable Table -->
-    <div class="scrollable-table">
-        <table class="table table-bordered">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Student</th>
-                    <th scope="col">Access</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.username }}</td>
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input student-checkbox" type="checkbox" name="access_student_ids" value="{{ student.id }}"
-                                {% if student.id in students_with_access %}checked{% endif %}>
-                            <label class="form-check-label">
-                                {% if student.id in students_with_access %}
-                                    <span class="text-success">Access Granted</span>
-                                {% else %}
-                                    <span class="text-danger">No Access</span>
-                                {% endif %}
-                            </label>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Student</th>
+                <th scope="col">Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.username }}</td>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input student-checkbox" type="checkbox" name="access_student_ids" value="{{ student.id }}"
+                            {% if student.id in students_with_access %}checked{% endif %}>
+                        <label class="form-check-label">
+                            {% if student.id in students_with_access %}
+                                <span class="text-success">Access Granted</span>
+                            {% else %}
+                                <span class="text-danger">No Access</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <div style="display: inline-block; margin-top: 15px;">
+    <div style="display: inline-block;">
         <button type="submit" name="update_access" class="custom-button">Update Access</button>
     </div>
 </form>

@@ -1,0 +1,82 @@
+<h2 class="text-center card-title">Assignments for {{ class_shell.course_name }}</h2>
+
+<!-- List of Assignments -->
+<ul class="list-group mt-4">
+    {% for assignment in assignments %}
+        <li class="list-group-item p-3 card">
+            <strong>{{ assignment.title }}</strong>
+            <p class="mb-2">{{ assignment.text }}</p>
+
+            <!-- Display Files for this Assignment -->
+            {% if assignment.assignment_files.all %}
+                <ul class="list-unstyled mt-2">
+                    {% for assignment_file in assignment.assignment_files.all %}
+                        <li>
+                            <a href="{{ assignment_file.assignment_file.url }}" target="_blank">{{ assignment_file.assignment_file.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No files available for this assignment.</p>
+            {% endif %}
+
+            <!-- Buttons to Toggle Submission Form and Submitted Work -->
+            <button class="btn btn-sm btn-light"  onclick="toggleElement('submission_form_{{ assignment.id }}')">Submit Assignment</button>
+            
+            {% if assignment.id in submitted_assignment_ids %}
+                <button class="btn btn-sm mt-2" style="background-color: maroon; color: white;" onclick="toggleElement('submission_{{ assignment.id }}')">Show Submitted Work</button>
+            {% endif %}
+
+            <!-- Submission Form (Initially Hidden) -->
+            <div id="submission_form_{{ assignment.id }}" class="submission-form" style="display: none; margin-top: 10px;">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group mb-2">
+                        <label for="submission_content_{{ assignment.id }}">Your Submission</label>
+                        <textarea name="submission_text" id="submission_content_{{ assignment.id }}" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="submission_file_{{ assignment.id }}">Upload File (Optional)</label>
+                        <input type="file" name="submission_file" id="submission_file_{{ assignment.id }}" class="form-control">  
+                    </div>
+                    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                    <button type="submit" name="submit_assignment" class="btn btn-sm" style="background-color: maroon; color: white;">Submit</button>
+                </form>
+            </div>
+
+            <!-- Submitted Work (Initially Hidden) -->
+            {% if assignment.id in submitted_assignment_ids %}
+                <div id="submission_{{ assignment.id }}" class="submitted-work" style="display: none; margin-top: 10px;">
+                    <p><strong>Submitted Text:</strong> 
+                        {% for submission in assignment.submissions.all %}
+                            {% if submission.student == user %}
+                                {{ submission.submission_text }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+
+                    <!-- Display Submitted File -->
+                    {% for submission in assignment.submissions.all %}
+                        {% if submission.student == user %}
+                            {% if submission.submission_file %}
+                                <p><a href="{{ submission.submission_file.url }}" target="_blank">{{ submission.submission_file.name }}</a></p>
+                            {% else %}
+                                <p class="text-muted">No file submitted.</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">No assignments available.</li>
+    {% endfor %}
+</ul>
+
+<!-- JavaScript for Toggle Functionality -->
+<script>
+    function toggleElement(elementId) {
+        var element = document.getElementById(elementId);
+        element.style.display = (element.style.display === "none" || element.style.display === "") ? "block" : "none";
+    }
+</script>

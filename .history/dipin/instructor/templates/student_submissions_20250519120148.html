@@ -90,6 +90,26 @@
 </style>
 
 <body>
+    <h4>Debug Ungraded Quiz Fields:</h4>
+<pre>
+{% for quiz in ungraded_submissions.quizzes %}
+Title: {{ quiz.quiz.title }}
+Student: {{ quiz.student.username }}
+Score: {{ quiz.score }}
+---
+{% endfor %}
+</pre>
+
+<h4>Debug Graded Quiz Fields:</h4>
+<pre>
+{% for quiz in graded_submissions.quizzes %}
+Title: {{ quiz.quiz.title }}
+Student: {{ quiz.student.username }}
+Score: {{ quiz.score }}
+Grade: {{ quiz.grade }}
+---
+{% endfor %}
+</pre>
 
 <div class="container ">
     <h3 class="text-center mb-4 card-title">Ungraded Submissions</h3>
@@ -110,7 +130,7 @@
             {% for assignment in ungraded_submissions.assignments %}
             <tr>
                 <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
+                <td>{{ assignment.student.username }}</td>
                 <td>
                     {% if assignment.submission_text %}
                         <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
@@ -132,7 +152,7 @@
             {% for assignment in graded_submissions.assignments %}
             <tr>
                 <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
+                <td>{{ assignment.student.username }}</td>
                 <td>
                     {% if assignment.submission_text %}
                         <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
@@ -284,3 +304,4 @@
         document.getElementById("popup-overlay").style.display = "none";
     }
 </script>
+

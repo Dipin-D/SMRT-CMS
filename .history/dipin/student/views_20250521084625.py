@@ -46,20 +46,6 @@ class go_to_course_student(View):
             }
             for submission in latest_assignments
         ]
-        assignments_data = []
-        for assignment in assignments:
-            student_submissions = AssignmentSubmission.objects.filter(assignment=assignment, student=request.user).order_by('-attempt_number')
-            attempt_count = student_submissions.count()
-            can_submit = attempt_count < assignment.max_attempts
-
-            assignments_data.append({
-                'assignment': assignment,
-                'submissions': student_submissions,
-                'can_submit': can_submit,
-                'attempt_count': attempt_count,
-                'max_attempts': assignment.max_attempts,
-            })
-
 
         latest_quizzes = QuizAttempt.objects.filter(student=request.user)\
             .order_by('quiz_id', '-attempted_on')\
@@ -174,7 +160,6 @@ class go_to_course_student(View):
             'files': files,
             'submitted_assignments_info': submitted_assignments_info,
             'submitted_assignment_ids': submitted_assignment_ids,
-            'assignments_data': assignments_data,
             'submitted_quizzes_info': submitted_quizzes_info,
             'submitted_quiz_ids': submitted_quiz_ids,
             'submitted_exercises_info': submitted_exercises_info,
@@ -192,35 +177,35 @@ class go_to_course_student(View):
             'attendance_percentage': attendance_percentage,
         })
 
-    def post(self, request, class_shell_id):
-        assignment_id = request.POST.get('assignment_id')
-        if assignment_id:
-            assignment = get_object_or_404(Assignment, id=assignment_id)
-            submission_text = request.POST.get('submission_text')
-            submission_file = request.FILES.get('submission_file')
+def post(self, request, class_shell_id):
+    assignment_id = request.POST.get('assignment_id')
+    if assignment_id:
+        assignment = get_object_or_404(Assignment, id=assignment_id)
+        submission_text = request.POST.get('submission_text')
+        submission_file = request.FILES.get('submission_file')
 
-            # Count existing submissions for this student and assignment
-            previous_attempts = AssignmentSubmission.objects.filter(
-                assignment=assignment,
-                student=request.user
-            ).count()
+        # Count existing submissions for this student and assignment
+        previous_attempts = AssignmentSubmission.objects.filter(
+            assignment=assignment,
+            student=request.user
+        ).count()
 
-            # Set attempt number as one more than existing attempts
-            attempt_number = previous_attempts + 1
+        # Set attempt number as one more than existing attempts
+        attempt_number = previous_attempts + 1
 
-            assignment_submission = AssignmentSubmission(
-                assignment=assignment,
-                student=request.user,
-                submission_text=submission_text,
-                attempt_number=attempt_number,
-            )
+        assignment_submission = AssignmentSubmission(
+            assignment=assignment,
+            student=request.user,
+            submission_text=submission_text,
+            attempt_number=attempt_number,
+        )
 
-            if submission_file:
-                assignment_submission.submission_file = submission_file    
+        if submission_file:
+            assignment_submission.submission_file = submission_file    
 
-            assignment_submission.save()
+        assignment_submission.save()
 
-            return redirect('student:go_to_course', class_shell_id=class_shell_id)
+        return redirect('student:go_to_course', class_shell_id=class_shell_id)
 
 
 

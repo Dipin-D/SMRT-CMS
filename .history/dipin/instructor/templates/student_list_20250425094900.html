@@ -1,0 +1,55 @@
+<h3 class="text-center mb-4 card-title">Manage Student Access</h3>
+
+<form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}" class="container">
+    {% csrf_token %}
+    
+    <!-- Checkbox to grant access to all students -->
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="grant_all" name="grant_all">
+        <label class="form-check-label" for="grant_all">
+            <strong>Grant Access to All Students</strong>
+        </label>
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Student</th>
+                <th scope="col">Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.username }}</td>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input student-checkbox" type="checkbox" name="access_student_ids" value="{{ student.id }}"
+                            {% if student.id in students_with_access %}checked{% endif %}>
+                        <label class="form-check-label">
+                            {% if student.id in students_with_access %}
+                                <span class="text-success">Access Granted</span>
+                            {% else %}
+                                <span class="text-danger">No Access</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="display: inline-block;">
+        <button type="submit" name="update_access" class="custom-button">Update Access</button>
+    </div>
+</form>
+
+<script>
+    document.getElementById('grant_all').addEventListener('change', function() {
+        let checkboxes = document.querySelectorAll('.student-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>

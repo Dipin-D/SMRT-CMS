@@ -164,6 +164,7 @@ class GoToCourseView(View):
         )
 
         chart_bar2 = fig_bar2.to_html(full_html=False)
+        User = get_user_model()
 
 
 
@@ -213,47 +214,6 @@ class GoToCourseView(View):
                 selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
 
             class_shell.students_with_access.set(selected_students) 
-            # === Create Single Student Account ===
-        User = get_user_model()
-        if 'create_single' in request.POST:
-            first = request.POST.get('first_name', '').strip().lower()
-            last = request.POST.get('last_name', '').strip().lower()
-            email = request.POST.get('email', '').strip().lower()
-            username = first + last
-            password = last + first
-
-            if not User.objects.filter(username=username).exists():
-                new_user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    is_student=True
-                )
-                class_shell.students_with_access.add(new_user)
-
-        # === Bulk Upload Students from CSV ===
-        if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
-            try:
-                csv_file = request.FILES['student_csv'].read().decode('utf-8').splitlines()
-                reader = csv.DictReader(csv_file)
-                for row in reader:
-                    first = row['first_name'].strip().lower()
-                    last = row['last_name'].strip().lower()
-                    email = row['email'].strip().lower()
-                    username = first + last
-                    password = last + first
-
-                    if not User.objects.filter(username=username).exists():
-                        new_user = User.objects.create_user(
-                            username=username,
-                            email=email,
-                            password=password,
-                            is_student=True
-                        )
-                        class_shell.students_with_access.add(new_user)
-            except Exception as e:
-                messages.error(request, f"CSV upload failed: {str(e)}")
-
 
         if 'take_attendance' in request.POST:
             try:

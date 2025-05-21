@@ -110,7 +110,7 @@
             {% for assignment in ungraded_submissions.assignments %}
             <tr>
                 <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
+                <td>{{ assignment.student.username }}</td>
                 <td>
                     {% if assignment.submission_text %}
                         <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
@@ -132,7 +132,7 @@
             {% for assignment in graded_submissions.assignments %}
             <tr>
                 <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
+                <td>{{ assignment.student.username }} {{ assignment.attempt_number }}</td>
                 <td>
                     {% if assignment.submission_text %}
                         <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>

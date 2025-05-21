@@ -164,6 +164,7 @@ class GoToCourseView(View):
         )
 
         chart_bar2 = fig_bar2.to_html(full_html=False)
+        User = get_user_model()
 
 
 
@@ -213,9 +214,9 @@ class GoToCourseView(View):
                 selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
 
             class_shell.students_with_access.set(selected_students) 
-            # === Create Single Student Account ===
-        User = get_user_model()
-        if 'create_single' in request.POST:
+        # Handle manual creation of a single student
+        def handle_create_single_student(self, request, class_shell):
+            User = get_user_model()
             first = request.POST.get('first_name', '').strip().lower()
             last = request.POST.get('last_name', '').strip().lower()
             email = request.POST.get('email', '').strip().lower()
@@ -231,8 +232,9 @@ class GoToCourseView(View):
                 )
                 class_shell.students_with_access.add(new_user)
 
-        # === Bulk Upload Students from CSV ===
-        if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
+        # Handle bulk CSV student creation
+        def handle_upload_student_csv(self, request, class_shell):
+            User = get_user_model()
             try:
                 csv_file = request.FILES['student_csv'].read().decode('utf-8').splitlines()
                 reader = csv.DictReader(csv_file)
