@@ -221,7 +221,7 @@ class GoToCourseView(View):
             email = request.POST.get('email', '').strip().lower()
             username = first + last
             password = last + first
-            user = User.objects.filter(username=username).first()
+
             if not User.objects.filter(username=username).exists():
                 new_user = User.objects.create_user(
                     username=username,
@@ -243,7 +243,6 @@ class GoToCourseView(View):
                     email = row['email'].strip().lower()
                     username = first + last
                     password = last + first
-                    user = User.objects.filter(username=username).first()
 
                     if not User.objects.filter(username=username).exists():
                         new_user = User.objects.create_user(
@@ -253,8 +252,6 @@ class GoToCourseView(View):
                             is_student=True
                         )
                         class_shell.students_with_access.add(new_user)
-                    class_shell.students_with_access.add(user)
-
             except Exception as e:
                 messages.error(request, f"CSV upload failed: {str(e)}")
 
