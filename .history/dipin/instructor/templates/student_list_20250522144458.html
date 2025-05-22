@@ -1,3 +1,38 @@
+{% if messages %}
+  <div id="popup-messages">
+
+    {# Show only CREATE-related messages #}
+    {% for message in messages %}
+      {% if "create" in message.tags %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {# Show only CSV-related messages #}
+    {% for message in messages %}
+      {% if "csv" in message.tags %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {# Show only ACCESS-related messages #}
+    {% for message in messages %}
+      {% if "access" in message.tags %}
+        <div class="alert alert-primary alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+  </div>
+{% endif %}
 
 <style>
     .scrollable-table {
@@ -6,9 +41,17 @@
         display: block;
     }
 </style>
-
 <h4 class="text-center mb-4 card-title">Create and/or Enroll New Students Accounts</h4>
-
+{% if messages %}
+  <div id="popup-messages">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <!-- CSV Upload -->
 <form method="POST" enctype="multipart/form-data" action="{% url 'instructor:go_to_course' class_shell.id %}" class="mt-4">
@@ -71,7 +114,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for student in students|dictsort:"username"%}
+                {% for student in students %}
                 <tr>
                     <td>{{ student.username }}</td>
                     <td>

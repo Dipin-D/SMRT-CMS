@@ -225,12 +225,11 @@
     });
   });
   
-   document.addEventListener('click', function(e) {
-      if (!e.target.closest('#exercise-editor-container')) {
-          resetForm();
-      }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.edit-button') && !e.target.closest('#question-form')) {
+      resetForm();
+    }
   });
-
   
   document.addEventListener('DOMContentLoaded', () => {
     updateFields();

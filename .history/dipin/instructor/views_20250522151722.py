@@ -36,7 +36,7 @@ def class_shell_list(request):
         elif 'delete' in request.POST:
             class_shell = get_object_or_404(ClassShell, pk=request.POST.get('class_shell_id'), user=request.user)
             class_shell.delete()
-            messages.success(request, "ClassShell deleted successfully.")
+            messages.error(request, "ClassShell deleted successfully.")
             return redirect('instructor:class_shell_list')
 
     class_shells = ClassShell.objects.filter(user=request.user)

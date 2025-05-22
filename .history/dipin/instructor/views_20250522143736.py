@@ -30,13 +30,11 @@ def class_shell_list(request):
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Successfully Created ClassShell.")
             return redirect('instructor:class_shell_list')
 
         elif 'delete' in request.POST:
             class_shell = get_object_or_404(ClassShell, pk=request.POST.get('class_shell_id'), user=request.user)
             class_shell.delete()
-            messages.success(request, "ClassShell deleted successfully.")
             return redirect('instructor:class_shell_list')
 
     class_shells = ClassShell.objects.filter(user=request.user)
@@ -227,7 +225,7 @@ class GoToCourseView(View):
             username = f"{first} {last}"
             password = f"{last} {first}"
 
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(username=username).first()
             if not user:
                 user = User.objects.create_user(
                     username=username,
@@ -236,7 +234,7 @@ class GoToCourseView(View):
                     is_student=True
                 )
             class_shell.students_with_access.add(user)
-            messages.success(request, f"Student '{username}' enrolled and/or created successfully.", extra_tags="create")
+            messages.success(request, f"Student '{username}' enrolled and/or created successfully.")
 
         # === Bulk Upload Students from CSV ===
         if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
@@ -250,7 +248,7 @@ class GoToCourseView(View):
                     username = f"{first} {last}"
                     password = f"{last} {first}"
 
-                    user = User.objects.filter(email=email).first()
+                    user = User.objects.filter(username=username).first()
                     if not user:
                         user = User.objects.create_user(
                             username=username,
@@ -259,7 +257,7 @@ class GoToCourseView(View):
                             is_student=True
                         )
                     class_shell.students_with_access.add(user)
-                messages.success(request, "CSV upload and student enrollment completed.", extra_tags="csv")
+                messages.success(request, "CSV upload and student enrollment completed.")
             except Exception as e:
                 messages.error(request, f"CSV upload failed: {str(e)}")
 

@@ -1,4 +1,3 @@
-
 <style>
     .scrollable-table {
         max-height: 300px;
@@ -6,19 +5,13 @@
         display: block;
     }
 </style>
-
 <h4 class="text-center mb-4 card-title">Create and/or Enroll New Students Accounts</h4>
-
 
 <!-- CSV Upload -->
 <form method="POST" enctype="multipart/form-data" action="{% url 'instructor:go_to_course' class_shell.id %}" class="mt-4">
     {% csrf_token %}
     <div class="mb-3">
-<label>
-    Upload a CSV file with the following columns: <strong>first_name</strong>, <strong>last_name</strong>, and <strong>email</strong>.<br>
-    The default username will be <em>firstName lastName</em> and the default password will be <em>lastName firstName</em> (both in lowercase).<br>
-    Students can change their password from the homepage.
-</label>
+        <label>Upload CSV (first_name, last_name, email). The default username is firstName lastName & password is lastName firstName </label>
         <input type="file" name="student_csv" accept=".csv" class="form-control" required>
     </div>
     <input type="hidden" name="upload_csv" value="1">
@@ -71,7 +64,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for student in students|dictsort:"username"%}
+                {% for student in students %}
                 <tr>
                     <td>{{ student.username }}</td>
                     <td>

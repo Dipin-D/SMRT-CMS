@@ -95,50 +95,44 @@
   <h5 class="mt-4">Existing Questions</h5>
   <div class="list-group">
     {% for question in questions %}
- <div class="list-group-item d-flex justify-content-between align-items-start mb-2">
-  <div class="flex-grow-1">
-<pre class="mb-0 bg-light p-3 rounded font-monospace" style="white-space: pre-wrap; word-break: break-word; max-width: 100%; overflow-x: auto;">
-  <code>{{ question.text }}</code>
-</pre>
-  </div>
-  <div class="d-flex gap-2 flex-shrink-0">
-    <!-- Edit Question Button -->
-    <button class="btn btn-warning shadow-sm edit-button"
-      data-id="{{ question.id }}"
-      data-text="{{ question.text }}"
-      data-type="{{ question.type }}"
-      data-mark="{{ question.mark }}"
-      {% if question.type == 'multiple_choice' %}
-        data-choices="{{ question.mcq_choices|join:'\\n' }}" 
-        data-correct='{{ question.mcq_answers_json|escapejs }}'
-      {% elif question.type == 'true_false' %}
-        data-answer="{{ question.tf_answer }}"
-      {% elif question.type == 'essay' %}
-        data-answer="{{ question.essay_answer }}"
-      {% endif %}>
-      Edit
-    </button>
+      <div class="list-group-item d-flex justify-content-between align-items-center mb-2">
+        <span>{{ question.text }}</span>
+        <div>
+               <!-- Edit Question Button -->
+                <button class="btn btn-warning shadow-sm edit-button" 
+                data-id="{{ question.id }}" 
+                data-text="{{ question.text }}" 
+                data-type="{{ question.type }}"
+                data-mark="{{ question.mark }}"
+                {% if question.type == 'multiple_choice' %}
+                  data-choices="{{ question.mcq_choices|join:'\\n' }}" 
+                  data-correct='{{ question.mcq_answers_json|escapejs }}'
+                  {% elif question.type == 'true_false' %} 
+                  data-answer="{{ question.tf_answer }}"
+                {% elif question.type == 'essay' %}
+                  data-answer="{{ question.essay_answer }}"
+                {% endif %}>
+                Edit
+                </button>
 
-    <!-- Delete Button Form -->
-    <form method="POST" class="d-inline">
-      {% csrf_token %}
-      <input type="hidden" name="question_id" value="{{ question.id }}">
-      <button type="submit" name="delete_question" class="btn btn-danger shadow-sm">Delete</button>
-    </form>
-  </div>
-</div>
-
+          <!-- Delete Question Form -->
+          <form method="POST" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <button type="submit" name="delete_question" class="btn btn-danger shadow-sm">Delete</button>
+          </form>
+        </div>
+      </div>
     {% empty %}
       <div class="list-group-item">No questions available.</div>
     {% endfor %}
   </div>
 </div>
 
-
 <div class="mt-3">
   <a href="{% url 'instructor:quizlist' class_shell_id=class_shell_id %}" class="btn btn-secondary mb-3">Go Back to Quiz</a>
 </div>
-</div>
+
 <!-- JavaScript to Handle Edit Button Functionality -->
 <script>
   let isEditMode = false;
@@ -233,11 +227,11 @@
   });
   
   document.addEventListener('click', function(e) {
-      if (!e.target.closest('#quiz-editor-container')) {
+      if (!e.target.closest('.edit-button') && !e.target.closest('#question-form')) {
           resetForm();
       }
   });
-
+  
   document.addEventListener('DOMContentLoaded', () => {
       updateFields();
       document.querySelector('button[name="edit_question"]').style.display = 'none';
@@ -261,7 +255,6 @@
   
           const label = document.createElement('label');
           label.htmlFor = checkbox.id;
-          label.className = 'ms-2';
           label.innerText = ` ${choice}`;
   
           const div = document.createElement('div');

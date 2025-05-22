@@ -30,13 +30,11 @@ def class_shell_list(request):
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Successfully Created ClassShell.")
             return redirect('instructor:class_shell_list')
 
         elif 'delete' in request.POST:
             class_shell = get_object_or_404(ClassShell, pk=request.POST.get('class_shell_id'), user=request.user)
             class_shell.delete()
-            messages.success(request, "ClassShell deleted successfully.")
             return redirect('instructor:class_shell_list')
 
     class_shells = ClassShell.objects.filter(user=request.user)
@@ -215,7 +213,7 @@ class GoToCourseView(View):
                 selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
 
             class_shell.students_with_access.set(selected_students)
-            messages.success(request, "Student access updated.")
+            messages.success(request, "Student access updated.", extra_tags="access")
  
 
         User = get_user_model()

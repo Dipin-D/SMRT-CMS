@@ -4,40 +4,29 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
+
 
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email'].lower()
-
-            # Check if email already exists
-            if User.objects.filter(email=email).exists():
-                messages.error(request, "An account with this email already exists.")
-                return render(request, 'registration/register.html', {'form': form})
-
-            user = form.save(commit=False)
+            user = form.save(commit=False)  # Create instance but don't save yet
             user.set_password(form.cleaned_data['password1'])
-
-            # Assign roles
-            if email.endswith('@bulldogs.aamu.edu'):
+            
+            # Assign roles based on email domain
+            if user.email.endswith('@bulldogs.aamu.edu'):
                 user.is_student = True
-            elif email.endswith('@aamu.edu'):
+            elif user.email.endswith('@aamu.edu'):
                 user.is_instructor = True
 
-            user.email = email  
             user.save()
             auth_login(request, user)
-            return redirect_based_on_role(user)
+            return redirect_based_on_role(user)  # Pass the user object here
     else:
         form = UserRegistrationForm()
 
     return render(request, 'registration/register.html', {'form': form})
-
 
 def front_page(request):
     if request.method == 'POST':  # What happens after hitting submit?

@@ -30,13 +30,11 @@ def class_shell_list(request):
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Successfully Created ClassShell.")
             return redirect('instructor:class_shell_list')
 
         elif 'delete' in request.POST:
             class_shell = get_object_or_404(ClassShell, pk=request.POST.get('class_shell_id'), user=request.user)
             class_shell.delete()
-            messages.success(request, "ClassShell deleted successfully.")
             return redirect('instructor:class_shell_list')
 
     class_shells = ClassShell.objects.filter(user=request.user)
@@ -214,54 +212,51 @@ class GoToCourseView(View):
                 selected_student_ids = request.POST.getlist('access_student_ids')
                 selected_students = CustomUser.objects.filter(id__in=selected_student_ids, is_student=True)
 
-            class_shell.students_with_access.set(selected_students)
-            messages.success(request, "Student access updated.")
- 
+            class_shell.students_with_access.set(selected_students) 
 
-        User = get_user_model()
-        # === Create Single Student Account ===
-        if 'create_single' in request.POST:
-            first = request.POST.get('first_name', '').strip().lower()
-            last = request.POST.get('last_name', '').strip().lower()
-            email = request.POST.get('email', '').strip().lower()
-            username = f"{first} {last}"
-            password = f"{last} {first}"
+            User = get_user_model()
+            # === Create Single Student Account ===
+            if 'create_single' in request.POST:
+                first = request.POST.get('first_name', '').strip().lower()
+                last = request.POST.get('last_name', '').strip().lower()
+                email = request.POST.get('email', '').strip().lower()
+                username = f"{first} {last}"
+                password = f"{last} {first}"
 
-            user = User.objects.filter(email=email).first()
-            if not user:
-                user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    is_student=True
-                )
-            class_shell.students_with_access.add(user)
-            messages.success(request, f"Student '{username}' enrolled and/or created successfully.", extra_tags="create")
+                user = User.objects.filter(username=username).first()
+                if not user:
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        is_student=True
+                    )
+                class_shell.students_with_access.add(user)
 
-        # === Bulk Upload Students from CSV ===
-        if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
-            try:
-                csv_file = request.FILES['student_csv'].read().decode('utf-8').splitlines()
-                reader = csv.DictReader(csv_file)
-                for row in reader:
-                    first = row['first_name'].strip().lower()
-                    last = row['last_name'].strip().lower()
-                    email = row['email'].strip().lower()
-                    username = f"{first} {last}"
-                    password = f"{last} {first}"
+            # === Bulk Upload Students from CSV ===
+            if 'upload_csv' in request.POST and 'student_csv' in request.FILES:
+                try:
+                    csv_file = request.FILES['student_csv'].read().decode('utf-8').splitlines()
+                    reader = csv.DictReader(csv_file)
+                    for row in reader:
+                        first = row['first_name'].strip().lower()
+                        last = row['last_name'].strip().lower()
+                        email = row['email'].strip().lower()
+                        username = f"{first} {last}"
+                        password = f"{last} {first}"
 
-                    user = User.objects.filter(email=email).first()
-                    if not user:
-                        user = User.objects.create_user(
-                            username=username,
-                            email=email,
-                            password=password,
-                            is_student=True
-                        )
-                    class_shell.students_with_access.add(user)
-                messages.success(request, "CSV upload and student enrollment completed.", extra_tags="csv")
-            except Exception as e:
-                messages.error(request, f"CSV upload failed: {str(e)}")
+                        user = User.objects.filter(username=username).first()
+                        if not user:
+                            user = User.objects.create_user(
+                                username=username,
+                                email=email,
+                                password=password,
+                                is_student=True
+                            )
+                        class_shell.students_with_access.add(user)
+
+                except Exception as e:
+                    messages.error(request, f"CSV upload failed: {str(e)}")
 
 
         if 'take_attendance' in request.POST:

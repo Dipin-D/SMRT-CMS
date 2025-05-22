@@ -311,21 +311,16 @@
 
   <!-- Main content container -->
   <body class="d-flex flex-column min-vh-100">
-{% if messages %}
-<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
-  {% for message in messages %}
-  <div class="toast align-items-center text-bg-{{ message.tags }} border-0 show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
+    {% if messages %}
+  <div id="popup-messages" class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
         {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
 {% endif %}
-
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="loading-spinner active">
       <div class="spinner"></div>
@@ -472,8 +467,6 @@
 
 
   <!-- Font Awesome Script -->
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
   <script>
    

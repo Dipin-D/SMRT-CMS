@@ -100,7 +100,7 @@
                 <div class="date-record" id="record-{{ date|date:'Y-m-d' }}" style="display: none;">
                     <h4>{{ date|date:"F j, Y" }}</h4>
                     <div class="history-grid">
-                        {% for record in records|dictsort:"student.username" %}
+                        {% for record in records %}
                         <div class="history-box">
                             <p><strong>{{ record.student.username }}</strong></p>
                             <p>{{ record.get_status_display }}</p>
