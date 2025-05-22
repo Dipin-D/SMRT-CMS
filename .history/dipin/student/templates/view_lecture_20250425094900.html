@@ -30,18 +30,15 @@
                 {% for file in files %}
                     {% if file.course.id == lecture.id %}
                         <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center mb-2 border rounded px-2 py-1" style="max-width: 100%; display: inline-flex;">
-                                <a href="{{ file.file.url }}" target="_blank"
-                                    class="text-decoration-none text-dark d-inline-flex align-items-center me-3" style="font-weight: 500; font-size: 16px;">
-                                    <i class="fas fa-file me-2"></i> {{ file.file.name }}
-                                </a>
-
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ file.file.url }}" target="_blank" style="font-weight: 500; font-size: 16px; color: black;">{{ file.file.name }}</a>
+                                
                                 <button class="btn btn-sm btn-outline-secondary toggle-preview"
                                         data-target="#file-preview-{{ file.id }}">
                                     Preview
                                 </button>
                             </div>
-                                
+                            
                             <!-- File Preview (Handles different file types) -->
                             <div id="file-preview-{{ file.id }}" class="file-preview mt-2" style="display: none;">
                                 <div class="d-flex justify-content-end">
@@ -52,8 +49,6 @@
                                     <img src="{{ file.file.url }}" class="img-fluid mt-2" />
                                 {% elif ".pdf" in file.file.url %}
                                     <iframe src="{{ file.file.url }}#view=fitH" class="w-100" style="height: 500px;"></iframe>
-                                {% elif ".ppt" in file.file.url or ".pptx" in file.file.url %}
-                                    <iframe src="https://docs.google.com/gview?url={{ file.file.url }}&embedded=true" class="w-100" style="height: 500px;"></iframe>
                                 {% elif ".mp4" in file.file.url %}
                                     <video controls width="100%" class="mt-2">
                                         <source src="{{ file.file.url }}" type="video/mp4">

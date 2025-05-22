@@ -43,20 +43,17 @@
             <p>{{ assignment.text }}</p>
             <p><strong>Due Date:</strong> {{ assignment.due_date }}</p>
             <p><strong>Total Marks:</strong> {{ assignment.total_marks }}</p>
-            <p><strong>Max Attempts:</strong> {{ assignment.max_attempts }}</p>  
+            <p><strong>Max Attempts:</strong> {{ assignment.max_attempts }}</p>  <!-- Display Max Attempts -->
 
             <!-- Display Files for this Assignment -->
-            <ul class="list-unstyled mt-3">
-            {% for assignment_file in assignment.assignment_files.all %}
-                <li class="d-inline-block me-3 mb-2">
-                <a href="{{ assignment_file.assignment_file.url }}" target="_blank"
-                    class="text-decoration-none text-dark border rounded px-2 py-1 d-inline-flex align-items-center">
-                    <i class="fas fa-file me-2"></i> {{ assignment_file.assignment_file.name }}
-                </a>
-                </li>
-            {% empty %}
-                <li>No files available for this assignment.</li>
-            {% endfor %}
+            <ul class="list-group mt-3">
+                {% for assignment_file in assignment.assignment_files.all %}
+                    <li>
+                        <a href="{{ assignment_file.assignment_file.url }}" target="_blank">{{ assignment_file.assignment_file.name }}</a>
+                    </li>
+                {% empty %}
+                    <li>No files available for this assignment.</li>
+                {% endfor %}
             </ul>
 
             <!-- Edit Assignment Form -->

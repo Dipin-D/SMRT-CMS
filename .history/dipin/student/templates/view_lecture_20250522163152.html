@@ -52,8 +52,6 @@
                                     <img src="{{ file.file.url }}" class="img-fluid mt-2" />
                                 {% elif ".pdf" in file.file.url %}
                                     <iframe src="{{ file.file.url }}#view=fitH" class="w-100" style="height: 500px;"></iframe>
-                                {% elif ".ppt" in file.file.url or ".pptx" in file.file.url %}
-                                    <iframe src="https://docs.google.com/gview?url={{ file.file.url }}&embedded=true" class="w-100" style="height: 500px;"></iframe>
                                 {% elif ".mp4" in file.file.url %}
                                     <video controls width="100%" class="mt-2">
                                         <source src="{{ file.file.url }}" type="video/mp4">

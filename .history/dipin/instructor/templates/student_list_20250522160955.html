@@ -52,14 +52,14 @@
       <h3 class="text-center mb-4 card-title">Manage Student Access</h3>
 
       <!-- Search -->
-      <div class="text-center mb-2">
+      <div class="text-center mb-3">
         <input type="text" id="studentSearch" class="form-control" placeholder="Search students by username">
       </div>
 
       <!-- Access Table Form -->
       <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
         {% csrf_token %}
-        <div class="form-check mb-2">
+        <div class="form-check mb-3">
           <input class="form-check-input" type="checkbox" id="grant_all" name="grant_all">
           <label class="form-check-label" for="grant_all"><strong>Grant Access to All Students</strong></label>
         </div>

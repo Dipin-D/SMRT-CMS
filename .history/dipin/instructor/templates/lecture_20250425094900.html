@@ -13,17 +13,14 @@
             <p>{{ lecture.text }}</p>
 
             <!-- Display Files for this Lecture -->
-            <ul class="list-unstyled mt-3">
-            {% for file in files %}
-                {% if file.course.id == lecture.id %}
-                <li class="d-inline-block me-3 mb-2">
-                    <a href="{{ file.file.url }}" target="_blank" class="text-decoration-none text-dark border rounded px-2 py-1 d-inline-flex align-items-center">
-                    <i class="fas fa-file me-2"></i> {{ file.file.name }}
-                    </a>
-                </li>
-                {% endif %}
-            {% endfor %}
+            <ul class="list-group mt-3">
+                {% for file in files %}
+                    {% if file.course.id == lecture.id %}
+                        <li><a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a></li>
+                    {% endif %}
+                {% endfor %}
             </ul>
+
             <!-- Edit Lecture Form -->
             <form method="post" enctype="multipart/form-data" class="edit-lecture-form mt-3" id="edit-lecture-{{ lecture.id }}" style="display: none;">
                 {% csrf_token %}
