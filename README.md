@@ -26,3 +26,7 @@ The platform is hosted on AWS EC2, utilizing PostgreSQL RDS for database managem
 ## Deployment:
 The CMS is deployed at [www.aamusmartcms.com](http://www.aamusmartcms.com) and will be used by over 500 students each semester.
 
+### Acknowledgment
+
+This research is supported by the **National Science Foundation (NSF)** under **Award No. 2236002**, titled:  
+**“Improving Programming Skills of Engineering Students at Historically Black Colleges and Universities Using AI-enhanced Personalized Adaptive Learning Tools.”**
