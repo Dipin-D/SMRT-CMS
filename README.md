@@ -2,13 +2,12 @@
 ## 🎥 Demo Videos
 
 ### 🎓 Student Registration Guide
-[▶ Watch Video](https://github.com/user-attachments/assets/0dcabe3f-7510-4b68-bb3c-6b91e02005e1)
+[▶ Watch Video](https://github.com/user-attachments/assets/0a314b13-9027-4398-8e45-032e6c35dc1c)
 
 ### 👩‍🏫 Professor Full Guide
-[▶ Watch Video](https://github.com/user-attachments/assets/751fb98f-60af-4343-a28c-bd7509efee18)
+[▶ Watch Video](https://github.com/user-attachments/assets/7f7274b0-52f5-4a71-9b8a-461d17dfccc3)
 
 ---
-
 This project is a Course Management System (CMS) developed with Django, designed to streamline course management for instructors and assignment submission for students. The system supports file uploads, user authentication, and role-based access for instructors and students. 
 
 The platform is hosted on AWS EC2, utilizing PostgreSQL RDS for database management, S3 for file storage, and GoDaddy for domain management. It is currently live at [www.aamusmartcms.com](http://www.aamusmartcms.com), in the User Acceptance Testing (UAT) phase, and will support over 500 students each semester. Data collected from the system is used to develop a machine learning reinforcement model.
