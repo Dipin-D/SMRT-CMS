@@ -1,4 +1,13 @@
 # Course Management System (CMS) using Django
+## 🎥 Demo Videos
+
+### 🎓 Student Registration Guide
+[▶ Watch Video](https://github.com/user-attachments/assets/0dcabe3f-7510-4b68-bb3c-6b91e02005e1)
+
+### 👩‍🏫 Professor Full Guide
+[▶ Watch Video](https://github.com/user-attachments/assets/751fb98f-60af-4343-a28c-bd7509efee18)
+
+---
 
 This project is a Course Management System (CMS) developed with Django, designed to streamline course management for instructors and assignment submission for students. The system supports file uploads, user authentication, and role-based access for instructors and students. 
 
