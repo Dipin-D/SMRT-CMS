@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}My Course Graphs{% endblock %}
+
+{% block content %}
+<style>
+    .graph-page {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .hero-card {
+        border-radius: 30px;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(98, 32, 52, 0.98), rgba(233, 50, 99, 0.88));
+        color: white;
+        box-shadow: 0 26px 54px rgba(98, 32, 52, 0.2);
+    }
+
+    .hero-card h1 {
+        margin: 0 0 0.75rem;
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        line-height: 1;
+    }
+
+    .hero-card p {
+        margin: 0;
+        max-width: 54ch;
+        color: rgba(255,255,255,0.82);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .summary-card {
+        border-radius: 24px;
+        padding: 1.2rem 1.25rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+    }
+
+    .summary-card strong {
+        display: block;
+        font-size: 2rem;
+        line-height: 1;
+        margin-bottom: 0.4rem;
+        color: #ffe0e8;
+    }
+
+    .summary-card span {
+        color: rgba(255,255,255,0.76);
+    }
+
+    .section-card {
+        border-radius: 28px;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(98, 32, 52, 0.08);
+        box-shadow: 0 18px 40px rgba(98, 32, 52, 0.08);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-head h2 {
+        margin: 0;
+        color: #571d30;
+        font-size: 1.45rem;
+    }
+
+    .section-head p {
+        margin: 0;
+        color: #7f6270;
+    }
+
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .course-card {
+        border-radius: 24px;
+        padding: 1.35rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+        display: grid;
+        gap: 1rem;
+    }
+
+    .course-card h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1.18rem;
+    }
+
+    .course-card p {
+        margin: 0;
+        color: rgba(255,255,255,0.76);
+    }
+
+    .metric-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .metric-box {
+        padding: 0.85rem;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.08);
+        text-align: center;
+    }
+
+    .metric-box strong {
+        display: block;
+        font-size: 1.15rem;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+
+    .metric-box span {
+        color: rgba(255,255,255,0.72);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .empty-card {
+        border-radius: 28px;
+        padding: 2rem;
+        text-align: center;
+        background: rgba(255,255,255,0.76);
+        border: 1px solid rgba(98, 32, 52, 0.08);
+        box-shadow: 0 18px 40px rgba(98, 32, 52, 0.08);
+        color: #7f6270;
+    }
+
+    .empty-card i {
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 0.8rem;
+        color: #8a5567;
+    }
+
+    @media (max-width: 1024px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-card,
+        .summary-card,
+        .section-card,
+        .course-card,
+        .empty-card {
+            border-radius: 22px;
+        }
+
+        .hero-card {
+            padding: 1.5rem;
+        }
+
+        .section-head {
+            display: grid;
+        }
+
+        .metric-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="graph-page">
+    <section class="hero-card">
+        <h1>My Course Graphs</h1>
+        <p>Open a course to explore its topic map, connections, and where your activity already matches the graph.</p>
+    </section>
+
+    {% if course_cards %}
+    <section class="summary-grid">
+        <div class="summary-card">
+            <strong>{{ course_cards|length }}</strong>
+            <span>Courses with graph views</span>
+        </div>
+        <div class="summary-card">
+            <strong>{% widthratio course_cards|length 1 1 %}{% for item in course_cards %}{% if forloop.first %}{% endif %}{% endfor %}</strong>
+            <span>Ready to explore now</span>
+        </div>
+        <div class="summary-card">
+            <strong>{% for item in course_cards %}{% if forloop.first %}{{ item.interactions_count }}{% endif %}{% endfor %}</strong>
+            <span>Tagged interactions in first listed course</span>
+        </div>
+    </section>
+
+    <section class="section-card">
+        <div class="section-head">
+            <div>
+                <h2>Available Graphs</h2>
+                <p>Choose a course to open its knowledge graph.</p>
+            </div>
+        </div>
+
+        <div class="course-grid">
+            {% for item in course_cards %}
+            <article class="course-card">
+                <div>
+                    <h3>{{ item.course.course_id }}</h3>
+                    <p>{{ item.course.title|default:"Course graph" }}</p>
+                </div>
+
+                <div class="metric-row">
+                    <div class="metric-box">
+                        <strong>{{ item.topics_count }}</strong>
+                        <span>Topics</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>{{ item.edge_count }}</strong>
+                        <span>Connections</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>{{ item.interactions_count }}</strong>
+                        <span>Activity</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'knowledge_graph:course_graph' item.course.course_id %}" class="btn btn-primary">
+                    <i class="bi bi-diagram-3"></i>
+                    Open Graph
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <div class="empty-card">
+        <i class="bi bi-diagram-3"></i>
+        <h3>No Course Graphs Yet</h3>
+        <p>We could not find any enrolled courses with topics yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

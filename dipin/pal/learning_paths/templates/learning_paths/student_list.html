@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Paths{% endblock %}
+
+{% block content %}
+<div class="lp-page">
+    <section class="lp-hero">
+        <div>
+            <p class="lp-eyebrow">Instructor View</p>
+            <h1>Learning Paths</h1>
+            <p class="lp-subtitle">See which students already have paths and which ones still need activity.</p>
+        </div>
+    </section>
+
+    <section class="lp-stats">
+        <article class="lp-stat-card">
+            <span class="lp-stat-value">{{ total_students }}</span>
+            <span class="lp-stat-label">Students</span>
+        </article>
+        <article class="lp-stat-card">
+            <span class="lp-stat-value">{{ total_paths }}</span>
+            <span class="lp-stat-label">Paths</span>
+        </article>
+        <article class="lp-stat-card">
+            <span class="lp-stat-value">{{ students_with_paths|length }}</span>
+            <span class="lp-stat-label">Ready</span>
+        </article>
+        <article class="lp-stat-card lp-stat-card-soft">
+            <span class="lp-stat-value">{{ students_without_paths|length }}</span>
+            <span class="lp-stat-label">Waiting</span>
+        </article>
+    </section>
+
+    {% if students_with_paths %}
+    <section class="lp-section">
+        <div class="lp-section-head">
+            <h2>Students With Paths</h2>
+            <span>{{ students_with_paths|length }}</span>
+        </div>
+
+        <div class="lp-grid">
+            {% for student in students_with_paths %}
+            <article class="lp-card">
+                <div class="lp-card-top">
+                    <div class="lp-avatar">
+                        {{ student.first_name|default:student.user.username|slice:":1"|upper }}{{ student.last_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h3>{{ student.first_name }} {{ student.last_name }}</h3>
+                        <p>{{ student.student_id }}</p>
+                    </div>
+                </div>
+
+                <div class="lp-card-metrics">
+                    <div>
+                        <strong>{{ student.path_count }}</strong>
+                        <span>Paths</span>
+                    </div>
+                    <div>
+                        <strong>{% if student.latest_path_date %}{{ student.latest_path_date|date:"M j" }}{% else %}-{% endif %}</strong>
+                        <span>Latest</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'learning_paths:student_paths' student.student_id %}" class="btn btn-primary lp-btn">
+                    View Paths
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if students_without_paths %}
+    <section class="lp-section">
+        <div class="lp-section-head">
+            <h2>Waiting For Activity</h2>
+            <span>{{ students_without_paths|length }}</span>
+        </div>
+
+        <div class="lp-grid">
+            {% for student in students_without_paths %}
+            <article class="lp-card lp-card-muted">
+                <div class="lp-card-top">
+                    <div class="lp-avatar lp-avatar-muted">
+                        {{ student.first_name|default:student.user.username|slice:":1"|upper }}{{ student.last_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h3>{{ student.first_name }} {{ student.last_name }}</h3>
+                        <p>{{ student.student_id }}</p>
+                    </div>
+                </div>
+
+                <div class="lp-card-metrics">
+                    <div>
+                        <strong>{{ student.interactions.count }}</strong>
+                        <span>Activity</span>
+                    </div>
+                    <div>
+                        <strong>None</strong>
+                        <span>Path</span>
+                    </div>
+                </div>
+
+                <div class="lp-card-note">No learning path yet.</div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not students_with_paths and not students_without_paths %}
+    <section class="lp-empty">
+        <h2>No students found</h2>
+        <p>Learning paths will appear here once student course activity is available.</p>
+    </section>
+    {% endif %}
+</div>
+
+<style>
+.lp-page {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.lp-hero,
+.lp-section,
+.lp-empty {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+}
+
+.lp-hero {
+    padding: 1.7rem;
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 34%),
+        linear-gradient(135deg, rgba(97, 22, 45, 0.96), rgba(133, 43, 67, 0.94));
+    color: #fff;
+}
+
+.lp-eyebrow {
+    margin: 0 0 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.lp-hero h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 3vw, 2.3rem);
+    color: #fff;
+}
+
+.lp-subtitle {
+    margin: 0.6rem 0 0;
+    max-width: 42rem;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.lp-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.lp-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.15rem 1.2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.lp-stat-card-soft {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 242, 244, 0.98));
+    border-color: rgba(97, 22, 45, 0.12);
+    box-shadow: 0 10px 24px rgba(97, 22, 45, 0.08);
+}
+
+.lp-stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.lp-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.lp-stat-card-soft .lp-stat-value {
+    color: #5e1d31;
+}
+
+.lp-stat-card-soft .lp-stat-label {
+    color: #7d6770;
+}
+
+.lp-section {
+    padding: 1.3rem;
+}
+
+.lp-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.lp-section-head h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.lp-section-head span {
+    min-width: 2.2rem;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(97, 22, 45, 0.08);
+    color: var(--primary);
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.lp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.lp-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 246, 247, 0.98));
+    display: grid;
+    gap: 0.95rem;
+}
+
+.lp-card-muted {
+    background: linear-gradient(180deg, rgba(247, 243, 244, 0.95), rgba(244, 239, 241, 0.98));
+}
+
+.lp-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.lp-avatar {
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    background: linear-gradient(135deg, #61162D, #8e3d57);
+    color: #fff;
+    font-weight: 700;
+}
+
+.lp-avatar-muted {
+    background: linear-gradient(135deg, #8d6a74, #b08d96);
+}
+
+.lp-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #351520;
+}
+
+.lp-card p {
+    margin: 0.2rem 0 0;
+    color: #8b7580;
+    font-size: 0.86rem;
+    word-break: break-word;
+}
+
+.lp-card-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.lp-card-metrics div {
+    padding: 0.8rem 0.9rem;
+    border-radius: 14px;
+    background: rgba(97, 22, 45, 0.05);
+}
+
+.lp-card-metrics strong {
+    display: block;
+    color: #351520;
+    font-size: 1rem;
+}
+
+.lp-card-metrics span {
+    color: #7b6670;
+    font-size: 0.78rem;
+}
+
+.lp-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.lp-card-note {
+    padding: 0.8rem 0.9rem;
+    border-radius: 14px;
+    background: rgba(97, 22, 45, 0.05);
+    color: #735f68;
+    font-size: 0.88rem;
+}
+
+.lp-empty {
+    padding: 2rem 1.4rem;
+    text-align: center;
+}
+
+.lp-empty h2 {
+    margin: 0 0 0.45rem;
+}
+
+.lp-empty p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+    .lp-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .lp-page {
+        gap: 1rem;
+    }
+
+    .lp-hero,
+    .lp-section,
+    .lp-empty {
+        border-radius: 18px;
+    }
+
+    .lp-hero,
+    .lp-section {
+        padding: 1rem;
+    }
+
+    .lp-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-section-head {
+        align-items: flex-start;
+    }
+}
+</style>
+{% endblock %}

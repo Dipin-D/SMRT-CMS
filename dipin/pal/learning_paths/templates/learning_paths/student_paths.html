@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.first_name|default:student.user.username }}'s Learning Paths{% endblock %}
+
+{% block content %}
+<style>
+    .page-shell {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .crumbs {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        color: #7f6270;
+        font-size: 0.92rem;
+    }
+
+    .crumbs a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .crumbs span:last-child {
+        color: #5d3243;
+        font-weight: 600;
+    }
+
+    .hero-card {
+        border-radius: 30px;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(98, 32, 52, 0.98), rgba(233, 50, 99, 0.88));
+        color: white;
+        box-shadow: 0 26px 54px rgba(98, 32, 52, 0.2);
+    }
+
+    .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 1rem;
+    }
+
+    .hero-title {
+        margin: 0 0 0.7rem;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1;
+    }
+
+    .hero-copy {
+        margin: 0;
+        color: rgba(255,255,255,0.82);
+        max-width: 50ch;
+    }
+
+    .hero-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-tile {
+        border-radius: 24px;
+        padding: 1.25rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 38px rgba(74, 18, 37, 0.14);
+    }
+
+    .stat-tile strong {
+        display: block;
+        font-size: 2rem;
+        line-height: 1;
+        margin-bottom: 0.45rem;
+        color: #ffe0e8;
+    }
+
+    .stat-tile span {
+        color: rgba(255,255,255,0.76);
+    }
+
+    .section-card {
+        border-radius: 28px;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(98, 32, 52, 0.08);
+        box-shadow: 0 18px 40px rgba(98, 32, 52, 0.08);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-head h2 {
+        margin: 0;
+        color: #571d30;
+        font-size: 1.45rem;
+    }
+
+    .section-head p {
+        margin: 0;
+        color: #7f6270;
+    }
+
+    .path-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 1rem;
+    }
+
+    .path-item {
+        border-radius: 24px;
+        padding: 1.35rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+        display: grid;
+        gap: 1rem;
+    }
+
+    .path-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 1rem;
+    }
+
+    .path-top h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1.2rem;
+    }
+
+    .path-code {
+        color: rgba(255,255,255,0.72);
+        font-size: 0.88rem;
+    }
+
+    .status-pill,
+    .id-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.38rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .status-pill.waiting {
+        color: #ffe29b;
+    }
+
+    .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .metric-box {
+        padding: 0.85rem;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.08);
+        text-align: center;
+    }
+
+    .metric-box strong {
+        display: block;
+        font-size: 1.2rem;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+
+    .metric-box span {
+        color: rgba(255,255,255,0.72);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .path-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .path-foot small {
+        color: rgba(255,255,255,0.72);
+        max-width: 28ch;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.25rem;
+        color: #7f6270;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #8a5567;
+        margin-bottom: 0.8rem;
+        display: block;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-card,
+        .section-card,
+        .path-item,
+        .stat-tile {
+            border-radius: 22px;
+        }
+
+        .hero-card {
+            padding: 1.4rem;
+        }
+
+        .hero-top,
+        .path-foot,
+        .section-head {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .metrics-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="page-shell">
+    <div class="crumbs">
+        <a href="{% url 'learning_paths:student_list' %}">Learning Paths</a>
+        <span>/</span>
+        <span>{{ student.student_id }}</span>
+    </div>
+
+    <section class="hero-card">
+        <div class="hero-top">
+            <div>
+                <h1 class="hero-title">{{ student.first_name|default:student.user.username }}{% if student.last_name %} {{ student.last_name }}{% endif %}</h1>
+                <div class="hero-badges">
+                    <span class="hero-badge"><i class="bi bi-person"></i> {{ student.user.username }}</span>
+                    <span class="hero-badge"><i class="bi bi-book"></i> {{ student.courses.count }} course{{ student.courses.count|pluralize }}</span>
+                    <span class="hero-badge"><i class="bi bi-activity"></i> {{ student.interactions.count }} interactions</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-tile">
+            <strong>{{ total_paths }}</strong>
+            <span>Active learning paths</span>
+        </div>
+        <div class="stat-tile">
+            <strong>{{ total_time|floatformat:1 }}h</strong>
+            <span>Total study time across current paths</span>
+        </div>
+        <div class="stat-tile">
+            <strong>{{ avg_weak_topics }}</strong>
+            <span>Average weak topics per path</span>
+        </div>
+    </section>
+
+    <section class="section-card">
+        <div class="section-head">
+            <div>
+                <h2>Current Paths</h2>
+                <p>Each course appears once with its latest path status.</p>
+            </div>
+        </div>
+
+        {% if learning_paths or courses_without_paths %}
+        <div class="path-grid">
+            {% for path in learning_paths %}
+            <article class="path-item">
+                <div class="path-top">
+                    <div>
+                        <h3>{{ path.course.title|default:path.course.course_id }}</h3>
+                        <div class="path-code">{{ path.course.course_id }}</div>
+                    </div>
+                    <div style="display:grid; gap:0.45rem; justify-items:end;">
+                        <span class="id-pill">{{ path.id }}</span>
+                        <span class="status-pill">Active</span>
+                    </div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-box">
+                        <strong>{{ path.weak_topics_count }}</strong>
+                        <span>Weak Topics</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>{{ path.recommended_topics_count }}</strong>
+                        <span>Recommended</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>{{ path.total_estimated_time|floatformat:1 }}h</strong>
+                        <span>Study Time</span>
+                    </div>
+                </div>
+
+                <div class="path-foot">
+                    <small>Updated {{ path.generated_at|timesince }} ago</small>
+                    <a href="{% url 'learning_paths:path_detail' path.id %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye"></i>
+                        View Path
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+
+            {% for course in courses_without_paths %}
+            <article class="path-item">
+                <div class="path-top">
+                    <div>
+                        <h3>{{ course.title|default:course.course_id }}</h3>
+                        <div class="path-code">{{ course.course_id }}</div>
+                    </div>
+                    <div style="display:grid; gap:0.45rem; justify-items:end;">
+                        <span class="id-pill">New</span>
+                        <span class="status-pill waiting">Waiting for Activity</span>
+                    </div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-box">
+                        <strong>0</strong>
+                        <span>Weak Topics</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>0</strong>
+                        <span>Recommended</span>
+                    </div>
+                    <div class="metric-box">
+                        <strong>0.0h</strong>
+                        <span>Study Time</span>
+                    </div>
+                </div>
+
+                <div class="path-foot">
+                    <small>Take a quiz or exercise in this course to generate a learning path.</small>
+                    <span class="btn btn-secondary btn-sm disabled" aria-disabled="true">
+                        <i class="bi bi-hourglass-split"></i>
+                        No Path Yet
+                    </span>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-diagram-3"></i>
+            <h3>No Learning Paths Yet</h3>
+            <p>This student does not have any learning paths generated yet.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

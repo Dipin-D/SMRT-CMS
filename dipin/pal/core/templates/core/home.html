@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}PAL 2.0{% endblock %}
+
+{% block content %}
+<style>
+    .home-shell {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 1.75rem 1.85rem;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 30%),
+            linear-gradient(135deg, rgba(98, 32, 52, 0.98), rgba(233, 50, 99, 0.9));
+        color: white;
+        box-shadow: 0 28px 60px rgba(98, 32, 52, 0.22);
+    }
+
+    .hero::after {
+        content: '';
+        position: absolute;
+        right: -56px;
+        bottom: -56px;
+        width: 170px;
+        height: 170px;
+        border-radius: 32px;
+        transform: rotate(18deg);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 650px;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.42rem 0.82rem;
+        border-radius: 999px;
+        margin-bottom: 0.8rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .hero-title {
+        font-size: clamp(1.9rem, 3.8vw, 3rem);
+        line-height: 1;
+        margin-bottom: 0.65rem;
+    }
+
+    .hero-copy {
+        max-width: 50ch;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.94rem;
+        margin: 0;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 1rem;
+    }
+
+    .hero-actions .btn-secondary {
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .hero-actions .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.18);
+        color: white;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.2rem 1.25rem;
+        border-radius: 26px;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+    }
+
+    .stat-card strong {
+        display: block;
+        font-size: 2rem;
+        line-height: 1;
+        margin-bottom: 0.45rem;
+        color: #ffe0e8;
+    }
+
+    .stat-card span {
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .section-block {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .section-head {
+        display: grid;
+        gap: 0.35rem;
+    }
+
+    .section-title {
+        margin: 0;
+        font-size: 1.55rem;
+        color: #571d30;
+    }
+
+    .section-note {
+        margin: 0;
+        color: #7f6270;
+    }
+
+    .feature-grid,
+    .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .feature-card,
+    .quick-card {
+        border-radius: 28px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 22px 44px rgba(74, 18, 37, 0.16);
+    }
+
+    .feature-card .card-body,
+    .quick-card .card-body {
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .feature-icon,
+    .quick-icon {
+        width: 74px;
+        height: 74px;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 14px 28px rgba(0,0,0,0.18);
+        color: #ffe3ea;
+    }
+
+    .feature-card p,
+    .quick-card p {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .feature-points {
+        display: grid;
+        gap: 0.45rem;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.92rem;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-row,
+        .feature-grid,
+        .quick-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero,
+        .stat-card,
+        .feature-card,
+        .quick-card {
+            border-radius: 24px;
+        }
+
+        .hero {
+            padding: 1.2rem;
+        }
+    }
+</style>
+
+<div class="home-shell">
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-badge"><i class="bi bi-stars"></i> Personalized Adaptive Learning</span>
+            <h1 class="hero-title">Learning paths and course insight, in one place.</h1>
+            <p class="hero-copy">
+                See progress, spot weak areas, and decide what to study next.
+            </p>
+
+            <div class="hero-actions">
+                <a href="{% if user.is_authenticated and user.is_student %}{% url 'learning_paths:my_learning_path' %}{% else %}{% url 'learning_paths:student_list' %}{% endif %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-through-heart"></i>
+                    {% if user.is_authenticated and user.is_student %}Open My Learning Path{% else %}Open Learning Paths{% endif %}
+                </a>
+                <a href="{% if user.is_authenticated and user.is_student %}{% url 'knowledge_graph:my_graphs' %}{% else %}{% url 'knowledge_graph:graph_list' %}{% endif %}" class="btn btn-secondary">
+                    <i class="bi bi-diagram-3"></i>
+                    {% if user.is_authenticated and user.is_student %}Open Course Graphs{% else %}Open Knowledge Graph{% endif %}
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-row">
+        <div class="stat-card">
+            <strong>{{ interaction_count }}</strong>
+            <span>Student interactions from quizzes, exercises, and synced course activity.</span>
+        </div>
+        <div class="stat-card">
+            <strong>{{ question_count }}</strong>
+            <span>Questions across {{ topic_count }} PAL topics used for paths and course recommendations.</span>
+        </div>
+        <div class="stat-card">
+            <strong>{{ resource_count }}</strong>
+            <span>Learning resources available for weak areas and next study steps.</span>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="section-head">
+            <h2 class="section-title">Core Features</h2>
+            <p class="section-note">The main parts of PAL are easier to scan and reach from here.</p>
+        </div>
+
+        <div class="feature-grid">
+            <article class="feature-card">
+                <div class="card-body">
+                    <div>
+                        <div class="feature-icon">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <h3 class="card-title">Adaptive Learning</h3>
+                        <p>Use real assessment performance to surface what a student should study next, not just static course content.</p>
+                    </div>
+                    <div class="feature-points">
+                        <span>Weak-topic detection from attempts</span>
+                        <span>Priority-based recommendations</span>
+                        <span>Resources attached to next steps</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <div class="card-body">
+                    <div>
+                        <div class="feature-icon">
+                            <i class="bi bi-tags"></i>
+                        </div>
+                        <h3 class="card-title">Topic Classification</h3>
+                        <p>Organize questions and course activity around concepts so PAL can reason about topics instead of isolated items.</p>
+                    </div>
+                    <div class="feature-points">
+                        <span>Question-to-topic mapping</span>
+                        <span>Cleaner course organization</span>
+                        <span>Better graph and path results</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <div class="card-body">
+                    <div>
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3 class="card-title">Performance Analytics</h3>
+                        <p>Turn quiz and exercise data into readable progress signals for students and instructors.</p>
+                    </div>
+                    <div class="feature-points">
+                        <span>Attempts and correctness signals</span>
+                        <span>Weak-area visibility</span>
+                        <span>Course-level follow-up</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section-block">
+        <div class="section-head">
+            <h2 class="section-title">Quick Actions</h2>
+            <p class="section-note">Jump directly into the parts of PAL you’re most likely to use.</p>
+        </div>
+
+        <div class="quick-grid">
+            {% if not user.is_authenticated or not user.is_student %}
+            <article class="quick-card">
+                <div class="card-body">
+                    <div>
+                        <div class="quick-icon" style="color: #ffd8e4;">
+                            <i class="bi bi-upload"></i>
+                        </div>
+                        <h4 class="card-title">Upload Data</h4>
+                        <p class="card-text">Import student records, question data, or structured content into PAL.</p>
+                    </div>
+                    <a href="{% url 'data_ingestion:upload_data' %}" class="btn btn-primary">
+                        <i class="bi bi-upload"></i>
+                        Upload CSV
+                    </a>
+                </div>
+            </article>
+            {% endif %}
+
+            <article class="quick-card">
+                <div class="card-body">
+                    <div>
+                        <div class="quick-icon" style="color: #ffe3ea;">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <h4 class="card-title">Knowledge Graph</h4>
+                        <p class="card-text">Open course concept maps and visual topic relationships.</p>
+                    </div>
+                    <a href="{% if user.is_authenticated and user.is_student %}{% url 'knowledge_graph:my_graphs' %}{% else %}{% url 'knowledge_graph:graph_list' %}{% endif %}" class="btn btn-primary">
+                        <i class="bi bi-diagram-3"></i>
+                        {% if user.is_authenticated and user.is_student %}Open Course Graphs{% else %}Open Graphs{% endif %}
+                    </a>
+                </div>
+            </article>
+
+            <article class="quick-card">
+                <div class="card-body">
+                    <div>
+                        <div class="quick-icon" style="color: #ffdbe3;">
+                            <i class="bi bi-arrow-through-heart"></i>
+                        </div>
+                        <h4 class="card-title">Learning Paths</h4>
+                        <p class="card-text">Go straight to personalized study guidance and recommended resources.</p>
+                    </div>
+                    <a href="{% if user.is_authenticated and user.is_student %}{% url 'learning_paths:my_learning_path' %}{% else %}{% url 'learning_paths:student_list' %}{% endif %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-through-heart"></i>
+                        {% if user.is_authenticated and user.is_student %}Open My Path{% else %}Open Paths{% endif %}
+                    </a>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+{% endblock %}
