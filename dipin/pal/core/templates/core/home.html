@@ -221,10 +221,12 @@
                     <i class="bi bi-arrow-through-heart"></i>
                     {% if user.is_authenticated and user.is_student %}Open My Learning Path{% else %}Open Learning Paths{% endif %}
                 </a>
+                {% if user.is_authenticated and user.is_student %}
                 <a href="{% if user.is_authenticated and user.is_student %}{% url 'knowledge_graph:my_graphs' %}{% else %}{% url 'knowledge_graph:graph_list' %}{% endif %}" class="btn btn-secondary">
                     <i class="bi bi-diagram-3"></i>
                     {% if user.is_authenticated and user.is_student %}Open Course Graphs{% else %}Open Knowledge Graph{% endif %}
                 </a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -329,6 +331,7 @@
             </article>
             {% endif %}
 
+            {% if user.is_authenticated and user.is_student %}
             <article class="quick-card">
                 <div class="card-body">
                     <div>
@@ -344,6 +347,7 @@
                     </a>
                 </div>
             </article>
+            {% endif %}
 
             <article class="quick-card">
                 <div class="card-body">

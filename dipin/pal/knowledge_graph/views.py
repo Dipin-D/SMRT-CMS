@@ -274,16 +274,14 @@ def graph_list(request):
     """
     if getattr(request.user, 'is_student', False):
         return redirect('knowledge_graph:my_graphs')
-
-    graphs = KnowledgeGraph.objects.all().order_by('-updated_at')
-    return render(request, 'knowledge_graph/graph_list.html', {'graphs': graphs})
+    return redirect('/pal/')
 
 
 @login_required
 def my_graphs(request):
     """Show simple course-based graphs for the logged-in student's enrolled courses."""
     if not getattr(request.user, 'is_student', False):
-        return redirect('knowledge_graph:graph_list')
+        return redirect('/pal/')
 
     sync_service = SmrtPalSyncService()
     courses = sync_service.get_user_courses(request.user)

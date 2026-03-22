@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Graphs{% endblock %}
+
+{% block content %}
+<style>
+    .graph-list-page {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .hero-card {
+        border-radius: 30px;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(98, 32, 52, 0.98), rgba(233, 50, 99, 0.88));
+        color: white;
+        box-shadow: 0 26px 54px rgba(98, 32, 52, 0.2);
+    }
+
+    .hero-card h1 {
+        margin: 0 0 0.7rem;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1;
+        color: #fff;
+    }
+
+    .hero-card p {
+        margin: 0;
+        max-width: 54ch;
+        color: rgba(255,255,255,0.84);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .summary-card {
+        border-radius: 24px;
+        padding: 1.15rem 1.2rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+    }
+
+    .summary-card strong {
+        display: block;
+        font-size: 1.9rem;
+        line-height: 1;
+        margin-bottom: 0.35rem;
+        color: #ffe0e8;
+    }
+
+    .summary-card span {
+        color: rgba(255,255,255,0.76);
+    }
+
+    .section-card,
+    .empty-card {
+        border-radius: 28px;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid rgba(98, 32, 52, 0.08);
+        box-shadow: 0 18px 40px rgba(98, 32, 52, 0.08);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-head h2 {
+        margin: 0;
+        color: #571d30;
+        font-size: 1.4rem;
+    }
+
+    .section-head p {
+        margin: 0;
+        color: #7f6270;
+    }
+
+    .graph-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .graph-card {
+        border-radius: 24px;
+        padding: 1.3rem;
+        background: linear-gradient(180deg, rgba(98, 32, 52, 0.98), rgba(82, 26, 48, 0.98));
+        color: white;
+        border: 1px solid rgba(131, 53, 74, 0.9);
+        box-shadow: 0 18px 36px rgba(74, 18, 37, 0.14);
+        display: grid;
+        gap: 1rem;
+    }
+
+    .graph-card h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1.15rem;
+        color: #fff;
+    }
+
+    .graph-card p {
+        margin: 0;
+        color: rgba(255,255,255,0.76);
+    }
+
+    .graph-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .graph-meta-box {
+        padding: 0.8rem;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .graph-meta-box strong {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.1;
+    }
+
+    .graph-meta-box span {
+        color: rgba(255,255,255,0.7);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .graph-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+    }
+
+    .graph-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .graph-btn-primary {
+        background: #fff;
+        color: #61162D;
+    }
+
+    .graph-btn-primary:hover {
+        color: #4b1527;
+        text-decoration: none;
+    }
+
+    .graph-btn-soft {
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .graph-btn-soft:hover {
+        color: #fff;
+        text-decoration: none;
+        background: rgba(255,255,255,0.16);
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.32rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(72, 187, 120, 0.14);
+        color: #d6ffe4;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .empty-card {
+        text-align: center;
+        color: #7f6270;
+    }
+
+    .empty-card i {
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 0.75rem;
+        color: #8a5567;
+    }
+
+    @media (max-width: 1024px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-card,
+        .summary-card,
+        .section-card,
+        .graph-card,
+        .empty-card {
+            border-radius: 22px;
+        }
+
+        .hero-card {
+            padding: 1.5rem;
+        }
+
+        .section-head {
+            display: grid;
+        }
+
+        .graph-meta {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="graph-list-page">
+    <section class="hero-card">
+        <h1>Knowledge Graphs</h1>
+        <p>Open an existing graph, review versions, and manage the active graph used across PAL.</p>
+    </section>
+
+    {% if graphs %}
+    <section class="summary-grid">
+        <div class="summary-card">
+            <strong>{{ graphs|length }}</strong>
+            <span>Total saved graphs</span>
+        </div>
+        <div class="summary-card">
+            <strong>{% for graph in graphs %}{% if graph.is_active %}1{% endif %}{% empty %}0{% endfor %}</strong>
+            <span>Active graph</span>
+        </div>
+        <div class="summary-card">
+            <strong>{% if graphs.0 %}{{ graphs.0.updated_at|date:"M j" }}{% else %}-{% endif %}</strong>
+            <span>Latest update</span>
+        </div>
+    </section>
+
+    <section class="section-card">
+        <div class="section-head">
+            <div>
+                <h2>Available Graphs</h2>
+                <p>Select a graph to inspect or manage it.</p>
+            </div>
+        </div>
+
+        <div class="graph-grid">
+            {% for graph in graphs %}
+            <article class="graph-card">
+                <div>
+                    <h3>{{ graph.name }}</h3>
+                    <p>{{ graph.description|default:"No description provided." }}</p>
+                </div>
+
+                <div class="graph-meta">
+                    <div class="graph-meta-box">
+                        <strong>{{ graph.version }}</strong>
+                        <span>Version</span>
+                    </div>
+                    <div class="graph-meta-box">
+                        <strong>{{ graph.updated_at|date:"M j, Y" }}</strong>
+                        <span>Updated</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    {% if graph.is_active %}
+                    <span class="status-pill">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Active
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="graph-actions">
+                    <a href="{% url 'knowledge_graph:graph_detail' graph.id %}" class="graph-btn graph-btn-primary">
+                        Open Graph
+                    </a>
+                    {% if not graph.is_active %}
+                    <a href="{% url 'knowledge_graph:set_active_graph' graph.id %}" class="graph-btn graph-btn-soft">
+                        Set Active
+                    </a>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <section class="empty-card">
+        <i class="bi bi-diagram-3"></i>
+        <h2>No knowledge graphs yet</h2>
+        <p>Create or upload a graph to start using the knowledge graph views.</p>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

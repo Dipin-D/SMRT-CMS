@@ -541,10 +541,12 @@
                     Documents
                 </a>
                 {% endif %}
-                <a href="{% if user.is_authenticated and user.is_student %}{% url 'knowledge_graph:my_graphs' %}{% else %}{% url 'knowledge_graph:graph_list' %}{% endif %}" class="nav-link">
+                {% if user.is_authenticated and user.is_student %}
+                <a href="{% url 'knowledge_graph:my_graphs' %}" class="nav-link">
                     <i class="bi bi-diagram-3"></i>
-                    {% if user.is_authenticated and user.is_student %}My Course Graphs{% else %}Knowledge Graph{% endif %}
+                    My Course Graphs
                 </a>
+                {% endif %}
                 <a href="{% if user.is_authenticated and user.is_student %}{% url 'learning_paths:my_learning_path' %}{% else %}{% url 'learning_paths:student_list' %}{% endif %}" class="nav-link">
                     <i class="bi bi-arrow-through-heart"></i>
                     {% if user.is_authenticated and user.is_student %}My Learning Path{% else %}Learning Paths{% endif %}
