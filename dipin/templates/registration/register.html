@@ -5,44 +5,261 @@ Register
 {% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 3rem;">
-    <div class="text-center" style="max-width: 400px; margin: auto; padding: 3rem; background: #f8f9fa; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);">
-        <h2 style="color: #8A2C3B;">Register Here:</h2> 
-
-        <form method="post" action="{% url 'accounts:register' %}" class="d-inline-block text-start">
-            {% csrf_token %}
-            {{ form.as_p }}
-
-            <div class="d-flex justify-content-center">
-                <button class="btn custom-button btn-lg d-inline-flex align-items-center mt-3" type="submit" style="border-radius: 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); padding: 10px 20px;">
-                    Register
-                </button>
-            </div>
-        </form>
-        <div class="alert alert-info mt-3" role="alert">
-            <strong>Note:</strong> Please use your first and last name as your username. Make sure to register with your school email address. If you use any other email, you will not be granted access to the system.
-        </div>
-
-        <p class="mt-3" style="font-weight: 500;">Already have an account? <a href="{% url 'accounts:login' %}" style="color: #8A2C3B;">Login Here</a></p> <!-- Updated color here -->
-    </div>
-</div>
-
 <style>
-    .custom-button {
-        background-color: #8A2C3B; 
-        color: white;
-        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-        border: none;
-        border-radius: 5px;
-        padding: 15px 20px; 
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    .register-shell {
+        min-height: calc(100vh - 180px);
+        display: grid;
+        place-items: center;
+        padding: 2rem 0;
     }
 
-    .custom-button:hover {
+    .register-layout {
+        width: min(1020px, 100%);
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+        background: #ffffff;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 28px 60px rgba(97, 22, 45, 0.16);
+        border: 1px solid rgba(97, 22, 45, 0.08);
+    }
+
+    .register-brand {
+        position: relative;
+        padding: 3rem;
         color: white;
-        background-color: #7A2B3B; 
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        background:
+            radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 28%),
+            linear-gradient(135deg, #61162D 0%, #8b3451 100%);
+    }
+
+    .register-brand::after {
+        content: '';
+        position: absolute;
+        right: -70px;
+        bottom: -70px;
+        width: 220px;
+        height: 220px;
+        border-radius: 40px;
+        transform: rotate(18deg);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .brand-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        margin-bottom: 1rem;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.14);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .brand-title {
+        margin: 0 0 0.9rem;
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        line-height: 0.98;
+    }
+
+    .brand-copy {
+        margin: 0;
+        max-width: 34ch;
+        color: rgba(255,255,255,0.82);
+    }
+
+    .brand-note {
+        margin-top: 1.4rem;
+        padding: 1rem 1.05rem;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.84);
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .register-panel {
+        padding: 2.5rem;
+        display: grid;
+        align-content: center;
+        gap: 1.2rem;
+        background: #fffafb;
+    }
+
+    .register-panel h1 {
+        margin: 0;
+        color: #61162D;
+        font-size: 2rem;
+    }
+
+    .register-panel p {
+        margin: 0;
+        color: #7d6970;
+    }
+
+    .register-form {
+        display: grid;
+        gap: 1rem;
+        margin-top: 0.3rem;
+    }
+
+    .field-group {
+        display: grid;
+        gap: 0.45rem;
+    }
+
+    .field-group label {
+        color: #4d2233;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+        width: 100%;
+        padding: 0.95rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(97, 22, 45, 0.14);
+        background: #ffffff;
+        font-size: 0.96rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+        outline: none;
+        border-color: #8b3451;
+        box-shadow: 0 0 0 4px rgba(97, 22, 45, 0.08);
+    }
+
+    .field-help,
+    .field-error,
+    .form-error {
+        color: #8b3451;
+        font-size: 0.85rem;
+    }
+
+    .form-error {
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        background: rgba(139, 52, 81, 0.08);
+        border: 1px solid rgba(139, 52, 81, 0.12);
+    }
+
+    .register-actions {
+        display: grid;
+        gap: 0.85rem;
+        margin-top: 0.2rem;
+    }
+
+    .btn-register {
+        width: 100%;
+        justify-content: center;
+        background-color: #61162D;
+        color: #ffffff;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+    }
+
+    .btn-register:hover {
+        background-color: #7B2C3D;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(97, 22, 45, 0.18);
+        color: #ffffff;
+    }
+
+    .ghost-link {
+        color: #61162D;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .ghost-link:hover {
+        color: #7B2C3D;
+    }
+
+    .register-links {
+        text-align: center;
+        margin-top: 0.35rem;
+    }
+
+    @media (max-width: 900px) {
+        .register-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .register-brand,
+        .register-panel {
+            padding: 1.6rem;
+        }
     }
 </style>
+
+<div class="register-shell">
+    <div class="register-layout">
+        <section class="register-brand">
+            <div class="brand-content">
+                <span class="brand-badge"><i class="bi bi-person-plus"></i> New Account</span>
+                <h2 class="brand-title">Create your account</h2>
+                <p class="brand-copy">Register to access courses, assignments, quizzes, learning paths, and student tools.</p>
+                <div class="brand-note">
+                    Use your first and last name for the username and register with your school email. Other email addresses may not be granted access.
+                </div>
+            </div>
+        </section>
+
+        <section class="register-panel">
+            <div>
+                <h1>Register</h1>
+                <p>Fill in your details to get started.</p>
+            </div>
+
+            <form method="post" action="{% url 'accounts:register' %}" class="register-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="form-error">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="field-help">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                <div class="register-actions">
+                    <button class="btn btn-register btn-lg" type="submit">
+                        <i class="bi bi-person-plus"></i> Register
+                    </button>
+                </div>
+            </form>
+
+            <div class="register-links">
+                <p>Already have an account? <a href="{% url 'accounts:login' %}" class="ghost-link">Login Here</a></p>
+            </div>
+        </section>
+    </div>
+</div>
 {% endblock %}

@@ -6,124 +6,364 @@
 
 {% block content %}
 <style>
-    .button-container {
+    .course-shell {
+        display: grid;
+        gap: 1.25rem;
+        padding: 1rem 0 2rem;
+    }
+
+    .course-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 1.8rem;
+        background: linear-gradient(135deg, rgba(97, 22, 45, 0.98), rgba(151, 53, 83, 0.92));
+        color: white;
+        box-shadow: 0 22px 48px rgba(97, 22, 45, 0.18);
+    }
+
+    .course-hero::after {
+        content: '';
+        position: absolute;
+        right: -58px;
+        bottom: -58px;
+        width: 170px;
+        height: 170px;
+        border-radius: 32px;
+        background: rgba(255,255,255,0.08);
+        transform: rotate(18deg);
+    }
+
+    .course-hero-content {
+        position: relative;
+        z-index: 1;
         display: flex;
-        justify-content: center; 
-        margin: 10px 0;
-        padding: 0;  
-        flex-wrap: wrap;  
-        background-color: #f8f9fa;
-
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
     }
 
-    .custombutton {
-        background-color: #61162D;
-        border: none;
-        padding: 10px 20px;
-        color: #fff;
-        font-weight: bold;
-        border-radius: 5px;
+    .course-title {
+        margin: 0 0 0.45rem;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1;
+    }
+
+    .course-subtitle {
+        margin: 0;
+        color: rgba(255,255,255,0.82);
+        max-width: 44ch;
+    }
+
+    .course-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.95rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: white;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .tab-shell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.2rem;
+    }
+
+    .tab-toggle {
+        display: none;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        background: #ffffff;
+        color: #61162D;
+        font-weight: 700;
+        box-shadow: 0 12px 24px rgba(97, 22, 45, 0.06);
         cursor: pointer;
-        transition: background-color 0.3s ease;
-        display: inline-block;
-        margin: 5px;
     }
 
-    .custombutton:hover {
-        background-color:rgb(124, 49, 64);
-        color: #fff;}
+    .tab-toggle i:last-child {
+        transition: transform 0.2s ease;
+    }
+
+    .tab-toggle.is-open i:last-child {
+        transform: rotate(180deg);
+    }
+
+    .tab-btn {
+        background: #ffffff;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        padding: 0.85rem 1rem;
+        color: #61162D;
+        font-weight: 700;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        box-shadow: 0 12px 24px rgba(97, 22, 45, 0.06);
+    }
+
+    .tab-btn:hover,
+    .tab-btn.active {
+        background: #61162D;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(97, 22, 45, 0.14);
+    }
+
+    .content-card {
+        background: #ffffff;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        border-radius: 24px;
+        box-shadow: 0 16px 34px rgba(97, 22, 45, 0.08);
+        padding: 1.2rem;
+        min-height: 70vh;
+        overflow-x: hidden;
+    }
+
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+    }
+
+    @media (max-width: 1024px) {
+        .course-shell {
+            gap: 1rem;
+        }
+
+        .course-hero {
+            padding: 1.5rem;
+        }
+
+        .course-hero-content {
+            display: grid;
+            align-items: start;
+        }
+
+        .course-pill {
+            width: fit-content;
+            max-width: 100%;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .tab-toggle {
+            display: flex;
+        }
+
+        .tab-shell {
+            display: none;
+            gap: 0.65rem;
+            padding-top: 0;
+        }
+
+        .tab-shell.is-open {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .tab-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .content-card {
+            min-height: auto;
+        }
+    }
 
     @media (max-width: 768px) {
-        .button-container {
-            justify-content: center;  /* Center buttons on smaller screens */
+        .course-hero,
+        .content-card {
+            border-radius: 22px;
+        }
+
+        .course-hero {
+            padding: 1.4rem;
+        }
+
+        .course-hero-content {
+            display: grid;
+            align-items: start;
+        }
+
+        .tab-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.8rem 0.9rem;
+            font-size: 0.92rem;
+        }
+
+        .content-card {
+            padding: 0.9rem;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .tab-shell.is-open {
+            grid-template-columns: 1fr;
+        }
+
+        .course-title {
+            font-size: 1.7rem;
+        }
+
+        .course-subtitle {
+            font-size: 0.94rem;
+        }
+
+        .course-pill {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .content-card {
+            padding: 0.75rem;
+            border-radius: 18px;
         }
     }
 </style>
 
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Button container for horizontal layout -->
-        <div class="button-container">
-            <button class="custombutton btn btn-sm" onclick="loadContent('lecture', event)">
-                <i class="fas fa-chalkboard-teacher"></i> <span>Lectures</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('exercise', event)">
-                <i class="fas fa-tasks"></i> <span>Exercises</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('quiz', event)">
-                <i class="fas fa-clipboard-list"></i> <span>Quizzes</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('assignment', event)">
-                <i class="fas fa-file-alt"></i> <span>Assignments</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('grade', event)">
-                <i class="fas fa-graduation-cap"></i> <span>Grades</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('analytics', event)">
-                <i class="fas fa-chart-bar"></i> <span>Analytics</span>
-            </button>
-            <button class="custombutton btn btn-sm" onclick="loadContent('ide', event)">
-                <i class="fas fa-laptop-code"></i> <span>IDE</span>
-            </button>
+<div class="course-shell">
+    <section class="course-hero">
+        <div class="course-hero-content">
+            <div>
+                <h1 class="course-title">{{ class_shell.course_name }}</h1>
+                <p class="course-subtitle">Lectures, quizzes, assignments, exercises, grades, analytics, and IDE tools for this course.</p>
+            </div>
+            <div class="course-pill">{{ class_shell.semester }} {{ class_shell.year }} · Section {{ class_shell.section_number }}</div>
         </div>
+    </section>
 
-        <!-- Content area -->
-        <div class="col p-3" style="min-height: 100vh; overflow-y: auto;">
-            <div id="lecture-content" class="content-section">
-                {% include 'view_lecture.html' %}
-            </div>
-            <div id="exercise-content" class="content-section">
-                {% include 'take_exercise.html' %}
-            </div>
-            <div id="quiz-content" class="content-section">
-                {% include 'quiz_list.html' %}
-            </div>
-            <div id="assignment-content" class="content-section">
-                {% include 'do_assignment.html' %}
-            </div>
-            <div id="grade-content" class="content-section">
-                {% include 'Grades.html' %}
-            </div>
-            <div id="analytics-content" class="content-section">
-                {% include 'student_analytics.html' %}
-            </div>
-            <div id="ide-content" class="content-section">
-                {% include 'ide.html' %}
-            </div>
+    <button class="tab-toggle" type="button" aria-expanded="false" aria-controls="course-tabs">
+        <span><i class="bi bi-grid"></i> Course Sections</span>
+        <i class="bi bi-chevron-down"></i>
+    </button>
+
+    <nav class="tab-shell" id="course-tabs" aria-label="Course sections">
+        <button class="tab-btn" onclick="loadContent('lecture', event)">
+            <i class="bi bi-easel"></i><span>Lectures</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('exercise', event)">
+            <i class="bi bi-ui-checks-grid"></i><span>Exercises</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('quiz', event)">
+            <i class="bi bi-patch-question"></i><span>Quizzes</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('assignment', event)">
+            <i class="bi bi-file-earmark-text"></i><span>Assignments</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('grade', event)">
+            <i class="bi bi-mortarboard"></i><span>Grades</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('analytics', event)">
+            <i class="bi bi-bar-chart"></i><span>Analytics</span>
+        </button>
+        <button class="tab-btn" onclick="loadContent('ide', event)">
+            <i class="bi bi-code-square"></i><span>IDE</span>
+        </button>
+    </nav>
+
+    <section class="content-card">
+        <div id="lecture-content" class="content-section">
+            {% include 'view_lecture.html' %}
         </div>
-    </div>
+        <div id="exercise-content" class="content-section">
+            {% include 'take_exercise.html' %}
+        </div>
+        <div id="quiz-content" class="content-section">
+            {% include 'quiz_list.html' %}
+        </div>
+        <div id="assignment-content" class="content-section">
+            {% include 'do_assignment.html' %}
+        </div>
+        <div id="grade-content" class="content-section">
+            {% include 'Grades.html' %}
+        </div>
+        <div id="analytics-content" class="content-section">
+            {% include 'student_analytics.html' %}
+        </div>
+        <div id="ide-content" class="content-section">
+            {% include 'ide.html' %}
+        </div>
+    </section>
 </div>
 
 <script>
     function loadContent(contentType, event) {
         document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
+            section.classList.remove('active');
         });
 
-        document.getElementById(`${contentType}-content`).style.display = 'block';
+        const target = document.getElementById(`${contentType}-content`);
+        if (target) {
+            target.classList.add('active');
+        }
+
         localStorage.setItem('activeTab', contentType);
 
-        document.querySelectorAll('.custombutton').forEach(button => {
+        document.querySelectorAll('.tab-btn').forEach(button => {
             button.classList.remove('active');
         });
-        event.currentTarget.classList.add('active');
+
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+
+        const tabs = document.getElementById('course-tabs');
+        const toggle = document.querySelector('.tab-toggle');
+        if (window.innerWidth <= 1024 && tabs && toggle) {
+            tabs.classList.remove('is-open');
+            toggle.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        let activeTab = localStorage.getItem('activeTab') || 'lecture';
-        localStorage.setItem('activeTab', activeTab);
+        const activeTab = localStorage.getItem('activeTab') || 'lecture';
+        const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'grade', 'analytics', 'ide'];
+        const tabIndex = tabOrder.indexOf(activeTab);
+        const button = document.querySelectorAll('.tab-btn')[tabIndex >= 0 ? tabIndex : 0];
+        const tabs = document.getElementById('course-tabs');
+        const toggle = document.querySelector('.tab-toggle');
 
-        const button = document.querySelector(`.custombutton:nth-child(${getTabIndex(activeTab)})`);
         if (button) {
             loadContent(activeTab, { currentTarget: button });
         }
-    });
 
-    function getTabIndex(contentType) {
-        const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'grade', 'analytics', 'ide'];
-        return tabOrder.indexOf(contentType) + 1;
-    }
+        if (toggle && tabs) {
+            toggle.addEventListener('click', function() {
+                const isOpen = tabs.classList.toggle('is-open');
+                toggle.classList.toggle('is-open', isOpen);
+                toggle.setAttribute('aria-expanded', String(isOpen));
+            });
+
+            function resetTabsForDesktop() {
+                if (window.innerWidth > 1024) {
+                    tabs.classList.remove('is-open');
+                    toggle.classList.remove('is-open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            window.addEventListener('resize', resetTabsForDesktop);
+            resetTabsForDesktop();
+        }
+    });
 </script>
 
 {% endblock %}

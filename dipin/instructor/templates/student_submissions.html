@@ -1,286 +1,695 @@
 <style>
-
-    .container {
-        font-size: 14px;
-        margin: 20px;
+    .submissions-shell {
+        display: grid;
+        gap: 1rem;
+        padding: 0.2rem 0 0.75rem;
     }
 
-    .table-container {
-        margin-top: 20px;
+    .submissions-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.1rem;
+        border-radius: 20px;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 34%),
+            linear-gradient(135deg, #61162D, #8d3752);
+        color: #fff;
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
+    .submissions-hero h3 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.15rem;
     }
 
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
+    .submissions-hero p {
+        margin: 0.3rem 0 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.9rem;
     }
 
-    th {
-        background-color: #f4f4f4;
+    .submissions-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
     }
 
-    .collapsible {
-        background-color: #8A2C3B;
-        color: white;
-        cursor: pointer;
-        padding: 10px;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 15px;
-        margin-bottom: 5px;
-        border-radius: 5px;
+    .submission-stat {
+        padding: 0.9rem 1rem;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid rgba(97, 22, 45, 0.1);
+        box-shadow: 0 12px 28px rgba(97, 22, 45, 0.08);
     }
 
-    .active, .collapsible:hover {
-        background-color: #7A2B3B;
+    .submission-stat strong {
+        display: block;
+        color: #4a1324;
+        font-size: 1.3rem;
+        line-height: 1.1;
     }
 
-    .collapsible-content {
-        display: none;
+    .submission-stat span {
+        color: #8a747d;
+        font-size: 0.84rem;
+    }
+
+    .submission-group {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        border-radius: 22px;
+        box-shadow: 0 16px 34px rgba(97, 22, 45, 0.08);
         overflow: hidden;
-        padding: 0 15px;
     }
 
-    /* Popup styles */
+    .submission-toggle {
+        width: 100%;
+        border: none;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.15rem;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .submission-toggle:hover {
+        background: rgba(97, 22, 45, 0.04);
+    }
+
+    .submission-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .submission-toggle-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: linear-gradient(135deg, #61162D, #8d3752);
+        flex: 0 0 auto;
+    }
+
+    .submission-toggle h4 {
+        margin: 0;
+        color: #421622;
+        font-size: 1.02rem;
+    }
+
+    .submission-toggle p {
+        margin: 0.2rem 0 0;
+        color: #8a747d;
+        font-size: 0.84rem;
+    }
+
+    .submission-toggle-right {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .submission-pill {
+        padding: 0.34rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .submission-pill-pending {
+        background: rgba(237, 137, 54, 0.12);
+        color: #b95d17;
+    }
+
+    .submission-pill-done {
+        background: rgba(72, 187, 120, 0.12);
+        color: #26734a;
+    }
+
+    .submission-chevron {
+        color: #6d4150;
+        transition: transform 0.2s ease;
+    }
+
+    .submission-group.is-open .submission-chevron {
+        transform: rotate(180deg);
+    }
+
+    .submission-content {
+        display: none;
+        padding: 0 1.15rem 1.15rem;
+    }
+
+    .submission-group.is-open .submission-content {
+        display: block;
+    }
+
+    .submission-block {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .submission-block + .submission-block {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(97, 22, 45, 0.08);
+    }
+
+    .submission-block-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .submission-block-head h5 {
+        margin: 0;
+        color: #4a1324;
+        font-size: 0.96rem;
+    }
+
+    .submission-count {
+        color: #866f78;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .submission-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .submission-card {
+        display: grid;
+        gap: 0.85rem;
+        padding: 1rem;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,244,245,0.98));
+        border: 1px solid rgba(97, 22, 45, 0.08);
+    }
+
+    .submission-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.85rem;
+    }
+
+    .submission-card-title {
+        margin: 0;
+        color: #3b1520;
+        font-size: 0.98rem;
+    }
+
+    .submission-card-meta {
+        margin: 0.25rem 0 0;
+        color: #8b7680;
+        font-size: 0.84rem;
+    }
+
+    .submission-grade-badge {
+        padding: 0.32rem 0.68rem;
+        border-radius: 999px;
+        background: rgba(72, 187, 120, 0.12);
+        color: #26734a;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .submission-actions,
+    .grade-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: center;
+    }
+
+    .submission-link,
+    .submission-btn {
+        appearance: none;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0.72rem 0.95rem;
+        border-radius: 13px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .submission-link:hover,
+    .submission-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .submission-btn-primary,
+    .submission-link-primary {
+        background: linear-gradient(135deg, #61162D, #8d3752);
+        color: #fff;
+    }
+
+    .submission-btn-primary:hover,
+    .submission-link-primary:hover {
+        color: #fff;
+    }
+
+    .submission-btn-soft,
+    .submission-link-soft {
+        background: rgba(97, 22, 45, 0.08);
+        color: #5e1d31;
+        border: 1px solid rgba(97, 22, 45, 0.12);
+    }
+
+    .submission-btn-soft:hover,
+    .submission-link-soft:hover {
+        color: #4b1527;
+        background: rgba(97, 22, 45, 0.12);
+    }
+
+    .grade-input {
+        min-width: 140px;
+        padding: 0.72rem 0.85rem;
+        border-radius: 13px;
+        border: 1px solid rgba(97, 22, 45, 0.14);
+        background: #fff;
+    }
+
+    .grade-input:focus {
+        outline: none;
+        border-color: rgba(97, 22, 45, 0.4);
+        box-shadow: 0 0 0 3px rgba(97, 22, 45, 0.08);
+    }
+
+    .empty-copy {
+        padding: 0.9rem 1rem;
+        border-radius: 16px;
+        background: rgba(97, 22, 45, 0.04);
+        color: #826d76;
+        font-size: 0.88rem;
+    }
+
+    .popup-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(27, 10, 16, 0.55);
+        z-index: 999;
+    }
+
     .popup {
         display: none;
         position: fixed;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border: 1px solid #ddd;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: min(680px, calc(100vw - 2rem));
+        max-height: 80vh;
+        overflow-y: auto;
+        background: #fff;
+        border-radius: 22px;
+        border: 1px solid rgba(97, 22, 45, 0.12);
+        box-shadow: 0 24px 54px rgba(39, 12, 21, 0.24);
         z-index: 1000;
-        max-height: 80%;
+        padding: 1.2rem;
+    }
+
+    .popup h4 {
+        margin: 0 0 0.85rem;
+        color: #4a1324;
+    }
+
+    .popup-body {
+        color: #543341;
+        white-space: pre-wrap;
+        line-height: 1.65;
+        max-height: 50vh;
         overflow-y: auto;
     }
 
-    .popup-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-    }
-
     .popup-close {
-        background: #8A2C3B;
-        color: #fff;
-        border-radius: 5px;
-        padding: 5px 10px;
-        border: none;
-        cursor: pointer;
+        margin-top: 1rem;
     }
 
-    .popup-close:hover {
-        background: #9B3E51;
+    @media (max-width: 900px) {
+        .submissions-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .submissions-hero,
+        .submission-toggle,
+        .submission-content,
+        .submission-card {
+            padding-left: 0.95rem;
+            padding-right: 0.95rem;
+        }
+
+        .submissions-hero,
+        .submission-card-top,
+        .submission-block-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .submission-toggle {
+            align-items: flex-start;
+        }
+
+        .submission-toggle-right,
+        .submission-actions,
+        .grade-form {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .submission-link,
+        .submission-btn,
+        .grade-input,
+        .grade-form button {
+            width: 100%;
+        }
     }
 </style>
 
-<body>
+<div class="submissions-shell">
+    <section class="submissions-hero">
+        <div>
+            <h3>Submissions</h3>
+            <p>Review assignment, quiz, and exercise work in one place.</p>
+        </div>
+    </section>
 
-<div class="container ">
-    <h3 class="text-center mb-4 card-title"> Submissions</h3>
+    <section class="submissions-stats">
+        <article class="submission-stat">
+            <strong>{{ ungraded_submissions.assignments|length|add:graded_submissions.assignments|length }}</strong>
+            <span>Assignments</span>
+        </article>
+        <article class="submission-stat">
+            <strong>{{ ungraded_submissions.quizzes|length|add:graded_submissions.quizzes|length }}</strong>
+            <span>Quizzes</span>
+        </article>
+        <article class="submission-stat">
+            <strong>{{ ungraded_submissions.exercises|length|add:graded_submissions.exercises|length }}</strong>
+            <span>Exercises</span>
+        </article>
+    </section>
 
-<!-- Collapsible for Assignments -->
-<button class="collapsible custom-button mt-3 mb-3 ml-3">Assignments</button>
-<div class="collapsible-content table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Student Name</th>
-                <th>Submission</th>
-                <th>Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for assignment in ungraded_submissions.assignments %}
-            <tr>
-                <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
-                <td>
-                    {% if assignment.submission_text %}
-                        <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
-                    {% endif %}
-                    {% if assignment.submission_file %}
-                        <a href="{{ assignment.submission_file.url }}" target="_blank">View File</a>
-                    {% endif %}
-                </td>
-                <td>
-                    <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="submission_id" value="{{ assignment.id }}">
-                        <input type="text" name="grade" placeholder="Enter Grade">
-                        <button type="submit" name="grade_submission" class="custom-button">Save</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-            {% for assignment in graded_submissions.assignments %}
-            <tr>
-                <td>{{ assignment.assignment.title }}</td>
-                <td>{{ assignment.student.username }}'s attempt_number({{ assignment.attempt_number }})</td>
-                <td>
-                    {% if assignment.submission_text %}
-                        <button class="view-submission-btn custom-button" data-text="{{ assignment.submission_text }}">View</button>
-                    {% endif %}
-                    {% if assignment.submission_file %}
-                        <a href="{{ assignment.submission_file.url }}" target="_blank">View File</a>
-                    {% endif %}
-                </td>
-                <td>
-                    <!-- Display current grade and edit button -->
-                    <div id="display-grade-{{ assignment.id }}">
-                        <span>✔️ Graded</span>
-                        <button type="button" class="custom-button" onclick="toggleEdit({{ assignment.id }})">Edit Grade</button>
-                    </div>
+    <section class="submission-group is-open">
+        <button class="submission-toggle" type="button">
+            <div class="submission-toggle-left">
+                <div class="submission-toggle-icon"><i class="fas fa-file-alt"></i></div>
+                <div>
+                    <h4>Assignments</h4>
+                    <p>Text submissions, uploaded files, and grade updates.</p>
+                </div>
+            </div>
+            <div class="submission-toggle-right">
+                <span class="submission-pill submission-pill-pending">{{ ungraded_submissions.assignments|length }} pending</span>
+                <span class="submission-pill submission-pill-done">{{ graded_submissions.assignments|length }} graded</span>
+                <i class="fas fa-chevron-down submission-chevron"></i>
+            </div>
+        </button>
+        <div class="submission-content">
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Needs grading</h5>
+                    <span class="submission-count">{{ ungraded_submissions.assignments|length }} items</span>
+                </div>
+                {% if ungraded_submissions.assignments %}
+                <div class="submission-list">
+                    {% for assignment in ungraded_submissions.assignments %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ assignment.assignment.title }}</h6>
+                                <p class="submission-card-meta">{{ assignment.student.username }} • Attempt {{ assignment.attempt_number }}</p>
+                            </div>
+                        </div>
+                        <div class="submission-actions">
+                            {% if assignment.submission_text %}
+                            <button class="submission-btn submission-btn-soft view-submission-btn" type="button" data-text="{{ assignment.submission_text|escape }}">
+                                View Text
+                            </button>
+                            {% endif %}
+                            {% if assignment.submission_file %}
+                            <a href="{{ assignment.submission_file.url }}" target="_blank" class="submission-link submission-link-soft">View File</a>
+                            {% endif %}
+                        </div>
+                        <form method="POST" action="{% url 'instructor:go_to_course' class_shell.id %}" class="grade-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="submission_id" value="{{ assignment.id }}">
+                            <input class="grade-input" type="text" name="grade" placeholder="Enter grade">
+                            <button type="submit" name="grade_submission" class="submission-btn submission-btn-primary">Save Grade</button>
+                        </form>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No assignment submissions are waiting for grading.</div>
+                {% endif %}
+            </div>
 
-                    <!-- Hidden edit form -->
-                    <form method="POST" id="edit-form-{{ assignment.id }}" style="display: none;" action="{% url 'instructor:go_to_course' class_shell.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="submission_id" value="{{ assignment.id }}">
-                        <input type="text" name="grade" value="{{ assignment.grade }}" placeholder="Enter Grade">
-                        <button type="submit" name="grade_submission" class="custom-button">Save</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Already graded</h5>
+                    <span class="submission-count">{{ graded_submissions.assignments|length }} items</span>
+                </div>
+                {% if graded_submissions.assignments %}
+                <div class="submission-list">
+                    {% for assignment in graded_submissions.assignments %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ assignment.assignment.title }}</h6>
+                                <p class="submission-card-meta">{{ assignment.student.username }} • Attempt {{ assignment.attempt_number }}</p>
+                            </div>
+                            <span class="submission-grade-badge">Grade {{ assignment.grade }}</span>
+                        </div>
+                        <div class="submission-actions">
+                            {% if assignment.submission_text %}
+                            <button class="submission-btn submission-btn-soft view-submission-btn" type="button" data-text="{{ assignment.submission_text|escape }}">
+                                View Text
+                            </button>
+                            {% endif %}
+                            {% if assignment.submission_file %}
+                            <a href="{{ assignment.submission_file.url }}" target="_blank" class="submission-link submission-link-soft">View File</a>
+                            {% endif %}
+                            <button type="button" class="submission-btn submission-btn-soft" onclick="toggleEdit({{ assignment.id }})">Edit Grade</button>
+                        </div>
+                        <form method="POST" id="edit-form-{{ assignment.id }}" style="display: none;" action="{% url 'instructor:go_to_course' class_shell.id %}" class="grade-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="submission_id" value="{{ assignment.id }}">
+                            <input class="grade-input" type="text" name="grade" value="{{ assignment.grade }}" placeholder="Enter grade">
+                            <button type="submit" name="grade_submission" class="submission-btn submission-btn-primary">Update Grade</button>
+                        </form>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No graded assignment submissions yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="submission-group">
+        <button class="submission-toggle" type="button">
+            <div class="submission-toggle-left">
+                <div class="submission-toggle-icon"><i class="fas fa-question-circle"></i></div>
+                <div>
+                    <h4>Quizzes</h4>
+                    <p>Review auto scores and open manual grading details.</p>
+                </div>
+            </div>
+            <div class="submission-toggle-right">
+                <span class="submission-pill submission-pill-pending">{{ ungraded_submissions.quizzes|length }} pending</span>
+                <span class="submission-pill submission-pill-done">{{ graded_submissions.quizzes|length }} graded</span>
+                <i class="fas fa-chevron-down submission-chevron"></i>
+            </div>
+        </button>
+        <div class="submission-content">
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Needs grading</h5>
+                    <span class="submission-count">{{ ungraded_submissions.quizzes|length }} items</span>
+                </div>
+                {% if ungraded_submissions.quizzes %}
+                <div class="submission-list">
+                    {% for quiz in ungraded_submissions.quizzes %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ quiz.quiz.title }}</h6>
+                                <p class="submission-card-meta">{{ quiz.student.username }}</p>
+                            </div>
+                            <span class="submission-grade-badge">Auto {{ quiz.score }}</span>
+                        </div>
+                        <div class="submission-actions">
+                            <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="submission-link submission-link-primary">View Details to Grade</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No quiz attempts are waiting for grading.</div>
+                {% endif %}
+            </div>
+
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Already graded</h5>
+                    <span class="submission-count">{{ graded_submissions.quizzes|length }} items</span>
+                </div>
+                {% if graded_submissions.quizzes %}
+                <div class="submission-list">
+                    {% for quiz in graded_submissions.quizzes %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ quiz.quiz.title }}</h6>
+                                <p class="submission-card-meta">{{ quiz.student.username }} • Auto {{ quiz.score }}</p>
+                            </div>
+                            <span class="submission-grade-badge">Grade {{ quiz.grade }}</span>
+                        </div>
+                        <div class="submission-actions">
+                            <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="submission-link submission-link-soft">Regrade / View Details</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No graded quiz attempts yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="submission-group">
+        <button class="submission-toggle" type="button">
+            <div class="submission-toggle-left">
+                <div class="submission-toggle-icon"><i class="fas fa-laptop-code"></i></div>
+                <div>
+                    <h4>Exercises</h4>
+                    <p>Check practice work and open detailed exercise grading.</p>
+                </div>
+            </div>
+            <div class="submission-toggle-right">
+                <span class="submission-pill submission-pill-pending">{{ ungraded_submissions.exercises|length }} pending</span>
+                <span class="submission-pill submission-pill-done">{{ graded_submissions.exercises|length }} graded</span>
+                <i class="fas fa-chevron-down submission-chevron"></i>
+            </div>
+        </button>
+        <div class="submission-content">
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Needs grading</h5>
+                    <span class="submission-count">{{ ungraded_submissions.exercises|length }} items</span>
+                </div>
+                {% if ungraded_submissions.exercises %}
+                <div class="submission-list">
+                    {% for exercise in ungraded_submissions.exercises %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ exercise.exercise.title }}</h6>
+                                <p class="submission-card-meta">{{ exercise.student.username }}</p>
+                            </div>
+                            <span class="submission-grade-badge">Auto {{ exercise.score }}</span>
+                        </div>
+                        <div class="submission-actions">
+                            <a href="{% url 'instructor:exercise_grade' exercise.id %}" class="submission-link submission-link-primary">View Details to Grade</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No exercise attempts are waiting for grading.</div>
+                {% endif %}
+            </div>
+
+            <div class="submission-block">
+                <div class="submission-block-head">
+                    <h5>Already graded</h5>
+                    <span class="submission-count">{{ graded_submissions.exercises|length }} items</span>
+                </div>
+                {% if graded_submissions.exercises %}
+                <div class="submission-list">
+                    {% for exercise in graded_submissions.exercises %}
+                    <article class="submission-card">
+                        <div class="submission-card-top">
+                            <div>
+                                <h6 class="submission-card-title">{{ exercise.exercise.title }}</h6>
+                                <p class="submission-card-meta">{{ exercise.student.username }} • Auto {{ exercise.score }}</p>
+                            </div>
+                            <span class="submission-grade-badge">Grade {{ exercise.grade }}</span>
+                        </div>
+                        <div class="submission-actions">
+                            <a href="{% url 'instructor:exercise_grade' exercise.id %}" class="submission-link submission-link-soft">Regrade / View Details</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-copy">No graded exercise attempts yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 </div>
 
-
-
-<!-- Collapsible for Quizzes -->
-<button class="collapsible custom-button mt-3 mb-3 ml-3">Quizzes</button>
-<div class="collapsible-content table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Student Name</th>
-                <th>Auto Grade Score</th>
-                <th>Manual Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for quiz in ungraded_submissions.quizzes %}
-            <tr>
-                <td>{{ quiz.quiz.title }}</td>
-                <td>{{ quiz.student.username }}</td>
-                <td>{{ quiz.score }}</td>
-                <td>
-                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button btn-sm">View Details to Grade</a>
-                </td>
-            </tr>
-            {% endfor %}
-
-            {% for quiz in graded_submissions.quizzes %}
-            <tr>
-                <td>{{ quiz.quiz.title }}</td>
-                <td>{{ quiz.student.username }}</td>
-                <td>Previous Auto Grade - {{ quiz.score }}</td>
-                <td>
-                    <span class="badge bg-success">{{ quiz.grade }}</span>
-                    <a href="{% url 'instructor:quiz_grade' quiz.id %}" class="custom-button">Regrade / View Details</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<!-- 
-<button class="collapsible">Exercises</button>
-<div class="collapsible-content table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Student Name</th>
-                <th>Auto Grade Score</th>
-                <th>Manual Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for exercise in ungraded_submissions.exercises %}
-            <tr>
-                <td>{{ exercise.exercise.title }}</td>
-                <td>{{ exercise.student.username }}</td>
-                <td>{{ exercise.score }}</td>
-                <td>
-                    <a href="{% url 'instructor:exercise_grade' exercise.id %}" class="custom-button">View Details to Grade</a>
-                </td>
-            </tr>
-            {% endfor %}
-
-            {% for exercise in graded_submissions.exercises %}
-            <tr>
-                <td>{{ exercise.exercise.title }}</td>
-                <td>{{ exercise.student.username }}</td>
-                <td>Previous Auto Grade - {{ exercise.score }}</td>
-                <td>
-                    <span class="badge bg-success">{{ exercise.grade }}</span>
-                    <a href="{% url 'instructor:exercise_grade' exercise.id %}" class="custom-button">Regrade / View Details</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-
-</div>
--->
-
-<!-- Popup Modal for Assignment Submissions -->
 <div class="popup-overlay" id="popup-overlay"></div>
 <div class="popup" id="popup-modal">
-    <div>
-        <p id="popup-text"></p>
-        <button class="popup-close" onclick="closePopup()">Close</button>
-    </div>
+    <h4>Submission Text</h4>
+    <div class="popup-body" id="popup-text"></div>
+    <button class="submission-btn submission-btn-primary popup-close" onclick="closePopup()">Close</button>
 </div>
 
 <script>
-    <!-- Inline Script for toggle -->
-  function toggleEdit(id) {
-    document.getElementById('display-grade-' + id).style.display = 'none';
-    document.getElementById('edit-form-' + id).style.display = 'block';
-  }
-  
-    document.querySelectorAll(".collapsible").forEach(button => {
-        button.addEventListener("click", function () {
-            this.classList.toggle("active");
-            const content = this.nextElementSibling;
-            content.style.display = content.style.display === "block" ? "none" : "block";
+    function toggleEdit(id) {
+        const form = document.getElementById('edit-form-' + id);
+        if (form) {
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'flex' : 'none';
+        }
+    }
+
+    document.querySelectorAll('.submission-toggle').forEach((button, index) => {
+        const group = button.closest('.submission-group');
+        if (index === 0) {
+            group.classList.add('is-open');
+        }
+
+        button.addEventListener('click', function () {
+            group.classList.toggle('is-open');
         });
     });
 
-    document.querySelectorAll(".view-submission-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const submissionText = this.getAttribute("data-text");
-            document.getElementById("popup-text").textContent = submissionText;
-            document.getElementById("popup-modal").style.display = "block";
-            document.getElementById("popup-overlay").style.display = "block";
+    document.querySelectorAll('.view-submission-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const submissionText = this.getAttribute('data-text');
+            document.getElementById('popup-text').textContent = submissionText;
+            document.getElementById('popup-modal').style.display = 'block';
+            document.getElementById('popup-overlay').style.display = 'block';
         });
     });
 
     function closePopup() {
-        document.getElementById("popup-modal").style.display = "none";
-        document.getElementById("popup-overlay").style.display = "none";
+        document.getElementById('popup-modal').style.display = 'none';
+        document.getElementById('popup-overlay').style.display = 'none';
     }
 </script>

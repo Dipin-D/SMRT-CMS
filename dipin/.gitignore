@@ -1,5 +1,16 @@
-.env
+# Python
+.venv/
 __pycache__/
 *.pyc
-*.pyo
+
+# VS Code history
 .history/
+
+# Mac
+.DS_Store
+
+# Env files
+.env
+
+# Django
+db.sqlite3

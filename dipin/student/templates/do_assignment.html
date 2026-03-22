@@ -1,86 +1,204 @@
-<h2 class="text-center card-title">Assignments for {{ class_shell.course_name }}</h2>
+<style>
+    .assignment-list {
+        display: grid;
+        gap: 1rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-<ul class="list-group mt-4">
-    {% for item in assignments_data %}
+    .assignment-card {
+        padding: 1rem;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,244,246,0.98));
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        box-shadow: 0 14px 28px rgba(97, 22, 45, 0.08);
+    }
+
+    .assignment-card h3 {
+        margin: 0;
+        color: #3e1522;
+        font-size: 1rem;
+    }
+
+    .assignment-copy {
+        margin: 0.6rem 0 0;
+        color: #6f5c64;
+    }
+
+    .assignment-file-list,
+    .submission-history {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 0.9rem;
+    }
+
+    .assignment-file-chip,
+    .submission-history-item {
+        padding: 0.85rem 0.9rem;
+        border-radius: 14px;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        background: rgba(255, 255, 255, 0.92);
+    }
+
+    .assignment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 1rem;
+    }
+
+    .assignment-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        min-height: 40px;
+        padding: 0.75rem 0.95rem;
+        border-radius: 12px;
+        border: 1px solid rgba(97, 22, 45, 0.12);
+        background: rgba(97, 22, 45, 0.08);
+        color: #5f1f32;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .assignment-btn:hover {
+        background: rgba(97, 22, 45, 0.12);
+        color: #4b1527;
+        text-decoration: none;
+    }
+
+    .assignment-btn-primary {
+        background: linear-gradient(135deg, #61162D, #8d3752);
+        color: #fff;
+        border: none;
+    }
+
+    .assignment-btn-primary:hover {
+        color: #fff;
+    }
+
+    .assignment-form {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+    }
+
+    .assignment-form label {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: #4a1324;
+        font-weight: 600;
+    }
+
+    .assignment-form textarea,
+    .assignment-form input[type="file"] {
+        width: 100%;
+        margin-bottom: 0.85rem;
+        border-radius: 12px;
+        border: 1px solid rgba(97, 22, 45, 0.14);
+        padding: 0.8rem;
+    }
+
+    .submission-history-item p {
+        margin: 0.2rem 0;
+    }
+
+    @media (max-width: 640px) {
+        .assignment-actions {
+            flex-direction: column;
+        }
+
+        .assignment-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="student-list-shell">
+    <h2 class="section-title-clean">Assignments for {{ class_shell.course_name }}</h2>
+
+    <ul class="assignment-list">
+        {% for item in assignments_data %}
         {% with assignment=item.assignment submissions=item.submissions can_submit=item.can_submit attempt_count=item.attempt_count max_attempts=item.max_attempts %}
-        <li class="list-group-item p-3 card">
-            <strong>{{ assignment.title }}</strong>
-            <p class="mb-2">{{ assignment.text }}</p>
+        <li class="assignment-card">
+            <h3>{{ assignment.title }}</h3>
+            <p class="assignment-copy">{{ assignment.text }}</p>
 
-            <!-- Display attached files -->
             {% if assignment.assignment_files.all %}
-            <ul class="list-unstyled mt-2">
-            {% for file in assignment.assignment_files.all %}
-                <li class="d-inline-block me-3 mb-2">
-                <a href="{{ file.assignment_file.url }}" target="_blank"
-                    class="text-decoration-none text-dark border rounded px-2 py-1 d-inline-flex align-items-center">
-                    <i class="fas fa-file me-2"></i> {{ file.assignment_file.name }}
+            <div class="assignment-file-list">
+                {% for file in assignment.assignment_files.all %}
+                <a href="{{ file.assignment_file.url }}" target="_blank" class="assignment-file-chip text-decoration-none text-dark">
+                    <i class="fas fa-file me-2"></i>{{ file.assignment_file.name }}
                 </a>
-                </li>
-            {% endfor %}
-            </ul>
+                {% endfor %}
+            </div>
             {% else %}
-                <p class="text-muted">No files available for this assignment.</p>
+            <p class="text-muted mt-3 mb-0">No files available for this assignment.</p>
             {% endif %}
 
-            <!-- Submit button or attempt limit reached -->
-            {% if can_submit %}
-                <button class="btn btn-sm btn-light" onclick="toggleElement('submission_form_{{ assignment.id }}')">
+            <div class="assignment-actions">
+                {% if can_submit %}
+                <button class="assignment-btn assignment-btn-primary" type="button" onclick="toggleElement('submission_form_{{ assignment.id }}')">
                     Submit Assignment ({{ attempt_count }}/{{ max_attempts }})
                 </button>
-            {% else %}
-                <p class="text-muted">You have reached the maximum number of attempts ({{ max_attempts }}).</p>
-            {% endif %}
+                {% else %}
+                <span class="assignment-btn">Attempt limit reached ({{ max_attempts }})</span>
+                {% endif %}
 
-            <!-- Show submissions button -->
-            {% if submissions %}
-                <button class="btn btn-sm mt-2" style="background-color: maroon; color: white;" onclick="toggleElement('submission_{{ assignment.id }}')">
+                {% if submissions %}
+                <button class="assignment-btn" type="button" onclick="toggleElement('submission_{{ assignment.id }}')">
                     Show Submitted Work
                 </button>
-            {% endif %}
+                {% endif %}
+            </div>
 
-            <!-- Submission form -->
             {% if can_submit %}
-            <div id="submission_form_{{ assignment.id }}" class="submission-form" style="display: none; margin-top: 10px;">
+            <div id="submission_form_{{ assignment.id }}" class="assignment-form">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="form-group mb-2">
-                        <label for="submission_content_{{ assignment.id }}">Your Submission</label>
-                        <textarea name="submission_text" id="submission_content_{{ assignment.id }}" class="form-control" required></textarea>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label for="submission_file_{{ assignment.id }}">Upload File (Optional)</label>
-                        <input type="file" name="submission_file" id="submission_file_{{ assignment.id }}" class="form-control">  
-                    </div>
+                    <label for="submission_content_{{ assignment.id }}">Your Submission</label>
+                    <textarea name="submission_text" id="submission_content_{{ assignment.id }}" required></textarea>
+
+                    <label for="submission_file_{{ assignment.id }}">Upload File (Optional)</label>
+                    <input type="file" name="submission_file" id="submission_file_{{ assignment.id }}">
+
                     <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
-                    <button type="submit" name="submit_assignment" class="btn btn-sm" style="background-color: maroon; color: white;">Submit</button>
+                    <button type="submit" name="submit_assignment" class="assignment-btn assignment-btn-primary">Submit</button>
                 </form>
             </div>
             {% endif %}
 
-            <!-- Past submissions -->
             {% if submissions %}
-            <div id="submission_{{ assignment.id }}" class="submitted-work" style="display: none; margin-top: 10px;">
-                {% for submission in submissions %}
-                <div class="border p-2 mb-2">
-                    <p><strong>Attempt {{ submission.attempt_number }}</strong></p>
-                    <p><strong>Submitted Text:</strong> {{ submission.submission_text }}</p>
-                    {% if submission.submission_file %}
-                        <p><a href="{{ submission.submission_file.url }}" target="_blank">{{ submission.submission_file.name }}</a></p>
-                    {% else %}
-                        <p class="text-muted">No file submitted.</p>
-                    {% endif %}
-                    <p class="text-muted">Submitted on: {{ submission.submitted_on }}</p>
+            <div id="submission_{{ assignment.id }}" class="assignment-form">
+                <div class="submission-history">
+                    {% for submission in submissions %}
+                    <div class="submission-history-item">
+                        <p><strong>Attempt {{ submission.attempt_number }}</strong></p>
+                        <p><strong>Submitted Text:</strong> {{ submission.submission_text }}</p>
+                        {% if submission.submission_file %}
+                            <p><a href="{{ submission.submission_file.url }}" target="_blank">{{ submission.submission_file.name }}</a></p>
+                        {% else %}
+                            <p class="text-muted">No file submitted.</p>
+                        {% endif %}
+                        <p class="text-muted">Submitted on: {{ submission.submitted_on }}</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
             {% endif %}
         </li>
         {% endwith %}
-    {% empty %}
-        <li class="list-group-item text-muted">No assignments available.</li>
-    {% endfor %}
-</ul>
+        {% empty %}
+        <li class="empty-note">No assignments available.</li>
+        {% endfor %}
+    </ul>
+</div>
 
 <script>
     function toggleElement(elementId) {

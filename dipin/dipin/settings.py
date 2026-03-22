@@ -34,9 +34,17 @@ INSTALLED_APPS = [
     'accounts',
     'instructor',
     'student',
+    'pal.core',
+    'pal.api',
+    'pal.ml_models',
+    'pal.learning_paths',
+    'pal.knowledge_graph',
+    'pal.data_ingestion',
+    'pal.topic_classification',
 ]
-
-
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware',

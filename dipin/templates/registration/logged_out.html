@@ -5,27 +5,254 @@ Logout
 {% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 3rem;">
-    <div class="text-center" style="max-width: 400px; margin: auto; padding: 3rem; background: #f8f9fa; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);">
-        <!-- Title -->
-        <h2 style="color: #dc3545;">Logout</h2>
-
-        <p>You have been logged out.</p>
-
-        <!-- Login Link -->
-        <p style="font-weight: 500;">Want to log back in? <a href="{% url 'accounts:login' %}" style="color: #007bff;">Login Here</a></p>
-    </div>
-</div>
-
 <style>
-    a {
-        text-decoration: none;
-        font-weight: bold;
+    .logout-shell {
+        min-height: calc(100vh - 170px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
     }
 
-    a:hover {
-        text-decoration: underline;
-        color: #0056b3; 
+    .logout-layout {
+        width: min(980px, 100%);
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        background: #ffffff;
+        border: 1px solid rgba(97, 22, 45, 0.1);
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px rgba(97, 22, 45, 0.14);
+    }
+
+    .logout-panel {
+        position: relative;
+        padding: 3rem;
+        background:
+            radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 42%),
+            linear-gradient(135deg, #61162D 0%, #7b2942 55%, #983552 100%);
+        color: #ffffff;
+    }
+
+    .logout-panel::after {
+        content: "";
+        position: absolute;
+        inset: auto -70px -70px auto;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.95rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .logout-panel h1 {
+        margin: 1.4rem 0 0.8rem;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        line-height: 1.08;
+    }
+
+    .logout-panel p {
+        margin: 0;
+        max-width: 34rem;
+        color: rgba(255, 255, 255, 0.88);
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+    .logout-notes {
+        display: grid;
+        gap: 0.85rem;
+        margin-top: 1.8rem;
+    }
+
+    .logout-note {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.95rem;
+    }
+
+    .logout-note i {
+        width: 2rem;
+        height: 2rem;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .logout-card {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .logout-icon {
+        width: 78px;
+        height: 78px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(97, 22, 45, 0.1), rgba(123, 41, 66, 0.18));
+        color: #61162D;
+        font-size: 2rem;
+        box-shadow: inset 0 0 0 1px rgba(97, 22, 45, 0.08);
+    }
+
+    .logout-card h1 {
+        margin: 1.25rem 0 0.65rem;
+        color: #61162D;
+        font-size: 2rem;
+    }
+
+    .logout-card p {
+        margin: 0;
+        color: #75636a;
+        line-height: 1.6;
+    }
+
+    .logout-actions {
+        display: flex;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+        margin-top: 1.8rem;
+    }
+
+    .logout-card .btn {
+        min-width: 170px;
+        padding: 0.8rem 1.1rem;
+        border-radius: 14px;
+        font-weight: 600;
+    }
+
+    .logout-card .btn-outline-secondary {
+        border-color: rgba(97, 22, 45, 0.2);
+        color: #61162D;
+    }
+
+    .logout-card .btn-outline-secondary:hover {
+        background: rgba(97, 22, 45, 0.06);
+        border-color: rgba(97, 22, 45, 0.24);
+        color: #61162D;
+    }
+
+    .ghost-link {
+        color: #61162D;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .ghost-link:hover {
+        color: #7B2C3D;
+    }
+
+    .logout-footer {
+        margin-top: 1rem;
+        color: #8a767d;
+        font-size: 0.92rem;
+    }
+
+    .logout-footer a {
+        color: #61162D;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .logout-footer a:hover {
+        color: #7B2C3D;
+    }
+
+    @media (max-width: 900px) {
+        .logout-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .logout-panel,
+        .logout-card {
+            padding: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .logout-shell {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .logout-layout {
+            border-radius: 24px;
+        }
+
+        .logout-panel,
+        .logout-card {
+            padding: 1.5rem;
+        }
+
+        .logout-actions {
+            flex-direction: column;
+        }
+
+        .logout-card .btn {
+            width: 100%;
+        }
     }
 </style>
+
+<div class="logout-shell">
+    <div class="logout-layout">
+        <div class="logout-panel">
+            <div class="logout-badge">
+                <i class="bi bi-shield-check"></i>
+                Session ended
+            </div>
+            <h1>You are signed out.</h1>
+            <p>Your account session has been closed safely. You can sign back in anytime to continue with your courses, teaching tools, and PAL workspace.</p>
+            <div class="logout-notes">
+                <div class="logout-note">
+                    <i class="bi bi-journal-bookmark"></i>
+                    <span>Return to your courses when you are ready.</span>
+                </div>
+                <div class="logout-note">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Your learning progress and course activity stay saved.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="logout-card">
+            <div class="logout-icon">
+                <i class="bi bi-box-arrow-right"></i>
+            </div>
+            <h1>Logged out</h1>
+            <p>You have been signed out of your account.</p>
+
+            <div class="logout-actions">
+                <a href="{% url 'accounts:login' %}" class="btn custom-button">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Login Again
+                </a>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i>
+                    Home
+                </a>
+            </div>
+
+            <p class="logout-footer">
+                Need an account? <a href="{% url 'accounts:register' %}">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -114,56 +114,99 @@ class go_to_course_student(View):
         else:
             attendance_percentage = 100  # Default to 100% if no attendance records exist
 
-        # --- Achieved Score (based on actual graded submissions only)
-        submitted_assignment_score = sum(sub['grade'] for sub in submitted_assignments_info if sub['grade'] is not None)
-        submitted_quiz_score = sum(sub['grade'] for sub in submitted_quizzes_info if sub['grade'] is not None)
+        latest_graded_assignments = AssignmentSubmission.objects.filter(
+            student=request.user,
+            assignment__class_shell=class_shell,
+            grade__isnull=False,
+        ).order_by('assignment_id', '-submitted_on').distinct('assignment_id')
 
-        # --- Total Possible Marks (based on all assignments and quizzes, submitted or not)
-        submitted_assignment_marks = sum(a.total_marks or 0 for a in assignments)
+        latest_graded_quizzes = QuizAttempt.objects.filter(
+            student=request.user,
+            quiz__class_shell=class_shell,
+            grade__isnull=False,
+        ).order_by('quiz_id', '-attempted_on').distinct('quiz_id')
 
-        submitted_quiz_marks = sum(
-            sum(q.mark for q in Question.objects.filter(quiz=quiz))
-            for quiz in quizzes
-        )
+        submitted_assignment_score = sum(float(sub.grade or 0) for sub in latest_graded_assignments)
+        submitted_quiz_score = sum(float(sub.grade or 0) for sub in latest_graded_quizzes)
 
-        # Final totals
+        submitted_assignment_marks = sum((sub.assignment.total_marks or 0) for sub in latest_graded_assignments)
+        submitted_quiz_marks = sum((sub.total_marks or 0) for sub in latest_graded_quizzes)
+
         overall_total_marks = submitted_assignment_marks + submitted_quiz_marks
         overall_score = submitted_assignment_score + submitted_quiz_score
+        analytics_summary_available = overall_total_marks > 0
 
+        if analytics_summary_available:
+            overall_percentage = (overall_score / overall_total_marks) * 100
+            grade = 'A' if overall_percentage >= 90 else 'B' if overall_percentage >= 80 else 'C' if overall_percentage >= 70 else 'D' if overall_percentage >= 60 else 'F'
 
-        # Avoid division by zero
-        overall_percentage = (overall_score / overall_total_marks) * 100 if overall_total_marks > 0 else 0
-        grade = 'A' if overall_percentage >= 90 else 'B' if overall_percentage >= 80 else 'C' if overall_percentage >= 70 else 'D' if overall_percentage >= 60 else 'F'
+            categories = ["Assignments", "Quizzes", "Overall"]
+            scores = [submitted_assignment_score, submitted_quiz_score, overall_score]
+            max_marks = [submitted_assignment_marks, submitted_quiz_marks, overall_total_marks]
+            fig = go.Figure()
 
-        # Categories and values for submitted items (without exercises)
-        categories = ["Assignments", "Quizzes", "Overall"]
-        scores = [submitted_assignment_score, submitted_quiz_score, overall_score]
-        max_marks = [submitted_assignment_marks, submitted_quiz_marks, overall_total_marks]
-        fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=categories,
+                y=scores,
+                name="Grade Achieved",
+                marker_color="#800000",
+                textposition='outside'
+            ))
 
-        fig.add_trace(go.Bar(
-            x=categories,
-            y=scores,
-            name="Grade Achieved",
-            marker_color="#800000",  
-            textposition='outside'
-        ))
+            fig.add_trace(go.Bar(
+                x=categories,
+                y=max_marks,
+                name="Total Marks",
+                marker_color="#f5f5f5",
+                textposition='outside'
+            ))
 
-        fig.add_trace(go.Bar(
-            x=categories,
-            y=max_marks,
-            name="Total Marks",
-            marker_color="#f5f5f5",  
-            textposition='outside'
-        ))
+            fig.update_layout(
+                title="Grade Breakdown",
+                title_x=0.5,
+                barmode='group',
+                template="plotly_white"
+            )
+            interactive_overall_chart = opy.plot(fig, output_type='div', include_plotlyjs=False)
+        else:
+            overall_percentage = None
+            grade = None
+            progress_categories = ["Assignments", "Quizzes", "Exercises", "Attendance"]
+            progress_done = [
+                len(submitted_assignment_ids),
+                len(submitted_quiz_ids),
+                len(submitted_exercise_ids),
+                round(attendance_percentage, 1),
+            ]
+            progress_total = [
+                assignments.count(),
+                quizzes.count(),
+                exercises.count(),
+                100,
+            ]
 
-        fig.update_layout(
-            title="Grade Breakdown",
-            title_x=0.5,  
-            barmode='group',
-            template="plotly_white"
-        )
-        interactive_overall_chart = opy.plot(fig, output_type='div', include_plotlyjs=False)
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=progress_categories,
+                y=progress_done,
+                name="Current Progress",
+                marker_color="#800000",
+                textposition='outside'
+            ))
+            fig.add_trace(go.Bar(
+                x=progress_categories,
+                y=progress_total,
+                name="Available",
+                marker_color="#f5f5f5",
+                textposition='outside'
+            ))
+            fig.update_layout(
+                title="Course Activity Overview",
+                title_x=0.5,
+                barmode='group',
+                template="plotly_white"
+            )
+            interactive_overall_chart = opy.plot(fig, output_type='div', include_plotlyjs=False)
 
         return render(request, 'go_to_course_student.html', {
             'class_shell': class_shell,
@@ -190,6 +233,7 @@ class go_to_course_student(View):
             'grade': grade,
             'interactive_overall_chart': interactive_overall_chart,
             'attendance_percentage': attendance_percentage,
+            'analytics_summary_available': analytics_summary_available,
         })
 
     def post(self, request, class_shell_id):

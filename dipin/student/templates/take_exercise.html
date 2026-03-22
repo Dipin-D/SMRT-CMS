@@ -1,26 +1,76 @@
-<h2 class="text-center mb-4 card-title">Exercises for {{ class_shell.course_name }}</h2>
+<style>
+    .student-list-shell {
+        display: grid;
+        gap: 1rem;
+    }
 
-<!-- List of Existing Exercises -->
-<div class="row mt-3">
-    {% for exercise in exercises %}
-        <div class="col-12">
-            <div class="card shadow-sm mb-3 border-0">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-1"><strong>{{ exercise.title }}</strong></p>
-                    </div>
+    .student-item-grid {
+        display: grid;
+        gap: 0.9rem;
+    }
 
-                    <!-- Go to Exercise Button -->
-                    <a href="{% url 'student:attempt_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}" 
-                    class="btn btn-sm btn-light text-maroon">
-                    <i class="fas fa-play"></i> Attempt 
-                    </a>
-                </div>
+    .student-item-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,244,246,0.98));
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        box-shadow: 0 14px 28px rgba(97, 22, 45, 0.08);
+    }
+
+    .student-item-card h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #3e1522;
+    }
+
+    .student-item-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #61162D, #8d3752);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .student-item-action:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+        .student-item-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .student-item-action {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="student-list-shell">
+    <h2 class="section-title-clean">Exercises for {{ class_shell.course_name }}</h2>
+
+    <div class="student-item-grid">
+        {% for exercise in exercises %}
+        <article class="student-item-card">
+            <div>
+                <h3>{{ exercise.title }}</h3>
             </div>
-        </div>
-    {% empty %}
-        <div class="col-12 text-center">
-            <p class="text-muted">No exercises available at the moment.</p>
-        </div>
-    {% endfor %}
+            <a href="{% url 'student:attempt_exercise' class_shell_id=class_shell.id exercise_id=exercise.id %}" class="student-item-action">
+                <i class="fas fa-play"></i> Attempt
+            </a>
+        </article>
+        {% empty %}
+        <p class="empty-note">No exercises available at the moment.</p>
+        {% endfor %}
+    </div>
 </div>

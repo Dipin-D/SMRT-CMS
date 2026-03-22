@@ -15,7 +15,10 @@ class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = ['text', 'title']
-    text = forms.CharField(widget=forms.Textarea(attrs={'cols': 80, 'rows': 10}))
+    text = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'cols': 80, 'rows': 10})
+    )
 
 class AssignmentForm(forms.ModelForm):
     class Meta:

@@ -1,43 +1,192 @@
 {% extends "home.html" %}
 
 {% block title %}
-  Class Shell
+  My Courses
 {% endblock %}
 
 {% block content %}
- 
-<div class="container d-flex flex-column flex-grow-1 mt-4">
-  <div class="text-center mb-4">
-    <h2 style="color: #61162D;">Welcome back, {{ user.username }}!</h2>
-  </div>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-    {% if class_shells %}
-      {% for class_shell in class_shells %}
-      <div class="col"> 
-        <div class="card hover-card d-flex flex-column" style="width: 250px; height: 270px;">
-            <img src="https://picsum.photos/600/400?random={{ forloop.counter }}" class="card-img-top" style="height: 100px;" alt="Course Image">
-            <div class="card-body d-flex flex-column justify-content-between text-center">
-              <div class="card-title text-truncate" style="max-width: 100%; white-space: nowrap; overflow: hidden;">
-                {{ class_shell.course_name }}-{{ class_shell.section_number }}
-              </div>
-                <div class="container">
-                <div class="row">
-                  <div class="col">{{ class_shell.semester }}</div>
-                  <div class="col">{{ class_shell.year }}</div>
-                </div>
-              </div>
-              <a href="{% url 'student:go_to_course' class_shell.id %}" class="btn custom-button mt-2">Go to course</a>
-            </div>
-          </div>
+<style>
+  .courses-shell {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 0 2rem;
+  }
+
+  .courses-title {
+    margin: 0;
+    color: #61162D;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+  }
+
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .course-card {
+    border-radius: 22px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid rgba(97, 22, 45, 0.08);
+    box-shadow: 0 14px 30px rgba(97, 22, 45, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(97, 22, 45, 0.12);
+  }
+
+  .course-image {
+    position: relative;
+    min-height: 132px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    color: white;
+  }
+
+  .course-image::after {
+    content: '';
+    position: absolute;
+    right: -28px;
+    bottom: -28px;
+    width: 110px;
+    height: 110px;
+    border-radius: 26px;
+    transform: rotate(18deg);
+    background: rgba(255,255,255,0.1);
+  }
+
+  .course-image.variant-a {
+    background: linear-gradient(135deg, #61162D 0%, #8a324f 100%);
+  }
+
+  .course-image.variant-b {
+    background: linear-gradient(135deg, #74213a 0%, #b24766 100%);
+  }
+
+  .course-image.variant-c {
+    background: linear-gradient(135deg, #4f1026 0%, #8d3552 100%);
+  }
+
+  .course-image.variant-d {
+    background: linear-gradient(135deg, #6b1833 0%, #9b3d5d 100%);
+  }
+
+  .course-icon {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.16);
+    font-size: 1.3rem;
+  }
+
+  .course-top {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding-right: 2.5rem;
+  }
+
+  .course-code {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .course-meta {
+    margin-top: 0.35rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.88rem;
+  }
+
+  .course-body {
+    padding: 1.2rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .course-section {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #f8f3f5;
+    color: #61162D;
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  .course-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    border-radius: 22px;
+    background: #ffffff;
+    border: 1px solid rgba(97, 22, 45, 0.08);
+    box-shadow: 0 14px 30px rgba(97, 22, 45, 0.08);
+    color: #7d6970;
+  }
+
+  .empty-state i {
+    display: block;
+    font-size: 2.8rem;
+    color: #8a5567;
+    margin-bottom: 0.7rem;
+  }
+
+  .empty-state h3 {
+    margin-bottom: 0.45rem;
+    color: #61162D;
+  }
+</style>
+
+<div class="courses-shell">
+  <h1 class="courses-title">My Courses</h1>
+
+  {% if class_shells %}
+  <div class="course-grid">
+    {% for class_shell in class_shells %}
+    <article class="course-card">
+      <div class="course-image {% cycle 'variant-a' 'variant-b' 'variant-c' 'variant-d' %}">
+        <div class="course-icon">
+          <i class="bi bi-journal-code"></i>
         </div>
-      {% endfor %}
-    {% else %}
-      <div class="col text-center">
-        <p>No courses available.</p>
+        <div class="course-top">
+          <p class="course-code">{{ class_shell.course_name }}</p>
+          <div class="course-meta">{{ class_shell.semester }} {{ class_shell.year }}</div>
+        </div>
       </div>
-    {% endif %}
+
+      <div class="course-body">
+        <span class="course-section">Section {{ class_shell.section_number }}</span>
+        <a href="{% url 'student:go_to_course' class_shell.id %}" class="btn custom-button course-action">
+          Go to course
+        </a>
+      </div>
+    </article>
+    {% endfor %}
   </div>
-  
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-journal-bookmark"></i>
+    <h3>No courses available</h3>
+    <p>Your courses will appear here.</p>
+  </div>
+  {% endif %}
 </div>
 
 {% endblock %}

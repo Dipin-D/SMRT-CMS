@@ -127,7 +127,16 @@
     });
 
     function getTabIndex(contentType) {
-        const tabOrder = ['lecture', 'exercise', 'quiz', 'assignment', 'other', 'attendance', 'student_submissions', 'analytics'];
+        const tabOrder = [
+            'lecture',
+            'exercise',
+            'quiz',
+            'assignment',
+            'other',
+            'attendance',
+            'student_submissions',
+            'analytics',
+        ];
         return tabOrder.indexOf(contentType) + 1;
     }
 </script>

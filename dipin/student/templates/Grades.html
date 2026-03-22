@@ -1,121 +1,180 @@
 <style>
-    .grades-container {
-        font-family: Arial, sans-serif;
-        margin: 20px;
+    .grades-shell {
+        display: grid;
+        gap: 1rem;
     }
 
-    .grades-header {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 30px;
+    .grades-title {
+        margin: 0;
+        text-align: center;
+        color: #4a1324;
+        font-size: 1.3rem;
     }
 
-    .grades-section {
-        margin-bottom: 30px;
-        border: none;
+    .grades-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
     }
 
-    .grades-section h3 {
-        font-size: 22px;
-        color: #333;
-        margin-bottom: 15px;
+    .grades-summary-card,
+    .grades-block {
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,244,246,0.98));
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 14px 28px rgba(97, 22, 45, 0.08);
     }
 
-    table {
+    .grades-summary-card {
+        padding: 1rem;
+    }
+
+    .grades-summary-card span {
+        display: block;
+        color: #8a747d;
+        font-size: 0.82rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .grades-summary-card strong {
+        color: #401622;
+        font-size: 1.2rem;
+    }
+
+    .grades-block {
+        padding: 1rem;
+    }
+
+    .grades-block h3 {
+        margin: 0 0 0.85rem;
+        color: #4a1324;
+        font-size: 1.05rem;
+    }
+
+    .grades-table-wrap {
+        overflow-x: auto;
+    }
+
+    .grades-table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 620px;
     }
 
-    th, td {
-        border: 1px solid #ddd;
-        padding: 12px 15px;
+    .grades-table th,
+    .grades-table td {
+        padding: 0.9rem 0.85rem;
+        border-bottom: 1px solid rgba(97, 22, 45, 0.08);
         text-align: left;
+        vertical-align: top;
     }
 
-    th {
-        background-color: #f4f4f4;
-        color: #333;
+    .grades-table th {
+        color: #7a6670;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
     }
 
-    td {
-        background-color: #fff;
+    .grades-table td {
+        color: #46202c;
+        background: rgba(255, 255, 255, 0.76);
     }
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
+    .grades-table tr:last-child td {
+        border-bottom: none;
     }
 
-    .no-grade {
-        color: #1045f4;
-        font-weight: bold;
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
     }
 
-    .not-submitted {
-        color: #888;
+    .status-ok {
+        background: rgba(72, 187, 120, 0.12);
+        color: #26734a;
     }
 
-    .status-submitted {
-        color: #008000;
-        font-weight: bold;
+    .status-wait {
+        background: rgba(97, 22, 45, 0.08);
+        color: #6c4a57;
     }
 
-    .attendance-section {
-        margin-bottom: 30px;
-        border: none;
+    .status-overdue {
+        background: rgba(230, 76, 60, 0.1);
+        color: #a52d1f;
     }
 
-    .attendance-section h2 {
-        font-size: 22px;
-        color: #333;
-        margin-bottom: 10px;
+    .grade-muted {
+        color: #8a747d;
     }
 
-    .attendance-percentage {
-        font-size: 28px;
-        font-weight: bold;
-        color: #008000;
-    }
-
-    .no-tasks-message {
-        font-size: 18px;
-        color: #888;
+    .grade-empty {
+        padding: 1rem;
         text-align: center;
+        color: #8a747d;
+        background: rgba(97, 22, 45, 0.04);
+        border-radius: 16px;
     }
 
+    .attendance-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    @media (max-width: 820px) {
+        .grades-summary {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="grades-container">
-    <h1 class="grades-header text-center card-title">Your Grades for {{ class_shell.course_name }}</h1>
+<div class="grades-shell">
+    <h1 class="grades-title">Your Grades for {{ class_shell.course_name }}</h1>
 
-<!-- Attendance Section -->
-<div class="card shadow-sm border-0 text-center mb-4">
-    <h5 class="mb-4">Attendance</h5>    
-            <!-- Attendance Icon and Percentage -->
-            <div class="d-flex justify-content-center align-items-center gap-2">
+    <div class="grades-summary">
+        <div class="grades-summary-card">
+            <span>Attendance</span>
+            <strong class="attendance-value">
                 {% if attendance_percentage >= 75 %}
-                    <i class="fas fa-check-circle text-success fs-3"></i>
+                    <i class="fas fa-check-circle text-success"></i>
                 {% elif attendance_percentage >= 50 %}
-                    <i class="fas fa-exclamation-circle text-warning fs-3"></i>
+                    <i class="fas fa-exclamation-circle text-warning"></i>
                 {% else %}
-                    <i class="fas fa-times-circle text-danger fs-3"></i>
+                    <i class="fas fa-times-circle text-danger"></i>
                 {% endif %}
-                <span class="fw-bold fs-4">{{ attendance_percentage|floatformat:2 }}%</span>
-            </div>
+                {{ attendance_percentage|floatformat:2 }}%
+            </strong>
         </div>
+        <div class="grades-summary-card">
+            <span>Assignments</span>
+            <strong>{{ assignments|length }}</strong>
+        </div>
+        <div class="grades-summary-card">
+            <span>Quizzes</span>
+            <strong>{{ quizzes|length }}</strong>
+        </div>
+    </div>
 
     {% if not assignments and not quizzes and not exercises %}
-        <p class="no-tasks-message">
-            Take it easy for now! You're in the right spot to check your grades, but your instructor hasn't assigned any tasks yet.
-        </p>
+        <div class="grade-empty">
+            Take it easy for now. Your instructor has not posted any gradable work yet.
+        </div>
     {% else %}
-        <!-- Display Assignment Grades -->
-        <div class="grades-section card">
+        <section class="grades-block">
             <h3>Assignments</h3>
-            <div style="width: 100%; overflow-x: auto;">
-                <table>
+            <div class="grades-table-wrap">
+                <table class="grades-table">
                     <thead>
                         <tr>
-                            <th>Assignment Title</th>
+                            <th>Assignment</th>
                             <th>Due Date</th>
                             <th>Status</th>
                             <th>Grade</th>
@@ -128,30 +187,28 @@
                             <td>{{ assignment.due_date }}</td>
                             <td>
                                 {% if assignment.id in submitted_assignment_ids %}
-                                    <span class="status-submitted">Submitted</span>
+                                    <span class="status-chip status-ok">Submitted</span>
                                 {% else %}
-                                    <span class="not-submitted">Not submitted</span>
+                                    {% if assignment.due_date < now %}
+                                        <span class="status-chip status-overdue">Overdue</span>
+                                    {% else %}
+                                        <span class="status-chip status-wait">Not submitted</span>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                             <td>
                                 {% if assignment.id in submitted_assignment_ids %}
                                     {% for submission_info in latest_assignments_info %}
                                         {% if submission_info.assignment_id == assignment.id %}
-                                            <p>
-                                                {% if submission_info.grade %}
-                                                    {{ submission_info.grade }}/{{ submission_info.total_marks }}
-                                                {% else %}
-                                                    <span class="no-grade">No grade posted yet</span>
-                                                {% endif %}
-                                            </p>
+                                            {% if submission_info.grade %}
+                                                {{ submission_info.grade }}/{{ submission_info.total_marks }}
+                                            {% else %}
+                                                <span class="grade-muted">No grade posted yet</span>
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}
-                                    {% if assignment.due_date < now %}
-                                        <span class="not-submitted" style="color: red;">Not submitted (Overdue)</span>
-                                    {% else %}
-                                        <span class="not-submitted">Not submitted</span>
-                                    {% endif %}
+                                    <span class="grade-muted">No submission yet</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -159,16 +216,15 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
-        <!-- Display Quiz Grades -->
-        <div class="grades-section card">
+        <section class="grades-block">
             <h3>Quizzes</h3>
-            <div style="width: 100%; overflow-x: auto;">
-                <table>
+            <div class="grades-table-wrap">
+                <table class="grades-table">
                     <thead>
                         <tr>
-                            <th>Quiz Title</th>
+                            <th>Quiz</th>
                             <th>Due Date</th>
                             <th>Status</th>
                             <th>Score</th>
@@ -181,30 +237,28 @@
                             <td>{{ quiz.due_date }}</td>
                             <td>
                                 {% if quiz.id in submitted_quiz_ids %}
-                                    <span class="status-submitted">Submitted</span>
+                                    <span class="status-chip status-ok">Submitted</span>
                                 {% else %}
                                     {% if quiz.due_date < now %}
-                                        <span class="not-submitted" style="color: red;">Not attempted (Overdue)</span>
+                                        <span class="status-chip status-overdue">Overdue</span>
                                     {% else %}
-                                        <span class="not-submitted">Not attempted</span>
+                                        <span class="status-chip status-wait">Not attempted</span>
                                     {% endif %}
                                 {% endif %}
                             </td>
                             <td>
                                 {% if quiz.id in submitted_quiz_ids %}
-                                {% for quiz_info in latest_quizzes %}
-                                    {% if quiz_info.quiz_id == quiz.id %}
-                                        <p>
+                                    {% for quiz_info in latest_quizzes %}
+                                        {% if quiz_info.quiz_id == quiz.id %}
                                             {% if quiz_info.grade is not None %}
                                                 {{ quiz_info.grade }}/{{ quiz_info.total_marks }}
                                             {% else %}
                                                 {{ quiz_info.score }}/{{ quiz_info.total_marks }}
                                             {% endif %}
-                                        </p>
-                                    {% endif %}
-                                {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
                                 {% else %}
-                                    <p class="not-submitted">Not attempted yet</p>
+                                    <span class="grade-muted">Not attempted yet</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -212,6 +266,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
     {% endif %}
 </div>

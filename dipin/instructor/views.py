@@ -48,6 +48,14 @@ def class_shell_list(request):
 
 
 class GoToCourseView(View):
+    def _format_form_errors(self, form):
+        errors = []
+        for field, field_errors in form.errors.items():
+            label = field.replace('_', ' ').title()
+            for error in field_errors:
+                errors.append(f"{label}: {error}")
+        return "; ".join(errors)
+
     def get(self, request, class_shell_id):
         class_shell = get_object_or_404(ClassShell, id=class_shell_id)
         if request.user.is_student and request.user not in class_shell.students_with_access.all():
@@ -281,8 +289,11 @@ class GoToCourseView(View):
                 messages.error(request, f'Error saving attendance: {str(e)}')
             return redirect('instructor:go_to_course', class_shell_id=class_shell_id)
         # Handle lecture
-        if 'add_lecture' in request.POST and lecture_form.is_valid():
-            self.handle_add_lecture(lecture_form, class_shell, request.user)
+        if 'add_lecture' in request.POST:
+            if lecture_form.is_valid():
+                self.handle_add_lecture(lecture_form, class_shell, request.user)
+            else:
+                messages.error(request, f"Lecture content was not saved. {self._format_form_errors(lecture_form)}")
         elif 'edit_lecture' in request.POST and lecture_id:
             self.handle_edit_lecture(request, class_shell, lecture_id)
         elif 'delete_lecture' in request.POST and lecture_id:
@@ -404,6 +415,7 @@ class GoToCourseView(View):
         lecture_instance.user = user
         lecture_instance.class_shell = class_shell
         lecture_instance.save()
+        file_saved = False
 
         # Handle file upload for the new lecture
         if 'file' in self.request.FILES:
@@ -414,6 +426,14 @@ class GoToCourseView(View):
                 lecture_file.course = lecture_instance
                 lecture_file.class_shell = class_shell
                 lecture_file.save()
+                file_saved = True
+            else:
+                messages.error(self.request, f"Lecture content was saved, but the file was not. {self._format_form_errors(file_form)}")
+
+        if file_saved:
+            messages.success(self.request, "Lecture content was saved with its file.")
+        else:
+            messages.success(self.request, "Lecture content was saved.")
 
     def handle_edit_lecture(self, request, class_shell, lecture_id):
         lecture = get_object_or_404(Course, id=lecture_id, class_shell=class_shell)
@@ -424,6 +444,7 @@ class GoToCourseView(View):
             lecture_instance.user = request.user
             lecture_instance.class_shell = class_shell
             lecture_instance.save()
+            file_saved = False
 
             # Handle file upload if there is a file being uploaded
             if 'file' in request.FILES:
@@ -434,6 +455,9 @@ class GoToCourseView(View):
                     lecture_file.course = lecture_instance
                     lecture_file.class_shell = class_shell
                     lecture_file.save()
+                    file_saved = True
+                else:
+                    messages.error(request, f"Lecture changes were saved, but the file was not. {self._format_form_errors(file_form)}")
 
             # Handle file removal if specified
             if 'remove_file' in request.POST:
@@ -444,6 +468,12 @@ class GoToCourseView(View):
                         lecture_file.delete()
                     except CourseFile.DoesNotExist:
                         print(f'File with ID {file_id} does not exist for this lecture.')
+            elif file_saved:
+                messages.success(request, "Lecture changes were saved with the new file.")
+            else:
+                messages.success(request, "Lecture changes were saved.")
+        else:
+            messages.error(request, f"Lecture changes were not saved. {self._format_form_errors(course_form)}")
 
     def handle_delete_lecture(self, lecture_id, class_shell):
         lecture = get_object_or_404(Course, id=lecture_id, class_shell=class_shell)
@@ -831,9 +861,3 @@ class InstructorAnalyticsView(View):
             'chart_pie': chart_pie,
         }
         return render(request, 'instructor_analytics.html', context)
-
-
-
-
-
-

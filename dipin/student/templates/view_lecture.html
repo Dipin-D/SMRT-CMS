@@ -1,83 +1,201 @@
-<h2 class="text-center card-title">Lecture for {{ class_shell.course_name }}</h2>
+<style>
+    .lecture-shell {
+        display: grid;
+        gap: 1rem;
+    }
 
-<!-- List of Lectures -->
-<ul class="list-group">
-    {% for lecture in lectures %}
-        <li class="list-group-item mt-4 p-3 border rounded card">
-            <h5><strong>{{ lecture.title }}</strong></h5>
+    .section-title-clean {
+        margin: 0;
+        color: #4a1324;
+        font-size: 1.3rem;
+        text-align: center;
+    }
 
-            <!-- Lecture Text with Toggle -->
-            <div class="lecture-text-container">
-                {% if lecture.text|length > 100 %}
-                    <button class="btn btn-sm btn-light toggle-lecture" 
-                            data-target="#lecture-text-{{ lecture.id }}">
-                        View Lecture Text
-                    </button>
-                    <div id="lecture-text-{{ lecture.id }}" class="lecture-text-content mt-2" style="display: none;">
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-sm btn-close toggle-lecture" 
-                                    data-target="#lecture-text-{{ lecture.id }}"></button>
+    .lecture-list {
+        display: grid;
+        gap: 1rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .lecture-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(249,244,246,0.98));
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        border-radius: 20px;
+        padding: 1rem;
+        box-shadow: 0 14px 28px rgba(97, 22, 45, 0.08);
+    }
+
+    .lecture-card h3 {
+        margin: 0;
+        color: #3e1522;
+        font-size: 1rem;
+    }
+
+    .lecture-copy {
+        margin-top: 0.8rem;
+        color: #6f5c64;
+    }
+
+    .lecture-toggle,
+    .file-toggle,
+    .file-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        min-height: 38px;
+        padding: 0.7rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid rgba(97, 22, 45, 0.12);
+        background: rgba(97, 22, 45, 0.08);
+        color: #5f1f32;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.86rem;
+        cursor: pointer;
+    }
+
+    .lecture-toggle:hover,
+    .file-toggle:hover,
+    .file-link:hover {
+        background: rgba(97, 22, 45, 0.12);
+        color: #4b1527;
+        text-decoration: none;
+    }
+
+    .lecture-text-content,
+    .file-preview {
+        margin-top: 0.8rem;
+        padding: 1rem;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(97, 22, 45, 0.08);
+    }
+
+    .lecture-file-list {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .lecture-file-card {
+        border: 1px solid rgba(97, 22, 45, 0.08);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 0.9rem;
+        display: grid;
+        gap: 0.7rem;
+    }
+
+    .lecture-file-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .lecture-file-name {
+        color: #4a1324;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .empty-note {
+        margin: 0;
+        padding: 1rem;
+        text-align: center;
+        color: #8a747d;
+        background: rgba(97, 22, 45, 0.04);
+        border-radius: 16px;
+    }
+
+    @media (max-width: 640px) {
+        .lecture-file-top {
+            align-items: flex-start;
+        }
+
+        .lecture-toggle,
+        .file-toggle,
+        .file-link {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="lecture-shell">
+    <h2 class="section-title-clean">Lectures for {{ class_shell.course_name }}</h2>
+
+    <ul class="lecture-list">
+        {% for lecture in lectures %}
+        <li class="lecture-card">
+            <h3>{{ lecture.title }}</h3>
+
+            <div class="lecture-copy">
+                {% if lecture.text %}
+                    {% if lecture.text|length > 100 %}
+                        <button class="lecture-toggle toggle-lecture" type="button" data-target="#lecture-text-{{ lecture.id }}">
+                            <i class="bi bi-eye"></i> View Lecture Text
+                        </button>
+                        <div id="lecture-text-{{ lecture.id }}" class="lecture-text-content" style="display: none;">
+                            <p class="mb-0">{{ lecture.text }}</p>
                         </div>
-                        <p>{{ lecture.text }}</p>
-                    </div>
+                    {% else %}
+                        <p class="mb-0">{{ lecture.text }}</p>
+                    {% endif %}
                 {% else %}
-                    <p>{{ lecture.text }}</p>
+                    <p class="mb-0 text-muted">No lecture text added.</p>
                 {% endif %}
             </div>
 
-            <!-- Display Files for this Lecture -->
-            <ul class="list-group mt-3">
+            <div class="lecture-file-list">
                 {% for file in files %}
                     {% if file.course.id == lecture.id %}
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between align-items-center mb-2 border rounded px-2 py-1" style="max-width: 100%; display: inline-flex;">
-                                <a href="{{ file.file.url }}" target="_blank"
-                                    class="text-decoration-none text-dark d-inline-flex align-items-center me-3" style="font-weight: 500; font-size: 16px;">
-                                    <i class="fas fa-file me-2"></i> {{ file.file.name }}
-                                </a>
+                    <div class="lecture-file-card">
+                        <div class="lecture-file-top">
+                            <div class="lecture-file-name">
+                                <i class="fas fa-file me-2"></i>{{ file.file.name }}
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ file.file.url }}" target="_blank" class="file-link">Open File</a>
+                                <button class="file-toggle toggle-preview" type="button" data-target="#file-preview-{{ file.id }}">Preview</button>
+                            </div>
+                        </div>
 
-                                <button class="btn btn-sm btn-outline-secondary toggle-preview"
-                                        data-target="#file-preview-{{ file.id }}">
-                                    Preview
-                                </button>
-                            </div>
-                                
-                            <!-- File Preview (Handles different file types) -->
-                            <div id="file-preview-{{ file.id }}" class="file-preview mt-2" style="display: none;">
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-sm btn-close toggle-preview"
-                                            data-target="#file-preview-{{ file.id }}"></button>
-                                </div>
-                                {% if ".jpg" in file.file.url or ".jpeg" in file.file.url or ".png" in file.file.url %}
-                                    <img src="{{ file.file.url }}" class="img-fluid mt-2" />
-                                {% elif ".pdf" in file.file.url %}
-                                    <iframe src="{{ file.file.url }}#view=fitH" class="w-100" style="height: 500px;"></iframe>
-                                {% elif ".ppt" in file.file.url or ".pptx" in file.file.url %}
-                                    <iframe src="https://docs.google.com/gview?url={{ file.file.url }}&embedded=true" class="w-100" style="height: 500px;"></iframe>
-                                {% elif ".mp4" in file.file.url %}
-                                    <video controls width="100%" class="mt-2">
-                                        <source src="{{ file.file.url }}" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                {% elif ".txt" in file.file.url or ".py" in file.file.url or ".cpp" in file.file.url or ".java" in file.file.url %}
-                                    <pre class="p-2 bg-light mt-2"><code>Download to view full content</code></pre>
-                                {% else %}
-                                    <p class="mt-2">Preview not available - please download the file</p>
-                                {% endif %}
-                            </div>
-                        </li>
+                        <div id="file-preview-{{ file.id }}" class="file-preview" style="display: none;">
+                            {% if ".jpg" in file.file.url or ".jpeg" in file.file.url or ".png" in file.file.url %}
+                                <img src="{{ file.file.url }}" class="img-fluid mt-2" />
+                            {% elif ".pdf" in file.file.url %}
+                                <iframe src="{{ file.file.url }}#view=fitH" class="w-100" style="height: 500px;"></iframe>
+                            {% elif ".ppt" in file.file.url or ".pptx" in file.file.url %}
+                                <iframe src="https://docs.google.com/gview?url={{ file.file.url }}&embedded=true" class="w-100" style="height: 500px;"></iframe>
+                            {% elif ".mp4" in file.file.url %}
+                                <video controls width="100%" class="mt-2">
+                                    <source src="{{ file.file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% elif ".txt" in file.file.url or ".py" in file.file.url or ".cpp" in file.file.url or ".java" in file.file.url %}
+                                <pre class="p-2 bg-light mt-2 mb-0"><code>Download to view full content</code></pre>
+                            {% else %}
+                                <p class="mt-2 mb-0">Preview not available. Open the file instead.</p>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
+                {% empty %}
                 {% endfor %}
-            </ul>
+            </div>
         </li>
-    {% empty %}
-        <li class="list-group-item text-center">No lecture content available.</li>
-    {% endfor %}
-</ul>
+        {% empty %}
+        <li class="empty-note">No lecture content available.</li>
+        {% endfor %}
+    </ul>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle lecture text
     document.querySelectorAll('.toggle-lecture').forEach(button => {
         button.addEventListener('click', function() {
             const target = this.getAttribute('data-target');
@@ -88,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Toggle file preview
     document.querySelectorAll('.toggle-preview').forEach(button => {
         button.addEventListener('click', function() {
             const target = this.getAttribute('data-target');
